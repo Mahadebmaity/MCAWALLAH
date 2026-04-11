@@ -64,7 +64,7 @@ export default function AuthModal({ onClose }) {
                 {/* Logo */}
                 <div className="auth-modal__logo">
                     <span className="auth-modal__logo-bracket">&lt;</span>
-                    <span className="auth-modal__logo-name">YourName</span>
+                    <span className="auth-modal__logo-name">Mahadeb</span>
                     <span className="auth-modal__logo-bracket">/&gt;</span>
                 </div>
 
