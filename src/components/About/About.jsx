@@ -126,7 +126,6 @@ export default function About() {
                     <div className="about__avatar-wrap">
                         <div className="about__avatar-ring" />
                         <div className="about__avatar">
-                            {/* <img src={profileImg} alt="Mahadeb" className="about__avatar-img" /> */}
                             <i className="fa-solid fa-user about__avatar-icon" />
                         </div>
                         <div className="about__avatar-badge">
