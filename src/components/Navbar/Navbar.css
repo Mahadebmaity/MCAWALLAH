@@ -1096,3 +1096,76 @@
     width: calc(100vw - 20px);
   }
 }
+
+/* ── MOBILE FIX ── */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 12px;
+    height: 60px;
+  }
+
+  /* Logo smaller */
+  .navbar__logo {
+    font-size: 0.95rem;
+  }
+  .navbar__logo-bracket { font-size: 1rem; }
+  .navbar__logo-dot {
+    width: 5px;
+    height: 5px;
+  }
+
+  /* Hide resume text, show only icon */
+  .navbar__resume-text { display: none; }
+  .navbar__resume-btn {
+    padding: 6px 8px;
+    border-radius: 8px;
+    min-width: unset;
+  }
+
+  /* Theme toggle smaller */
+  .navbar__toggle-track {
+    width: 42px;
+    height: 22px;
+  }
+  .navbar__toggle-thumb {
+    width: 17px;
+    height: 17px;
+    top: 2.5px;
+    left: 2.5px;
+  }
+  .navbar__toggle-thumb--dark { transform: translateX(20px); }
+  .navbar__toggle-sun,
+  .navbar__toggle-moon { font-size: 0.55rem; }
+
+  /* Sign In — compact pill */
+  .navbar__signin-btn {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    border-radius: 8px;
+    gap: 5px;
+  }
+  .navbar__signin-btn i { font-size: 0.75rem; }
+
+  /* Gap between action items */
+  .navbar__actions { gap: 6px; }
+
+  /* Hamburger */
+  .navbar__hamburger { padding: 4px; }
+}
+
+/* ── Very small phones ── */
+@media (max-width: 380px) {
+  .navbar__logo { font-size: 0.85rem; }
+
+  /* Hide Sign In text, show only icon */
+  .navbar__signin-btn span { display: none; }
+  .navbar__signin-btn {
+    padding: 6px 8px;
+    border-radius: 8px;
+  }
+
+  .navbar__actions { gap: 4px; }
+
+  /* Hide resume button entirely */
+  .navbar__resume-btn { display: none; }
+}
