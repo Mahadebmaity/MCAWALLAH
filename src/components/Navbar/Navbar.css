@@ -1089,13 +1089,13 @@
     width: 280px;
   }
 }
-
+/* 
 @media (max-width: 400px) {
   .navbar__panel {
     right: -10px;
     width: calc(100vw - 20px);
   }
-}
+} */
 
 /* ── MOBILE FIX ── */
 @media (max-width: 768px) {
