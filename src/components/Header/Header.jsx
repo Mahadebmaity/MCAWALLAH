@@ -145,7 +145,7 @@ export default function Header() {
 
                 {pickerOpen && (
                     <div className="header__bg-panel">
-                        <p className="header__bg-panel-title">Choose Style</p>
+                        <p className="header__bg-panel-title">Choose Style <br/>For Background</p>
                         <div className="header__bg-grid">
                             {BG_PRESETS.map((p) => (
                                 <button
