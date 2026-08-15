@@ -1,5 +1,5 @@
-// src/components/Navbar/Navbar.jsx
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { usePortfolioData } from "../../context/DataContext";
 import AuthModal from "../AuthModal/AuthModal";
@@ -427,15 +427,16 @@ export default function Navbar() {
 
                                     {/* Admin Studio Quick Link */}
                                     {user?.role === 'admin' && (
-                                        <a
-                                            href="/admin/dashboard"
+                                        <Link
+                                            to="/admin/dashboard"
+                                            onClick={() => setDropdown(false)}
                                             className="navbar__dropdown-item"
                                             style={{ color: 'var(--adm-primary, #38bdf8)', textDecoration: 'none' }}
                                         >
                                             <i className="fa-solid fa-gauge-high" />
                                             <span>Admin Studio CMS</span>
                                             <i className="fa-solid fa-chevron-right navbar__dropdown-item-arrow" />
-                                        </a>
+                                        </Link>
                                     )}
 
                                     {[

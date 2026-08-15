@@ -1,5 +1,5 @@
-// src/components/AuthModal/AuthModal.jsx
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "./AuthModal.css";
 
@@ -164,13 +164,14 @@ export default function AuthModal({ onClose }) {
                 </p>
 
                 <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', textAlign: 'center' }}>
-                    <a
-                        href="/admin/login"
+                    <Link
+                        to="/admin/login"
+                        onClick={onClose}
                         className="auth-modal__admin-link"
                         style={{ fontSize: '12px', color: 'var(--accent, #e84545)', textDecoration: 'none', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                     >
                         <i className="fa-solid fa-lock" /> Go to Admin Studio Portal &rarr;
-                    </a>
+                    </Link>
                 </div>
             </div>
         </div>
