@@ -9,6 +9,7 @@ import Analytics from '../models/Analytics.js';
 import SiteSettings from '../models/SiteSettings.js';
 import GameScore from '../models/GameScore.js';
 import Navbar from '../models/Navbar.js';
+import Document from '../models/Document.js';
 
 // @desc Get Full Admin Dashboard Statistics & Overview
 // @route GET /api/admin/overview
@@ -69,6 +70,7 @@ const getModel = (type) => {
         case 'games': return Game;
         case 'settings': return SiteSettings;
         case 'messages': return Message;
+        case 'documents': return Document;
         default: return null;
     }
 };
@@ -85,6 +87,26 @@ export const getSectionData = async (req, res) => {
             let doc = await Model.findOne();
             if (!doc) doc = await Model.create({});
             return res.json(doc);
+        }
+
+        if (type === 'documents') {
+            let docs = await Document.find().sort({ isBuiltin: -1, createdAt: -1 });
+            if (docs.length === 0) {
+                // Auto seed system documentation
+                await Document.create({
+                    title: 'MCA WALLAH Portfolio - Official System Architecture & Documentation',
+                    category: 'System Documentation',
+                    description: 'Comprehensive technical blueprint covering React 19 architecture, RESTful API endpoints, MongoDB schemas, and CMS workflows.',
+                    fileUrl: '/docs/PORTFOLIO_SYSTEM_DOCUMENTATION.pdf',
+                    fileName: 'PORTFOLIO_SYSTEM_DOCUMENTATION.pdf',
+                    fileSize: '1.60 MB',
+                    fileType: 'PDF',
+                    isBuiltin: true,
+                    tags: ['Architecture', 'API Docs', 'Mongoose', 'React 19', 'Vercel']
+                });
+                docs = await Document.find().sort({ isBuiltin: -1, createdAt: -1 });
+            }
+            return res.json(docs);
         }
 
         const items = await Model.find().sort({ order: 1, createdAt: -1 });
@@ -332,5 +354,25 @@ export const deleteGameScore = async (req, res) => {
         res.json({ message: 'Score entry deleted', id });
     } catch (error) {
         res.status(500).json({ message: 'Delete score failed', error: error.message });
+    }
+};
+
+// @desc Upload a Document / PDF to Document Vault
+// @route POST /api/admin/upload/document
+export const uploadDocument = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: 'No document file uploaded' });
+        }
+        const fileUrl = `/uploads/${req.file.filename}`;
+        const fileSizeMB = (req.file.size / (1024 * 1024)).toFixed(2) + ' MB';
+        res.json({
+            url: fileUrl,
+            fileName: req.file.originalname,
+            fileSize: fileSizeMB,
+            fileType: req.file.mimetype.includes('pdf') ? 'PDF' : req.file.originalname.split('.').pop().toUpperCase()
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 };

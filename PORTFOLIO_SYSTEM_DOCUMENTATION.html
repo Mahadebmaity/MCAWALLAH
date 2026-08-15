@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCA WALLAH Portfolio - Official System & Architecture Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --primary-light: #e0f2fe;
+            --secondary: #6366f1;
+            --accent: #e84545;
+            --bg-dark: #0f172a;
+            --surface: #ffffff;
+            --surface-alt: #f8fafc;
+            --border: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --code-bg: #0f172a;
+            --code-text: #38bdf8;
+            --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--text-main);
+            background: var(--surface);
+            line-height: 1.65;
+            font-size: 11pt;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        @page {
+            size: A4;
+            margin: 20mm 18mm 20mm 18mm;
+        }
+
+        .page-break {
+            page-break-before: always;
+            break-before: page;
+        }
+
+        /* ── COVER PAGE ── */
+        .cover {
+            height: 100vh;
+            min-height: 250mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e1b4b 100%);
+            color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .cover::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .cover-badge {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            color: #38bdf8;
+            font-size: 10pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 6px 16px;
+            border-radius: 999px;
+            margin-bottom: 24px;
+        }
+
+        .cover-title {
+            font-size: 32pt;
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 40%, #93c5fd 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 14px;
+        }
+
+        .cover-subtitle {
+            font-size: 14pt;
+            color: #94a3b8;
+            font-weight: 400;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+
+        .cover-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            border-top: 1px solid rgba(255,255,255,0.15);
+            padding-top: 24px;
+            margin-top: auto;
+        }
+
+        .cover-meta-item {
+            font-size: 9.5pt;
+        }
+
+        .cover-meta-label {
+            color: #64748b;
+            text-transform: uppercase;
+            font-size: 8pt;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .cover-meta-value {
+            color: #f1f5f9;
+            font-weight: 600;
+            font-size: 11pt;
+        }
+
+        /* ── HEADINGS ── */
+        h1, h2, h3, h4 {
+            color: #0f172a;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        h1 {
+            font-size: 20pt;
+            margin-top: 28px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2 {
+            font-size: 14pt;
+            margin-top: 22px;
+            margin-bottom: 8px;
+            color: var(--primary-dark);
+        }
+
+        h3 {
+            font-size: 11.5pt;
+            margin-top: 16px;
+            margin-bottom: 6px;
+            color: #334155;
+        }
+
+        p {
+            margin-bottom: 12px;
+            color: #334155;
+        }
+
+        /* ── CALLOUT BOXES ── */
+        .callout {
+            background: var(--surface-alt);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+            font-size: 10pt;
+        }
+
+        .callout-title {
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .callout-warning {
+            background: #fffbeb;
+            border-left-color: #f59e0b;
+        }
+        .callout-warning .callout-title { color: #b45309; }
+
+        .callout-success {
+            background: #f0fdf4;
+            border-left-color: #10b981;
+        }
+        .callout-success .callout-title { color: #047857; }
+
+        /* ── TABLES ── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 14px 0 20px 0;
+            font-size: 9.5pt;
+        }
+
+        th {
+            background: #0f172a;
+            color: #ffffff;
+            font-weight: 600;
+            text-align: left;
+            padding: 9px 12px;
+            border: 1px solid #0f172a;
+        }
+
+        td {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            color: #334155;
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        /* ── CODE BLOCKS ── */
+        pre {
+            background: var(--code-bg);
+            color: #f8fafc;
+            padding: 14px 16px;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 9pt;
+            line-height: 1.5;
+            overflow-x: auto;
+            margin: 12px 0 16px 0;
+            border: 1px solid #334155;
+        }
+
+        code {
+            font-family: var(--font-mono);
+            font-size: 9.5pt;
+            background: #f1f5f9;
+            color: #0369a1;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        /* ── LISTS ── */
+        ul, ol {
+            margin: 8px 0 14px 22px;
+            color: #334155;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        /* ── TOC ── */
+        .toc {
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin: 20px 0;
+        }
+
+        .toc-title {
+            font-size: 13pt;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .toc-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .toc-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed #e2e8f0;
+            font-size: 10pt;
+        }
+
+        .toc-item a {
+            color: var(--primary-dark);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 8pt;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .badge-get { background: #dcfce7; color: #15803d; }
+        .badge-post { background: #e0f2fe; color: #0369a1; }
+        .badge-put { background: #fef3c7; color: #b45309; }
+        .badge-delete { background: #fee2e2; color: #b91c1c; }
+
+        .footer-note {
+            text-align: center;
+            font-size: 8.5pt;
+            color: var(--text-muted);
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         COVER PAGE
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="cover">
+        <div>
+            <div class="cover-badge">Official Technical Documentation</div>
+            <h1 class="cover-title">MCA WALLAH<br>Full-Stack Portfolio & CMS Engine</h1>
+            <p class="cover-subtitle">
+                A comprehensive architectural blueprint, component design, database model specifications, REST API reference, and administrative maintenance manual.
+            </p>
+        </div>
+
+        <div class="cover-meta-grid">
+            <div class="cover-meta-item">
+                <div class="cover-meta-label">Author / Creator</div>
+                <div class="cover-meta-value">Mahadeb Maity</div>
+            </div>
+            <div class="cover-meta-item">
+                <div class="cover-meta-label">Project Version</div>
+                <div class="cover-meta-value">1.0.0 (Production Release)</div>
+            </div>
+            <div class="cover-meta-item">
+                <div class="cover-meta-label">Technology Stack</div>
+                <div class="cover-meta-value">React 19, Vite, Node.js, Express, MongoDB</div>
+            </div>
+            <div class="cover-meta-item">
+                <div class="cover-meta-label">Target Audience</div>
+                <div class="cover-meta-value">Software Engineers, Tech Recruiters & Clients</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         TABLE OF CONTENTS
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="toc">
+        <div class="toc-title">📑 Table of Contents</div>
+        <ul class="toc-list">
+            <li class="toc-item"><span>1. Executive Summary & Purpose</span> <span>Section 1.0</span></li>
+            <li class="toc-item"><span>2. System Architecture & High-Level Design</span> <span>Section 2.0</span></li>
+            <li class="toc-item"><span>3. Frontend Architecture & Design Systems</span> <span>Section 3.0</span></li>
+            <li class="toc-item"><span>4. Permanent Multi-Resume Vault Engine</span> <span>Section 4.0</span></li>
+            <li class="toc-item"><span>5. Interactive Gaming Arcade & Minimax AI</span> <span>Section 5.0</span></li>
+            <li class="toc-item"><span>6. Protected Admin Studio CMS Architecture</span> <span>Section 6.0</span></li>
+            <li class="toc-item"><span>7. Database Schemas & Data Modeling</span> <span>Section 7.0</span></li>
+            <li class="toc-item"><span>8. RESTful API Endpoint Documentation</span> <span>Section 8.0</span></li>
+            <li class="toc-item"><span>9. Security, Authentication & Rate Limiting</span> <span>Section 9.0</span></li>
+            <li class="toc-item"><span>10. Deployment, Production & Troubleshooting Guide</span> <span>Section 10.0</span></li>
+        </ul>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 1: EXECUTIVE SUMMARY
+    ══════════════════════════════════════════════════════════════ -->
+    <h1>1. Executive Summary & Purpose</h1>
+    
+    <h2>1.1 Project Vision</h2>
+    <p>
+        The <strong>MCA WALLAH Portfolio</strong> is an enterprise-grade personal branding platform engineered to demonstrate high-level full-stack development expertise. Unlike static portfolio templates, this application is a dynamic, living web system powered by an autonomous RESTful backend, persistent MongoDB database, and a full-featured administrative studio (CMS).
+    </p>
+
+    <h2>1.2 Core Business & Technical Objectives</h2>
+    <ul>
+        <li><strong>Dynamic Content Customization:</strong> Eliminate hardcoded content by enabling real-time administrative modifications for every visual section (Hero, Navbar, Resume Vault, Skills, Projects, and Games).</li>
+        <li><strong>Modern Visual Excellence:</strong> Deliver state-of-the-art UI/UX using custom CSS design tokens, frosted glassmorphism (<code>backdrop-filter: blur(28px)</code>), and dynamic responsive layout switching.</li>
+        <li><strong>Interactive Engagement:</strong> Maximize visitor retention through an interactive Retro Gaming Arcade (Snake, Unbeatable Minimax AI Tic-Tac-Toe, Typing Challenge, 15-Puzzle) and a movable Sticky Background Engine.</li>
+        <li><strong>Permanent Resume Library:</strong> Maintain a secure repository of candidate CVs and resumes with dynamic button toggling and multi-resume inline preview/download capabilities.</li>
+    </ul>
+
+    <div class="callout callout-success">
+        <div class="callout-title">Key Innovation: Real-Time Multi-Tab Synchronization</div>
+        The application employs the modern <code>BroadcastChannel API</code> alongside optimistic React state updates. Changes made in the Admin CMS reflect instantly on open portfolio visitor tabs without requiring full page reloads.
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 2: SYSTEM ARCHITECTURE
+    ══════════════════════════════════════════════════════════════ -->
+    <h1>2. System Architecture & High-Level Design</h1>
+
+    <h2>2.1 High-Level Architecture Diagram</h2>
+    <pre>
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          CLIENT LAYER (React 19 + Vite)                 │
+│  ┌───────────────────────┐  ┌───────────────────────┐  ┌──────────────┐ │
+│  │   Public Portfolio    │  │  Protected Admin CMS  │  │ Standalone   │ │
+│  │   (Navbar, Hero, Bio) │  │  (Layouts, CVs, Logs) │  │ Game Arcade  │ │
+│  └───────────┬───────────┘  └───────────┬───────────┘  └──────┬───────┘ │
+│              │                          │                     │         │
+│              └──────────────────┬───────┴─────────────────────┘         │
+│                                 ▼                                       │
+│                     DataContext & AuthContext                           │
+│                (BroadcastChannel & LocalStorage)                        │
+└─────────────────────────────────┬───────────────────────────────────────┘
+                                  │ HTTP / JSON (REST API)
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                     SERVER LAYER (Node.js + Express 4)                  │
+│  ┌───────────────────────────────────────────────────────────────────┐  │
+│  │ Middleware Pipeline: Helmet, CORS, RateLimiter, JWT Auth, Multer  │  │
+│  └──────────────────────────────────┬────────────────────────────────┘  │
+│                                     ▼                                   │
+│  ┌────────────────────┐   ┌────────────────────┐   ┌─────────────────┐  │
+│  │ Public Controllers │   │ Admin Controllers  │   │ Auth Controller │  │
+│  └─────────┬──────────┘   └─────────┬──────────┘   └────────┬────────┘  │
+└────────────┼────────────────────────┼───────────────────────┼───────────┘
+             │                        │                       │
+             ▼                        ▼                       ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                       PERSISTENCE LAYER (MongoDB)                       │
+│  Collections: Users, Heroes, Navbars, Abouts, Projects, Skills, Scores  │
+└─────────────────────────────────────────────────────────────────────────┘
+    </pre>
+
+    <div class="page-break"></div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 3: FRONTEND ARCHITECTURE
+    ══════════════════════════════════════════════════════════════ -->
+    <h1>3. Frontend Architecture & Design Systems</h1>
+
+    <h2>3.1 Dynamic Navigation Engine</h2>
+    <p>
+        The navigation bar is built with an adaptive auto-fit geometry (<code>width: max-content; max-width: min(96vw, 1320px)</code>) that prevents element clipping and supports 4 distinct presentation presets configurable from the Admin panel:
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Preset ID</th>
+                <th>Design Aesthetic</th>
+                <th>Visual Attributes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>floating-dock</code></td>
+                <td>macOS Frosted Glass Island</td>
+                <td>Central capsule, <code>backdrop-filter: blur(28px)</code>, subtle shadow aura</td>
+            </tr>
+            <tr>
+                <td><code>cyber-capsule</code></td>
+                <td>Cyberpunk Neo-HUD</td>
+                <td>High-contrast dark base, glowing neon border, cyan/magenta accents</td>
+            </tr>
+            <tr>
+                <td><code>minimal-island</code></td>
+                <td>Ultra-Clean Compact Pill</td>
+                <td>Streamlined geometry, auto-expanding pill boundary, tight padding</td>
+            </tr>
+            <tr>
+                <td><code>full-width</code></td>
+                <td>Classic Enterprise Sticky Bar</td>
+                <td>Edge-to-edge full width with bottom border and glass background</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3.2 Multi-Style Hero Section</h2>
+    <p>
+        The Hero section accommodates diverse candidate identities through 4 structural layout engines:
+    </p>
+    <ul>
+        <li><strong>💎 Glassmorphic Floating Capsule:</strong> Centered glassmorphic card with dynamic stat chips and call-to-action buttons.</li>
+        <li><strong>⚡ Two-Column Developer Split:</strong> Left-hand copy paired with a live interactive macOS Code Terminal with syntax highlighting and 1-click clipboard copying.</li>
+        <li><strong>🌌 Minimalist Editorial Spotlight:</strong> Bold high-impact typography with subtle radial ambient backdrops.</li>
+        <li><strong>🕹️ Retro-Futuristic Hologram:</strong> Angular cyberpunk badges, technical coordinates, and animated scanlines.</li>
+    </ul>
+
+    <h2>3.3 Draggable Floating Backdrop Widget (<code>⬡ Background</code>)</h2>
+    <p>
+        Visitors can freely reposition the theme customization widget anywhere on the desktop or mobile viewport via dual mouse/touch event listeners. Coordinates are saved in <code>localStorage</code> so the preferred widget position persists across browser visits.
+    </p>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 4: RESUME VAULT ENGINE
+    ══════════════════════════════════════════════════════════════ -->
+    <h1>4. Permanent Multi-Resume Vault Engine</h1>
+    <p>
+        The resume subsystem solves the limitation of single-file static PDF links:
+    </p>
+    <ul>
+        <li><strong>Permanent Cloud Vault:</strong> Every resume uploaded via Admin Studio is permanently archived in the backend storage with filename, file size, and upload timestamp.</li>
+        <li><strong>Multi-Button Visibility Controller:</strong> The administrator can dynamically toggle visibility for up to <strong>3 concurrent resume buttons</strong> (e.g. <em>Full Stack CV</em>, <em>Frontend Resume</em>, <em>Academic Bio</em>).</li>
+        <li><strong>Glassmorphic Dropdown & Inline Preview:</strong> If multiple resumes are active, the header seamlessly transforms into an interactive dropdown with direct download (<code>⬇</code>) and new-tab preview (<code>↗</code>) capabilities.</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 5: GAMING ARCADE
+    ══════════════════════════════════════════════════════════════ -->
+    <h1>5. Interactive Gaming Arcade & Minimax AI</h1>
+
+    <h2>5.1 Arcade Games Overview</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Game Title</th>
+                <th>Type & Mechanism</th>
+                <th>Algorithmic / Technical Highlight</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>🐍 Retro Snake</strong></td>
+                <td>Grid-based Canvas Game</td>
+                <td>Tick-rate velocity scaling, collision detection, and score multiplier.</td>
+            </tr>
+            <tr>
+                <td><strong>❌ Tic-Tac-Toe AI</strong></td>
+                <td>Strategy Board Game</td>
+                <td><strong>Unbeatable Minimax Algorithm</strong> with recursive alpha-beta tree evaluation.</td>
+            </tr>
+            <tr>
+                <td><strong>⌨️ Speed Typing</strong></td>
+                <td>Developer WPM Challenge</td>
+                <td>Character-by-character accuracy parser, real-time WPM calculation, timer hook.</td>
+            </tr>
+            <tr>
+                <td><strong>🧩 15-Puzzle Sliding</strong></td>
+                <td>Permutation Grid Puzzle</td>
+                <td>Solvability inversion checker, swap matrix, move counter.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>5.2 Dual Window Mode (Inline & Standalone Window)</h2>
+    <p>
+        Games can be played inside the interactive modal or launched into an isolated, distraction-free standalone window at <code>/arcade</code>. High scores are automatically synced to the MongoDB global leaderboard.
+    </p>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 6: ADMIN STUDIO CMS
+    ══════════════════════════════════════════════════════════════ -->
+    <h1>6. Protected Admin Studio CMS Architecture</h1>
+
+    <h2>6.1 Administrative Modules Overview</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Panel Route</th>
+                <th>Module Name</th>
+                <th>Administrative Capabilities</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>/admin/dashboard</code></td>
+                <td>📊 Analytics Overview</td>
+                <td>Real-time visitor counts, message analytics, and system status indicators.</td>
+            </tr>
+            <tr>
+                <td><code>/admin/navbar</code></td>
+                <td>🧭 Navbar Studio</td>
+                <td>Switch layout presets, customize brand prefix/suffix, style "Let's Talk" CTA.</td>
+            </tr>
+            <tr>
+                <td><code>/admin/hero</code></td>
+                <td>🪄 Hero & Header CMS</td>
+                <td>Change hero layout modes, edit typewriter roles, modify CTA anchors and pills.</td>
+            </tr>
+            <tr>
+                <td><code>/admin/about</code></td>
+                <td>👤 Profile & Resume Vault</td>
+                <td>Upload permanent resumes, manage button visibility limits, edit bio and stats.</td>
+            </tr>
+            <tr>
+                <td><code>/admin/projects</code></td>
+                <td>📂 Projects Manager</td>
+                <td>Create/Edit projects, assign tech tags, upload preview cards, manage order.</td>
+            </tr>
+            <tr>
+                <td><code>/admin/skills</code></td>
+                <td>💡 Skills Matrix</td>
+                <td>Add skill icons, assign categories (Frontend/Backend/DevOps), set proficiency %.</td>
+            </tr>
+            <tr>
+                <td><code>/admin/games</code></td>
+                <td>🎮 Arcade & Leaderboard</td>
+                <td>Manage active games, descriptions, and moderate leaderboard high scores.</td>
+            </tr>
+            <tr>
+                <td><code>/admin/messages</code></td>
+                <td>📥 Feedback Inbox</td>
+                <td>Read, mark as read, and delete contact form inquiries.</td>
+            </tr>
+            <tr>
+                <td><code>/admin/settings</code></td>
+                <td>⚙️ Account & Credentials</td>
+                <td>Change Admin username, email, password, and export JSON backups.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 7: DATABASE SCHEMAS
+    ══════════════════════════════════════════════════════════════ -->
+    <h1>7. Database Schemas & Data Modeling</h1>
+
+    <h2>7.1 Core Mongoose Schemas Summary</h2>
+    <pre>
+// 1. User & Admin Schema
+const UserSchema = new Schema({
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true, lowercase: true },
+    password: { type: String, required: true }, // BCrypt Hashed
+    role: { type: String, enum: ['user', 'admin'], default: 'user' },
+    avatar: { type: String },
+    preferences: {
+        darkMode: { type: Boolean, default: true },
+        background: { type: String, default: 'mesh' },
+        accentColor: { type: String, default: '#e84545' }
+    }
+}, { timestamps: true });
+
+// 2. Navbar Schema
+const NavbarSchema = new Schema({
+    layoutStyle: { type: String, default: 'floating-dock' },
+    logoText: { type: String, default: 'Mahadeb' },
+    logoPrefix: { type: String, default: '<' },
+    logoSuffix: { type: String, default: '/>' },
+    showHireMeButton: { type: Boolean, default: true },
+    hireMeButtonText: { type: String, default: "Let's Talk" },
+    hireMeStyle: { type: String, default: 'gradient-glow' },
+    hireMeIcon: { type: String, default: 'fa-solid fa-paper-plane' },
+    hireMeTarget: { type: String, default: 'contact' }
+}, { timestamps: true });
+
+// 3. About & Resume Vault Schema
+const AboutSchema = new Schema({
+    bio: [String],
+    resumes: [{
+        title: String,
+        url: String,
+        isPrimary: Boolean,
+        activeOnPortfolio: Boolean,
+        fileSize: String,
+        uploadedAt: { type: Date, default: Date.now }
+    }]
+});
+    </pre>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 8: REST API DOCUMENTATION
+    ══════════════════════════════════════════════════════════════ -->
+    <h1>8. RESTful API Endpoint Documentation</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Method</th>
+                <th>Endpoint Route</th>
+                <th>Access Level</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="badge badge-get">GET</span></td>
+                <td><code>/api/portfolio/public</code></td>
+                <td>Public</td>
+                <td>Aggregates all active portfolio data in a single high-performance payload.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-post">POST</span></td>
+                <td><code>/api/portfolio/contact</code></td>
+                <td>Public</td>
+                <td>Validates feedback message and sends automated Nodemailer notification.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-post">POST</span></td>
+                <td><code>/api/auth/login</code></td>
+                <td>Public</td>
+                <td>Authenticates credentials and returns JWT Access & Refresh tokens.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-put">PUT</span></td>
+                <td><code>/api/user/profile</code></td>
+                <td>Protected (JWT)</td>
+                <td>Updates authenticated admin's display name and login email.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-put">PUT</span></td>
+                <td><code>/api/user/password</code></td>
+                <td>Protected (JWT)</td>
+                <td>Verifies current password and updates to new bcrypt-hashed password.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-post">POST</span></td>
+                <td><code>/api/user/reset-defaults</code></td>
+                <td>Protected (JWT)</td>
+                <td>Restores factory default credentials (<code>mahadeb@portfolio.com</code>).</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-post">POST</span></td>
+                <td><code>/api/admin/section/:type</code></td>
+                <td>Admin Guard</td>
+                <td>Updates CMS section items in MongoDB and broadcasts cross-tab updates.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 9: SECURITY & OPTIMIZATION
+    ══════════════════════════════════════════════════════════════ -->
+    <h1>9. Security, Authentication & Rate Limiting</h1>
+
+    <h2>9.1 Authentication Architecture</h2>
+    <ul>
+        <li><strong>JWT Dual-Token Protocol:</strong> Short-lived Access Tokens (15m) paired with rolling Refresh Tokens (7d) stored securely in client storage.</li>
+        <li><strong>BCrypt Hashing:</strong> Passwords salted with 10 rounds before database persistence.</li>
+        <li><strong>Route Guards:</strong> Protected React Router wrapper (<code>AdminAuthGuard.jsx</code>) validates role privileges before rendering administrative panels.</li>
+    </ul>
+
+    <h2>9.2 API Protection & Headers</h2>
+    <ul>
+        <li><strong>Helmet Security Headers:</strong> Configures XSS filters, CSP protections, and prevents iframe clickjacking.</li>
+        <li><strong>Express Rate Limiting:</strong> Prevents DDoS and brute-force attempts on sensitive endpoints like <code>/api/auth/login</code> and <code>/api/portfolio/contact</code>.</li>
+    </ul>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SECTION 10: DEPLOYMENT & MAINTENANCE
+    ══════════════════════════════════════════════════════════════ -->
+    <h1>10. Deployment, Production & Troubleshooting Guide</h1>
+
+    <h2>10.1 Vercel SPA Routing Configuration (<code>vercel.json</code>)</h2>
+    <p>
+        To prevent <code>404: NOT_FOUND</code> errors on client-side routes (<code>/admin/login</code>, <code>/admin/dashboard</code>, <code>/arcade</code>), the root project contains:
+    </p>
+    <pre>
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+    </pre>
+
+    <h2>10.2 Default Administrative Credentials Quick Reference</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Default Production Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Admin Login Portal</strong></td>
+                <td><code>http://localhost:5173/admin/login</code></td>
+            </tr>
+            <tr>
+                <td><strong>Default Email</strong></td>
+                <td><code>mahadeb@portfolio.com</code></td>
+            </tr>
+            <tr>
+                <td><strong>Default Password</strong></td>
+                <td><code>Admin@123456</code></td>
+            </tr>
+            <tr>
+                <td><strong>Reset Mechanism</strong></td>
+                <td>Admin Studio $\rightarrow$ Settings $\rightarrow$ "Reset to Default Credentials"</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer-note">
+        <strong>MCA WALLAH Portfolio & CMS Architecture Documentation</strong><br>
+        Crafted with precision by Mahadeb Maity &copy; 2026. All rights reserved.
+    </div>
+
+</body>
+</html>

@@ -23,6 +23,7 @@ import SkillsCMS from './admin/SkillsCMS';
 import TimelineCMS from './admin/TimelineCMS';
 import ProjectsCMS from './admin/ProjectsCMS';
 import GamesCMS from './admin/GamesCMS';
+import DocumentsCMS from './admin/DocumentsCMS';
 import MessagesInbox from './admin/MessagesInbox';
 import SettingsCMS from './admin/SettingsCMS';
 
@@ -65,6 +66,7 @@ function App() {
           <Route path="timeline" element={<TimelineCMS />} />
           <Route path="projects" element={<ProjectsCMS />} />
           <Route path="games" element={<GamesCMS />} />
+          <Route path="docs" element={<DocumentsCMS />} />
           <Route path="messages" element={<MessagesInbox />} />
           <Route path="settings" element={<SettingsCMS />} />
         </Route>

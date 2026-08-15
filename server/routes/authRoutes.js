@@ -9,7 +9,8 @@ import {
     changePassword,
     updatePreferences,
     uploadAvatar,
-    removeAvatar
+    removeAvatar,
+    resetToDefaultCredentials
 } from '../controllers/authController.js';
 import { protectUser } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
@@ -27,6 +28,7 @@ router.get('/me', protectUser, getMe);
 router.put('/profile', protectUser, updateProfile);
 router.put('/password', protectUser, changePassword);
 router.put('/preferences', protectUser, updatePreferences);
+router.post('/reset-defaults', protectUser, resetToDefaultCredentials);
 
 // Avatar management
 router.post('/avatar', protectUser, upload.single('avatar'), uploadAvatar);

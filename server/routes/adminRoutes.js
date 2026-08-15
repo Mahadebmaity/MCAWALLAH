@@ -11,9 +11,11 @@ import {
     exportBackup,
     importBackup,
     getGameAnalytics,
-    deleteGameScore
+    deleteGameScore,
+    uploadDocument
 } from '../controllers/adminController.js';
 import { protectAdmin } from '../middleware/auth.js';
+import { upload } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -39,6 +41,9 @@ router.patch('/messages/:id/status', updateMessageStatus);
 // Game Scores & Leaderboard Analytics
 router.get('/games/scores', getGameAnalytics);
 router.delete('/games/scores/:id', deleteGameScore);
+
+// Document Upload
+router.post('/upload/document', upload.single('document'), uploadDocument);
 
 // JSON Backup & Restore
 router.get('/backup/export', exportBackup);

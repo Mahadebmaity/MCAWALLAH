@@ -40,6 +40,48 @@ export default function DashboardOverview() {
 
     return (
         <div>
+            {/* ── Official System Documentation Banner ── */}
+            <div className="adm-card" style={{
+                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.95) 100%)',
+                border: '1.5px solid rgba(56, 189, 248, 0.35)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '16px',
+                padding: '20px 24px',
+                marginBottom: '24px'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>
+                        <i className="fa-solid fa-file-shield" />
+                    </div>
+                    <div>
+                        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#ffffff' }}>
+                            MCA WALLAH System Architecture &amp; Documentation (PDF)
+                        </h3>
+                        <p style={{ margin: '3px 0 0 0', fontSize: '13px', color: '#94a3b8' }}>
+                            Complete technical specifications, REST API reference &amp; MongoDB schemas.
+                        </p>
+                    </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <Link to="/admin/docs" className="adm-btn adm-btn-primary" style={{ textDecoration: 'none' }}>
+                        <i className="fa-solid fa-folder-open" /> Open Docs &amp; Files Vault
+                    </Link>
+                    <a
+                        href="/docs/PORTFOLIO_SYSTEM_DOCUMENTATION.pdf"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="adm-btn adm-btn-secondary"
+                        style={{ color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.4)', textDecoration: 'none' }}
+                    >
+                        <i className="fa-solid fa-download" /> Download PDF (1.6 MB)
+                    </a>
+                </div>
+            </div>
+
             {/* ── Top Metric Cards ── */}
             <div className="adm-stats-grid">
                 <div className="adm-stat-card">

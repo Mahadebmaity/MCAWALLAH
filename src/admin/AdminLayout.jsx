@@ -13,6 +13,7 @@ const NAV_ITEMS = [
     { to: '/admin/timeline', icon: 'fa-solid fa-timeline', label: 'Experience & Edu' },
     { to: '/admin/projects', icon: 'fa-solid fa-folder-open', label: 'Projects' },
     { to: '/admin/games', icon: 'fa-solid fa-gamepad', label: 'Games Hub' },
+    { to: '/admin/docs', icon: 'fa-solid fa-file-shield', label: 'Docs & System Vault' },
     { to: '/admin/messages', icon: 'fa-solid fa-inbox', label: 'Feedback Inbox' },
     { to: '/admin/settings', icon: 'fa-solid fa-sliders', label: 'Settings & Backup' }
 ];

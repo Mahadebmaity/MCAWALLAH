@@ -148,7 +148,17 @@ export const updateProfile = async (req, res) => {
         if (!user) return res.status(404).json({ message: 'User not found' });
 
         if (req.body.name) user.name = req.body.name.trim();
-        if (req.body.email) user.email = req.body.email.trim().toLowerCase();
+
+        if (req.body.email) {
+            const newEmail = req.body.email.trim().toLowerCase();
+            if (newEmail !== user.email) {
+                const existing = await User.findOne({ email: newEmail, _id: { $ne: user._id } });
+                if (existing) {
+                    return res.status(400).json({ message: 'An account with this email already exists.' });
+                }
+                user.email = newEmail;
+            }
+        }
 
         await user.save();
 
@@ -175,6 +185,10 @@ export const changePassword = async (req, res) => {
             return res.status(400).json({ message: 'Current and new password are required.' });
         }
 
+        if (newPassword.length < 6) {
+            return res.status(400).json({ message: 'New password must be at least 6 characters.' });
+        }
+
         const user = await User.findById(req.user._id);
         const isMatch = await user.matchPassword(currentPassword);
         if (!isMatch) {
@@ -184,7 +198,34 @@ export const changePassword = async (req, res) => {
         user.password = newPassword;
         await user.save();
 
-        res.json({ message: 'Password updated successfully.' });
+        res.json({ message: 'Password updated successfully! Please remember your new password.' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Reset Admin Credentials to Default (mahadeb@portfolio.com / Admin@123456)
+// @route POST /api/user/reset-defaults
+export const resetToDefaultCredentials = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        user.name = 'Mahadeb Maity';
+        user.email = 'mahadeb@portfolio.com';
+        user.password = 'Admin@123456';
+        await user.save();
+
+        res.json({
+            message: 'Admin credentials reset to defaults (mahadeb@portfolio.com / Admin@123456)',
+            user: {
+                id: user._id,
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

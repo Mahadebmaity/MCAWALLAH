@@ -185,6 +185,19 @@ export function AuthProvider({ children }) {
         }
     };
 
+    /* ── RESET TO DEFAULT CREDENTIALS ── */
+    const resetToDefaultCredentials = async () => {
+        const res = await authFetch(`${API}/user/reset-defaults`, {
+            method: "POST"
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message);
+        if (data.user) {
+            setUser((u) => ({ ...u, ...data.user }));
+        }
+        return data;
+    };
+
     return (
         <AuthContext.Provider value={{
             user,
@@ -194,6 +207,7 @@ export function AuthProvider({ children }) {
             logout,
             updateProfile,
             changePassword,
+            resetToDefaultCredentials,
             uploadAvatar,
             removeAvatar,
             savePreferences,
