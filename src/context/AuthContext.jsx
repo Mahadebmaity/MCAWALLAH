@@ -61,6 +61,26 @@ export function AuthProvider({ children }) {
         return res;
     }, [refreshAccess]);
 
+    /* ── safe json parser helper ── */
+    const parseResponseJson = async (res, defaultErrMsg = "Request failed") => {
+        let data = {};
+        try {
+            const text = await res.text();
+            if (text && text.trim().length > 0) {
+                data = JSON.parse(text);
+            }
+        } catch {
+            // Not a JSON response (e.g. proxy error or empty response)
+        }
+        if (!res.ok) {
+            const fallback = res.status === 502 || res.status === 504 || res.status === 500
+                ? "Backend server is offline or restarting. Please ensure the server is running."
+                : defaultErrMsg;
+            throw new Error(data.message || fallback);
+        }
+        return data;
+    };
+
     /* ── load user on mount ── */
     useEffect(() => {
         const boot = async () => {
@@ -68,8 +88,8 @@ export function AuthProvider({ children }) {
             if (!token) { setLoading(false); return; }
             try {
                 const res = await authFetch(`${API}/user/me`);
-                const data = await res.json();
                 if (res.ok) {
+                    const data = await parseResponseJson(res);
                     setUser(data);
                     applyPrefs(data.preferences);
                 } else {
@@ -88,8 +108,7 @@ export function AuthProvider({ children }) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, email, password }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Registration failed");
+        const data = await parseResponseJson(res, "Registration failed");
         saveTokens(data.accessToken, data.refreshToken);
         setUser(data.user);
         applyPrefs(data.user.preferences);
@@ -103,8 +122,7 @@ export function AuthProvider({ children }) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Login failed");
+        const data = await parseResponseJson(res, "Login failed. Please check credentials.");
         saveTokens(data.accessToken, data.refreshToken);
         setUser(data.user);
         applyPrefs(data.user.preferences);
@@ -125,8 +143,7 @@ export function AuthProvider({ children }) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, email }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
+        const data = await parseResponseJson(res, "Update profile failed");
         setUser((u) => ({ ...u, name: data.name, email: data.email }));
         return data;
     };
@@ -138,8 +155,7 @@ export function AuthProvider({ children }) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ currentPassword, newPassword }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
+        const data = await parseResponseJson(res, "Change password failed");
         return data;
     };
 
@@ -148,8 +164,7 @@ export function AuthProvider({ children }) {
         const form = new FormData();
         form.append("avatar", file);
         const res = await authFetch(`${API}/user/avatar`, { method: "POST", body: form });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
+        const data = await parseResponseJson(res, "Upload avatar failed");
         setUser((u) => ({ ...u, avatar: data.avatarUrl }));
         return data.avatarUrl;
     };
@@ -157,8 +172,7 @@ export function AuthProvider({ children }) {
     /* ── REMOVE AVATAR ── */
     const removeAvatar = async () => {
         const res = await authFetch(`${API}/user/avatar`, { method: "DELETE" });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
+        const data = await parseResponseJson(res, "Remove avatar failed");
         setUser((u) => ({ ...u, avatar: null }));
     };
 
@@ -169,8 +183,7 @@ export function AuthProvider({ children }) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(prefs),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
+        const data = await parseResponseJson(res, "Save preferences failed");
         setUser((u) => ({ ...u, preferences: data.preferences }));
         applyPrefs(data.preferences);
         return data.preferences;
@@ -190,8 +203,7 @@ export function AuthProvider({ children }) {
         const res = await authFetch(`${API}/user/reset-defaults`, {
             method: "POST"
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
+        const data = await parseResponseJson(res, "Reset credentials failed");
         if (data.user) {
             setUser((u) => ({ ...u, ...data.user }));
         }

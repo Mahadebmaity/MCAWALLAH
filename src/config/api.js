@@ -1,35 +1,16 @@
 // src/config/api.js
 
 /**
- * Dynamically resolves the API Base URL.
- * Supports:
- * - Environment variable VITE_API_URL (production / deployed backend)
- * - Mobile devices / LAN access (e.g. 192.168.x.x:5173 -> 192.168.x.x:5000/api)
- * - Desktop localhost (localhost:5173 -> localhost:5000/api)
+ * Resolves the API Base URL.
+ * - In development: uses '/api' which Vite proxies directly to http://localhost:5000/api
+ *   This eliminates CORS and firewall connection issues for both mobile phones and desktop.
+ * - In production: uses import.meta.env.VITE_API_URL or relative '/api'
  */
 export const getApiBase = () => {
-    // 1. Explicit environment variable
     if (import.meta.env?.VITE_API_URL) {
         return import.meta.env.VITE_API_URL.replace(/\/+$/, '');
     }
-
-    // 2. Client-side browser auto-detection for LAN / Mobile access
-    if (typeof window !== 'undefined' && window.location) {
-        const { hostname, protocol, port } = window.location;
-        
-        // If accessed from a mobile phone or another device over Wi-Fi/LAN (non-localhost IP)
-        if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
-            // If running on Vite dev port (5173, 3000, etc.), point to backend port 5000 on the same machine
-            if (port === '5173' || port === '3000' || port === '4173' || port === '8080') {
-                return `${protocol}//${hostname}:5000/api`;
-            }
-            // Production deployment on custom domain / reverse proxy
-            return `${protocol}//${hostname}/api`;
-        }
-    }
-
-    // 3. Default fallback
-    return 'http://localhost:5000/api';
+    return '/api';
 };
 
 export const API_BASE = getApiBase();
@@ -50,15 +31,5 @@ export const getMediaUrl = (path) => {
         return `${base}${cleanPath}`;
     }
 
-    if (typeof window !== 'undefined' && window.location) {
-        const { hostname, protocol, port } = window.location;
-        if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
-            if (port === '5173' || port === '3000' || port === '4173' || port === '8080') {
-                return `${protocol}//${hostname}:5000${cleanPath}`;
-            }
-            return `${protocol}//${hostname}${cleanPath}`;
-        }
-    }
-
-    return `http://localhost:5000${cleanPath}`;
+    return cleanPath;
 };
