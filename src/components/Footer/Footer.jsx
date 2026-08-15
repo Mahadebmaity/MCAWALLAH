@@ -349,7 +349,9 @@ export default function Footer() {
                             <span className="footer__bottom-sep">·</span>
                             <button className="footer__bottom-link" onClick={() => scrollTo("#terms")}>Terms</button>
                             <span className="footer__bottom-sep">·</span>
-                            <button className="footer__bottom-link" onClick={() => scrollTo("#sitemap")}>Sitemap</button>
+                            <a href="/admin/login" className="footer__bottom-link" style={{ color: 'var(--f-accent, #e84545)', textDecoration: 'none', fontWeight: '700' }} title="Admin Studio Portal">
+                                <i className="fa-solid fa-lock" style={{ fontSize: '10px', marginRight: '4px' }} />Admin Portal
+                            </a>
                         </div>
                         <p className="footer__made-with">
                             Made with <span className="footer__heart">♥</span> Mahadeb Maity

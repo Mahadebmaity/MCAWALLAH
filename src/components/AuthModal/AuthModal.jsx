@@ -162,6 +162,16 @@ export default function AuthModal({ onClose }) {
                         {mode === "login" ? "Sign Up" : "Sign In"}
                     </button>
                 </p>
+
+                <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', textAlign: 'center' }}>
+                    <a
+                        href="/admin/login"
+                        className="auth-modal__admin-link"
+                        style={{ fontSize: '12px', color: 'var(--accent, #e84545)', textDecoration: 'none', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                        <i className="fa-solid fa-lock" /> Go to Admin Studio Portal &rarr;
+                    </a>
+                </div>
             </div>
         </div>
     );
