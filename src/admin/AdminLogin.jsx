@@ -26,7 +26,11 @@ export default function AdminLogin() {
                 setError('Access restricted to administrators only.');
             }
         } catch (err) {
-            setError(err.message || 'Login failed. Please check credentials.');
+            if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError') || err.name === 'TypeError') {
+                setError('Cannot connect to backend server. Make sure "npm run dev" or the backend server is running.');
+            } else {
+                setError(err.message || 'Login failed. Please check credentials.');
+            }
         } finally {
             setLoading(false);
         }

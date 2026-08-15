@@ -41,7 +41,11 @@ export default function AuthModal({ onClose }) {
             }
             onClose();
         } catch (err) {
-            setErrMsg(err.message);
+            if (err.message?.includes('Failed to fetch') || err.name === 'TypeError') {
+                setErrMsg("Cannot connect to backend server. Make sure the server is running.");
+            } else {
+                setErrMsg(err.message || "Authentication failed");
+            }
             setStatus("error");
         }
     };

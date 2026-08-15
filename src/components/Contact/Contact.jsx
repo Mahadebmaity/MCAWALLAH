@@ -60,7 +60,11 @@ export default function Contact() {
             setTimeout(() => setStatus(null), 5000);
         } catch (err) {
             setStatus("err");
-            setFeedbackText(err.message || "Failed to send message. Please try again.");
+            if (err.message?.includes('Failed to fetch') || err.name === 'TypeError') {
+                setFeedbackText("Cannot connect to server. Please make sure the backend server is running.");
+            } else {
+                setFeedbackText(err.message || "Failed to send message. Please try again.");
+            }
             setTimeout(() => setStatus(null), 5000);
         }
     };
