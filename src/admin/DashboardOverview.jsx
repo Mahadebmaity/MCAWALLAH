@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../config/api';
 import './admin.css';
 
 export default function DashboardOverview() {
@@ -11,7 +12,7 @@ export default function DashboardOverview() {
 
     const fetchOverview = async () => {
         try {
-            const res = await authFetch('http://localhost:5000/api/admin/overview');
+            const res = await authFetch(`${API_BASE}/admin/overview`);
             if (res.ok) {
                 const data = await res.json();
                 setOverview(data);

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
@@ -35,7 +36,7 @@ export default function ProjectsCMS() {
 
     const fetchProjects = async () => {
         try {
-            const res = await authFetch('http://localhost:5000/api/admin/section/projects');
+            const res = await authFetch(`${API_BASE}/admin/section/projects`);
             if (res.ok) {
                 const data = await res.json();
                 setProjects(data);
@@ -101,7 +102,7 @@ export default function ProjectsCMS() {
 
         try {
             const token = localStorage.getItem('accessToken');
-            const res = await fetch('http://localhost:5000/api/media/upload', {
+            const res = await fetch(`${API_BASE}/media/upload`, {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -131,8 +132,8 @@ export default function ProjectsCMS() {
             };
 
             const url = editingProject
-                ? `http://localhost:5000/api/admin/section/projects/${editingProject._id}`
-                : 'http://localhost:5000/api/admin/section/projects';
+                ? `${API_BASE}/admin/section/projects/${editingProject._id}`
+                : `${API_BASE}/admin/section/projects`;
             const method = editingProject ? 'PUT' : 'POST';
 
             const res = await authFetch(url, {
@@ -164,7 +165,7 @@ export default function ProjectsCMS() {
     const handleDelete = async (id, title) => {
         if (!window.confirm(`Are you sure you want to delete "${title || 'this project'}"?`)) return;
         try {
-            const res = await authFetch(`http://localhost:5000/api/admin/section/projects/${id}`, {
+            const res = await authFetch(`${API_BASE}/admin/section/projects/${id}`, {
                 method: 'DELETE'
             });
             if (res.ok) {
@@ -186,7 +187,7 @@ export default function ProjectsCMS() {
 
     const toggleVisibility = async (id, title) => {
         try {
-            const res = await authFetch(`http://localhost:5000/api/admin/section/projects/${id}/visibility`, {
+            const res = await authFetch(`${API_BASE}/admin/section/projects/${id}/visibility`, {
                 method: 'PATCH'
             });
             if (res.ok) {

@@ -1,7 +1,7 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { API } from "../config/api";
 
-const API = "http://localhost:5000/api";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {

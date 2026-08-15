@@ -1,6 +1,6 @@
-// src/admin/GamesCMS.jsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
@@ -42,8 +42,8 @@ export default function GamesCMS() {
     const fetchGamesAndSettings = async () => {
         try {
             const [gamesRes, settingsRes] = await Promise.all([
-                authFetch('http://localhost:5000/api/admin/section/games'),
-                authFetch('http://localhost:5000/api/admin/section/settings')
+                authFetch(`${API_BASE}/admin/section/games`),
+                authFetch(`${API_BASE}/admin/section/settings`)
             ]);
 
             if (gamesRes.ok) {
@@ -66,7 +66,7 @@ export default function GamesCMS() {
 
     const fetchScoreAnalytics = async () => {
         try {
-            const res = await authFetch('http://localhost:5000/api/admin/games/scores');
+            const res = await authFetch(`${API_BASE}/admin/games/scores`);
             if (res.ok) {
                 const data = await res.json();
                 setScoreData(data);
@@ -86,7 +86,7 @@ export default function GamesCMS() {
         e.preventDefault();
         setSavingSettings(true);
         try {
-            const res = await authFetch('http://localhost:5000/api/admin/section/settings', {
+            const res = await authFetch(`${API_BASE}/admin/section/settings`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -167,8 +167,8 @@ export default function GamesCMS() {
             };
 
             const url = editingGame
-                ? `http://localhost:5000/api/admin/section/games/${editingGame._id}`
-                : 'http://localhost:5000/api/admin/section/games';
+                ? `${API_BASE}/admin/section/games/${editingGame._id}`
+                : `${API_BASE}/admin/section/games`;
             const method = editingGame ? 'PUT' : 'POST';
 
             const res = await authFetch(url, {
@@ -200,7 +200,7 @@ export default function GamesCMS() {
     const handleDeleteGame = async (id, title) => {
         if (!window.confirm(`Are you sure you want to delete "${title || 'this game'}"?`)) return;
         try {
-            const res = await authFetch(`http://localhost:5000/api/admin/section/games/${id}`, {
+            const res = await authFetch(`${API_BASE}/admin/section/games/${id}`, {
                 method: 'DELETE'
             });
             if (res.ok) {
@@ -223,7 +223,7 @@ export default function GamesCMS() {
     const handleDeleteScore = async (id) => {
         if (!window.confirm('Delete this score from the leaderboard?')) return;
         try {
-            const res = await authFetch(`http://localhost:5000/api/admin/games/scores/${id}`, {
+            const res = await authFetch(`${API_BASE}/admin/games/scores/${id}`, {
                 method: 'DELETE'
             });
             if (res.ok) {
@@ -245,7 +245,7 @@ export default function GamesCMS() {
 
     const toggleVisibility = async (id, title) => {
         try {
-            const res = await authFetch(`http://localhost:5000/api/admin/section/games/${id}/visibility`, {
+            const res = await authFetch(`${API_BASE}/admin/section/games/${id}/visibility`, {
                 method: 'PATCH'
             });
             if (res.ok) {

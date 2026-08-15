@@ -1,6 +1,6 @@
-// src/admin/AboutCMS.jsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
@@ -49,7 +49,7 @@ export default function AboutCMS() {
     useEffect(() => {
         const fetchAbout = async () => {
             try {
-                const res = await authFetch('http://localhost:5000/api/admin/section/about');
+                const res = await authFetch(`${API_BASE}/admin/section/about`);
                 if (res.ok) {
                     const data = await res.json();
                     if (data && Object.keys(data).length > 0) {
@@ -78,7 +78,7 @@ export default function AboutCMS() {
         setSavedSuccess(false);
 
         try {
-            const res = await authFetch('http://localhost:5000/api/admin/section/about', {
+            const res = await authFetch(`${API_BASE}/admin/section/about`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(about)
@@ -145,7 +145,7 @@ export default function AboutCMS() {
         setUploadingAvatar(true);
         try {
             const token = localStorage.getItem('accessToken');
-            const res = await fetch('http://localhost:5000/api/user/avatar', {
+            const res = await fetch(`${API_BASE}/user/avatar`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` },
                 body: formData
@@ -241,7 +241,7 @@ export default function AboutCMS() {
         setUploadingResume(true);
         try {
             const token = localStorage.getItem('accessToken');
-            const res = await fetch('http://localhost:5000/api/media/upload', {
+            const res = await fetch(`${API_BASE}/media/upload`, {
                 method: 'POST',
                 headers: { Authorization: `Bearer ${token}` },
                 body: formData

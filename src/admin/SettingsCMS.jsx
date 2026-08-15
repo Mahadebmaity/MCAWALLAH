@@ -1,6 +1,6 @@
-// src/admin/SettingsCMS.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
@@ -118,7 +118,7 @@ export default function SettingsCMS() {
 
     const fetchSettings = async () => {
         try {
-            const res = await authFetch('http://localhost:5000/api/admin/section/settings');
+            const res = await authFetch(`${API_BASE}/admin/section/settings`);
             if (res.ok) {
                 const data = await res.json();
                 setSettings(data);
@@ -144,7 +144,7 @@ export default function SettingsCMS() {
         setSavedSuccess(false);
 
         try {
-            const res = await authFetch('http://localhost:5000/api/admin/section/settings', {
+            const res = await authFetch(`${API_BASE}/admin/section/settings`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(settings)
@@ -176,7 +176,7 @@ export default function SettingsCMS() {
     const handleExportBackup = async () => {
         try {
             const token = localStorage.getItem('accessToken');
-            const res = await fetch('http://localhost:5000/api/admin/backup/export', {
+            const res = await fetch(`${API_BASE}/admin/backup/export`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const blob = await res.blob();
@@ -213,7 +213,7 @@ export default function SettingsCMS() {
         reader.onload = async (event) => {
             try {
                 const json = JSON.parse(event.target.result);
-                const res = await authFetch('http://localhost:5000/api/admin/backup/import', {
+                const res = await authFetch(`${API_BASE}/admin/backup/import`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(json)

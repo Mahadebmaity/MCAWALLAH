@@ -81,8 +81,8 @@ const startServer = async () => {
             await seedInitialData();
         }
 
-        app.listen(PORT, () => {
-            console.log(`🚀 Portfolio CMS Server running on http://localhost:${PORT}`);
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`🚀 Portfolio CMS Server running on http://0.0.0.0:${PORT} (available on local network)`);
             console.log(`📡 Public API: http://localhost:${PORT}/api/portfolio/public`);
             console.log(`🔒 Admin API:  http://localhost:${PORT}/api/admin/overview`);
         });

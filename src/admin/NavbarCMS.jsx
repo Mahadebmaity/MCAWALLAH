@@ -1,5 +1,5 @@
-// src/admin/NavbarCMS.jsx
 import { useState, useEffect } from 'react';
+import { API_BASE } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
@@ -44,7 +44,7 @@ export default function NavbarCMS() {
         const fetchNavbar = async () => {
             try {
                 const token = localStorage.getItem('accessToken');
-                const res = await fetch('http://localhost:5000/api/admin/section/navbar', {
+                const res = await fetch(`${API_BASE}/admin/section/navbar`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (res.ok) {
@@ -74,7 +74,7 @@ export default function NavbarCMS() {
         setSaving(true);
         try {
             const token = localStorage.getItem('accessToken');
-            const res = await fetch('http://localhost:5000/api/admin/section/navbar', {
+            const res = await fetch(`${API_BASE}/admin/section/navbar`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

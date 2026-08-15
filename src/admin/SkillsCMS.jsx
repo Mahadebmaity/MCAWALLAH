@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
@@ -23,7 +24,7 @@ export default function SkillsCMS() {
 
     const fetchSkills = async () => {
         try {
-            const res = await authFetch('http://localhost:5000/api/admin/section/skills');
+            const res = await authFetch(`${API_BASE}/admin/section/skills`);
             if (res.ok) {
                 const data = await res.json();
                 setSkills(data);
@@ -69,8 +70,8 @@ export default function SkillsCMS() {
         e.preventDefault();
         try {
             const url = editingSkill
-                ? `http://localhost:5000/api/admin/section/skills/${editingSkill._id}`
-                : 'http://localhost:5000/api/admin/section/skills';
+                ? `${API_BASE}/admin/section/skills/${editingSkill._id}`
+                : `${API_BASE}/admin/section/skills`;
             const method = editingSkill ? 'PUT' : 'POST';
 
             const res = await authFetch(url, {
@@ -102,7 +103,7 @@ export default function SkillsCMS() {
     const handleDelete = async (id, name) => {
         if (!window.confirm(`Are you sure you want to delete "${name || 'this skill'}"?`)) return;
         try {
-            const res = await authFetch(`http://localhost:5000/api/admin/section/skills/${id}`, {
+            const res = await authFetch(`${API_BASE}/admin/section/skills/${id}`, {
                 method: 'DELETE'
             });
             if (res.ok) {
@@ -124,7 +125,7 @@ export default function SkillsCMS() {
 
     const toggleVisibility = async (id, name) => {
         try {
-            const res = await authFetch(`http://localhost:5000/api/admin/section/skills/${id}/visibility`, {
+            const res = await authFetch(`${API_BASE}/admin/section/skills/${id}/visibility`, {
                 method: 'PATCH'
             });
             if (res.ok) {

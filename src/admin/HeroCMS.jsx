@@ -1,6 +1,6 @@
-// src/admin/HeroCMS.jsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
@@ -18,7 +18,7 @@ export default function HeroCMS() {
 
     const fetchHero = async () => {
         try {
-            const res = await authFetch('http://localhost:5000/api/admin/section/hero');
+            const res = await authFetch(`${API_BASE}/admin/section/hero`);
             if (res.ok) {
                 const data = await res.json();
                 setHero({
@@ -74,7 +74,7 @@ export default function HeroCMS() {
         setSaving(true);
 
         try {
-            const res = await authFetch('http://localhost:5000/api/admin/section/hero', {
+            const res = await authFetch(`${API_BASE}/admin/section/hero`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(hero)

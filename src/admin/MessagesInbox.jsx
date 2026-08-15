@@ -1,6 +1,6 @@
-// src/admin/MessagesInbox.jsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../config/api';
 import './admin.css';
 
 export default function MessagesInbox() {
@@ -12,7 +12,7 @@ export default function MessagesInbox() {
 
     const fetchMessages = async () => {
         try {
-            const res = await authFetch('http://localhost:5000/api/admin/section/messages');
+            const res = await authFetch(`${API_BASE}/admin/section/messages`);
             if (res.ok) {
                 const data = await res.json();
                 setMessages(data);
@@ -37,7 +37,7 @@ export default function MessagesInbox() {
             if (typeof isRead === 'boolean') payload.isRead = isRead;
             if (typeof isArchived === 'boolean') payload.isArchived = isArchived;
 
-            const res = await authFetch(`http://localhost:5000/api/admin/messages/${id}/status`, {
+            const res = await authFetch(`${API_BASE}/admin/messages/${id}/status`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -58,7 +58,7 @@ export default function MessagesInbox() {
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this message permanently?')) return;
         try {
-            const res = await authFetch(`http://localhost:5000/api/admin/section/messages/${id}`, {
+            const res = await authFetch(`${API_BASE}/admin/section/messages/${id}`, {
                 method: 'DELETE'
             });
             if (res.ok) {

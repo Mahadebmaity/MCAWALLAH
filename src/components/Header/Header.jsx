@@ -445,24 +445,25 @@ export default function Header() {
                         </div>
                     )}
 
-                    <div className="header__intro-inline">
+                    <div className="header__title-block">
                         {hero.showGreeting !== false && (
-                            <span className="header__greeting-inline">{hero.greeting || "Hello, I'm"}</span>
+                            <p className="header__greeting">{hero.greeting || "Hello, I'm"}</p>
                         )}
-                        <h1 className="header__name-inline">
+                        <h1 className="header__name">
                             <span className="header__name-first">{hero.firstName || "MCA"} </span>
                             <span className="header__name-last">{hero.lastName || "WALLAH"}</span>
                         </h1>
-                        {hero.showTypewriter !== false && (
-                            <div className="header__role-inline">
-                                <span className="header__role-prefix">{hero.rolePrefix || "—"}</span>
-                                <span className="header__role-text">
-                                    {displayed}
-                                    <span className="header__cursor">|</span>
-                                </span>
-                            </div>
-                        )}
                     </div>
+
+                    {hero.showTypewriter !== false && (
+                        <div className="header__role-wrap">
+                            <span className="header__role-prefix">{hero.rolePrefix || "—"}</span>
+                            <span className="header__role-text">
+                                {displayed}
+                                <span className="header__cursor">|</span>
+                            </span>
+                        </div>
+                    )}
 
                     {hero.bio && <p className="header__bio">{hero.bio}</p>}
 
@@ -512,14 +513,15 @@ export default function Header() {
                                 </div>
                             )}
 
-                            {hero.showGreeting !== false && (
-                                <p className="header__greeting" style={{ textAlign: 'left' }}>{hero.greeting || "Hello, I'm"}</p>
-                            )}
-
-                            <h1 className="header__name" style={{ textAlign: 'left' }}>
-                                <span className="header__name-first">{hero.firstName || "MCA"} </span>
-                                <span className="header__name-last">{hero.lastName || "WALLAH"}</span>
-                            </h1>
+                            <div className="header__title-block header__title-block--left">
+                                {hero.showGreeting !== false && (
+                                    <p className="header__greeting" style={{ textAlign: 'left' }}>{hero.greeting || "Hello, I'm"}</p>
+                                )}
+                                <h1 className="header__name" style={{ textAlign: 'left', justifyContent: 'flex-start' }}>
+                                    <span className="header__name-first">{hero.firstName || "MCA"} </span>
+                                    <span className="header__name-last">{hero.lastName || "WALLAH"}</span>
+                                </h1>
+                            </div>
 
                             {hero.showTypewriter !== false && (
                                 <div className="header__role-wrap" style={{ justifyContent: 'flex-start' }}>
@@ -590,15 +592,15 @@ export default function Header() {
                                     <pre>
                                         <code>
                                             <span className="token-kw">const</span> <span className="token-var">developer</span> = &#123;{'\n'}
-                                            {'  '}<span className="token-prop">name</span>: <span className="token-str">"{hero.firstName || 'Mahadeb'} {hero.lastName || 'Maity'}"</span>,{'\n'}
-                                            {'  '}<span className="token-prop">role</span>: <span className="token-str">"{displayed || 'Full Stack Craftsman'}"</span>,{'\n'}
-                                            {'  '}<span className="token-prop">coreStack</span>: [{'\n'}
-                                            {'    '}{techPills.slice(0, 4).map((t, idx) => (
-                                                <span key={idx}><span className="token-str">"{t}"</span>{idx < 3 ? ', ' : ''}</span>
-                                            ))}{'\n'}
-                                            {'  '}],{'\n'}
-                                            {'  '}<span className="token-prop">status</span>: <span className="token-str">"Ready for high-impact projects 🚀"</span>,{'\n'}
-                                            {'  '}<span className="token-prop">location</span>: <span className="token-str">"Haldia, WB, India 📍"</span>{'\n'}
+                                             <span className="token-prop">name</span>: <span className="token-str">"{hero.firstName || 'Mahadeb'} {hero.lastName || 'Maity'}"</span>,{'\n'}
+                                             <span className="token-prop">role</span>: <span className="token-str">"{displayed || 'Full Stack Craftsman'}"</span>,{'\n'}
+                                             <span className="token-prop">coreStack</span>: [{'\n'}
+                                                {techPills.slice(0, 4).map((t, idx) => (
+                                                    <span key={idx}><span className="token-str">"{t}"</span>{idx < 3 ? ', ' : ''}</span>
+                                                ))}{'\n'}
+                                             ],{'\n'}
+                                             <span className="token-prop">status</span>: <span className="token-str">"Ready for high-impact projects 🚀"</span>,{'\n'}
+                                             <span className="token-prop">location</span>: <span className="token-str">"Haldia, WB, India 📍"</span>{'\n'}
                                             &#125;;
                                         </code>
                                     </pre>
@@ -621,14 +623,23 @@ export default function Header() {
                         </div>
                     )}
 
-                    <h1 className="header__editorial-title">
-                        {hero.firstName || "MCA"} <span className="header__name-last">{hero.lastName || "WALLAH"}</span>
-                    </h1>
+                    <div className="header__title-block">
+                        {hero.showGreeting !== false && (
+                            <p className="header__greeting">{hero.greeting || "Hello, I'm"}</p>
+                        )}
+                        <h1 className="header__editorial-title">
+                            {hero.firstName || "MCA"} <span className="header__name-last">{hero.lastName || "WALLAH"}</span>
+                        </h1>
+                    </div>
 
                     {hero.showTypewriter !== false && (
-                        <p className="header__editorial-role">
-                            {displayed}
-                        </p>
+                        <div className="header__role-wrap">
+                            <span className="header__role-prefix">{hero.rolePrefix || "—"}</span>
+                            <span className="header__editorial-role">
+                                {displayed}
+                                <span className="header__cursor">|</span>
+                            </span>
+                        </div>
                     )}
 
                     {hero.bio && <p className="header__bio">{hero.bio}</p>}
@@ -677,18 +688,25 @@ export default function Header() {
                         </div>
                     )}
 
-                    <div className="header__intro-inline">
-                        <h1 className="header__name-inline header__name-holo">
+                    <div className="header__title-block">
+                        {hero.showGreeting !== false && (
+                            <p className="header__greeting" style={{ color: '#38bdf8' }}>{hero.greeting || "Hello, I'm"}</p>
+                        )}
+                        <h1 className="header__name header__name-holo">
                             <span className="header__name-first">{hero.firstName || "MCA"} </span>
                             <span className="header__name-last">{hero.lastName || "WALLAH"}</span>
                         </h1>
-                        {hero.showTypewriter !== false && (
-                            <div className="header__role-inline">
-                                <span className="header__role-prefix">//</span>
-                                <span className="header__role-text">{displayed}<span className="header__cursor">_</span></span>
-                            </div>
-                        )}
                     </div>
+
+                    {hero.showTypewriter !== false && (
+                        <div className="header__role-wrap">
+                            <span className="header__role-prefix" style={{ color: '#38bdf8' }}>//</span>
+                            <span className="header__role-text" style={{ color: '#38bdf8' }}>
+                                {displayed}
+                                <span className="header__cursor">_</span>
+                            </span>
+                        </div>
+                    )}
 
                     {hero.bio && <p className="header__bio">{hero.bio}</p>}
 
@@ -735,44 +753,24 @@ export default function Header() {
                         </div>
                     )}
 
-                    {layoutStyle === "inline" ? (
-                        <div className="header__intro-inline">
-                            {hero.showGreeting !== false && (
-                                <span className="header__greeting-inline">{hero.greeting || "Hello, I'm"}</span>
-                            )}
-                            <h1 className="header__name-inline">
-                                <span className="header__name-first">{hero.firstName || "MCA"} </span>
-                                <span className="header__name-last">{hero.lastName || "WALLAH"}</span>
-                            </h1>
-                            {hero.showTypewriter !== false && (
-                                <div className="header__role-inline">
-                                    <span className="header__role-prefix">{hero.rolePrefix || "—"}</span>
-                                    <span className="header__role-text">
-                                        {displayed}
-                                        <span className="header__cursor">|</span>
-                                    </span>
-                                </div>
-                            )}
+                    <div className="header__title-block">
+                        {hero.showGreeting !== false && (
+                            <p className="header__greeting">{hero.greeting || "Hello, I'm"}</p>
+                        )}
+                        <h1 className="header__name">
+                            <span className="header__name-first">{hero.firstName || "MCA"} </span>
+                            <span className="header__name-last">{hero.lastName || "WALLAH"}</span>
+                        </h1>
+                    </div>
+
+                    {hero.showTypewriter !== false && (
+                        <div className="header__role-wrap">
+                            <span className="header__role-prefix">{hero.rolePrefix || (layoutStyle === "inline" ? "—" : "I build")}</span>
+                            <span className="header__role-text">
+                                {displayed}
+                                <span className="header__cursor">|</span>
+                            </span>
                         </div>
-                    ) : (
-                        <>
-                            {hero.showGreeting !== false && (
-                                <p className="header__greeting">{hero.greeting || "Hello, I'm"}</p>
-                            )}
-                            <h1 className="header__name">
-                                <span className="header__name-first">{hero.firstName || "MCA"} </span>
-                                <span className="header__name-last">{hero.lastName || "WALLAH"}</span>
-                            </h1>
-                            {hero.showTypewriter !== false && (
-                                <div className="header__role-wrap">
-                                    <span className="header__role-prefix">{hero.rolePrefix || "I build"}</span>
-                                    <span className="header__role-text">
-                                        {displayed}
-                                        <span className="header__cursor">|</span>
-                                    </span>
-                                </div>
-                            )}
-                        </>
                     )}
 
                     {hero.bio && <p className="header__bio">{hero.bio}</p>}

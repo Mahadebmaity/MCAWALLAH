@@ -1,6 +1,6 @@
-// src/admin/DocumentsCMS.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
@@ -28,7 +28,7 @@ export default function DocumentsCMS() {
 
     const fetchDocuments = async () => {
         try {
-            const res = await authFetch('http://localhost:5000/api/admin/section/documents');
+            const res = await authFetch(`${API_BASE}/admin/section/documents`);
             if (res.ok) {
                 const data = await res.json();
                 setDocs(data);
@@ -72,7 +72,7 @@ export default function DocumentsCMS() {
             const formData = new FormData();
             formData.append('document', form.file);
 
-            const uploadRes = await authFetch('http://localhost:5000/api/admin/upload/document', {
+            const uploadRes = await authFetch(`${API_BASE}/admin/upload/document`, {
                 method: 'POST',
                 body: formData
             });
@@ -91,7 +91,7 @@ export default function DocumentsCMS() {
                 tags: form.tags.split(',').map(t => t.trim()).filter(Boolean)
             };
 
-            const saveRes = await authFetch('http://localhost:5000/api/admin/section/documents', {
+            const saveRes = await authFetch(`${API_BASE}/admin/section/documents`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(docPayload)
@@ -120,7 +120,7 @@ export default function DocumentsCMS() {
     const handleDelete = async (id, title) => {
         if (!window.confirm(`Are you sure you want to delete "${title}"?`)) return;
         try {
-            const res = await authFetch(`http://localhost:5000/api/admin/section/documents/${id}`, {
+            const res = await authFetch(`${API_BASE}/admin/section/documents/${id}`, {
                 method: 'DELETE'
             });
             if (res.ok) {

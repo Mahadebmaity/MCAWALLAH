@@ -8,6 +8,7 @@ import TicTacToe from "./TicTacToe";
 import GameLeaderboard from "./GameLeaderboard";
 import GameInstructionsModal from "./GameInstructionsModal";
 import { useAuth } from "../../context/AuthContext";
+import { API_BASE } from "../../config/api";
 import "./FunGame.css";
 
 const GAMES = [
@@ -120,7 +121,7 @@ export default function StandaloneArcadeWindow() {
         // Submit to API
         try {
             const playerName = user?.name || localStorage.getItem('player_nickname') || 'Guest Player';
-            const res = await fetch(`http://localhost:5000/api/portfolio/games/${activeSlug}/score`, {
+            const res = await fetch(`${API_BASE}/portfolio/games/${activeSlug}/score`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

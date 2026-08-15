@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../config/api';
 import './admin.css';
 
 const NAV_ITEMS = [
@@ -31,7 +32,7 @@ export default function AdminLayout() {
             try {
                 const token = localStorage.getItem('accessToken');
                 if (!token) return;
-                const res = await fetch('http://localhost:5000/api/admin/overview', {
+                const res = await fetch(`${API_BASE}/admin/overview`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (res.ok) {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
@@ -22,7 +23,7 @@ export default function TimelineCMS() {
 
     const fetchTimeline = async () => {
         try {
-            const res = await authFetch('http://localhost:5000/api/admin/section/timeline');
+            const res = await authFetch(`${API_BASE}/admin/section/timeline`);
             if (res.ok) {
                 const data = await res.json();
                 setTimeline(data);
@@ -70,8 +71,8 @@ export default function TimelineCMS() {
         e.preventDefault();
         try {
             const url = editingItem
-                ? `http://localhost:5000/api/admin/section/timeline/${editingItem._id}`
-                : 'http://localhost:5000/api/admin/section/timeline';
+                ? `${API_BASE}/admin/section/timeline/${editingItem._id}`
+                : `${API_BASE}/admin/section/timeline`;
             const method = editingItem ? 'PUT' : 'POST';
 
             const res = await authFetch(url, {
@@ -103,7 +104,7 @@ export default function TimelineCMS() {
     const handleDelete = async (id, title) => {
         if (!window.confirm(`Delete "${title || 'this timeline entry'}"?`)) return;
         try {
-            const res = await authFetch(`http://localhost:5000/api/admin/section/timeline/${id}`, {
+            const res = await authFetch(`${API_BASE}/admin/section/timeline/${id}`, {
                 method: 'DELETE'
             });
             if (res.ok) {
@@ -125,7 +126,7 @@ export default function TimelineCMS() {
 
     const toggleVisibility = async (id, title) => {
         try {
-            const res = await authFetch(`http://localhost:5000/api/admin/section/timeline/${id}/visibility`, {
+            const res = await authFetch(`${API_BASE}/admin/section/timeline/${id}/visibility`, {
                 method: 'PATCH'
             });
             if (res.ok) {

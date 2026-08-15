@@ -1,5 +1,6 @@
 // src/components/FunGame/GameLeaderboard.jsx
 import { useState, useEffect } from "react";
+import { API_BASE } from "../../config/api";
 
 export default function GameLeaderboard({ gameSlug, onClose }) {
     const [leaderboard, setLeaderboard] = useState([]);
@@ -9,7 +10,7 @@ export default function GameLeaderboard({ gameSlug, onClose }) {
     useEffect(() => {
         const fetchScores = async () => {
             try {
-                const res = await fetch(`http://localhost:5000/api/portfolio/games/${gameSlug}/leaderboard`);
+                const res = await fetch(`${API_BASE}/portfolio/games/${gameSlug}/leaderboard`);
                 if (res.ok) {
                     const data = await res.json();
                     setLeaderboard(data.leaderboard || []);

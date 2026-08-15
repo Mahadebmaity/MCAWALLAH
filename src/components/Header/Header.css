@@ -440,66 +440,52 @@
 /* Greeting */
 .header__greeting {
     font-family: var(--h-font-mono);
-    font-size: 1rem;
+    font-size: clamp(0.95rem, 2.4vw, 1.15rem);
     color: var(--h-text-3);
     letter-spacing: 1px;
+    margin: 0;
 }
 
-/* Name */
 /* ═══════════════════════════
-   SINGLE-LINE INTRO & HEADLINE
+   ROCK-SOLID TITLE & HEADLINE BLOCK
    ═══════════════════════════ */
-.header__intro-inline {
+.header__title-block {
     display: flex;
-    align-items: baseline;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    flex-wrap: wrap;
-    gap: 12px 16px;
-    margin: 8px 0;
-    max-width: 900px;
+    gap: 8px;
+    width: 100%;
+    margin: 4px 0 2px;
+}
+
+.header__title-block--left {
+    align-items: flex-start;
+    justify-content: flex-start;
 }
 
 .header__greeting-inline {
     font-family: var(--h-font-mono);
-    font-size: clamp(1.2rem, 3.2vw, 2rem);
+    font-size: clamp(1.1rem, 3vw, 1.6rem);
     font-weight: 500;
     color: var(--h-text-2);
     letter-spacing: 0.5px;
 }
 
-.header__name-inline {
-    font-family: var(--hero-font, var(--h-font-display));
-    font-size: clamp(2.2rem, 6vw, 4.2rem);
-    font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -1.5px;
-    margin: 0;
-    display: inline-flex;
-    gap: 8px;
-    align-items: baseline;
-}
-
-.header__role-inline {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 10px;
-    font-family: var(--h-font-mono);
-    font-size: clamp(1.2rem, 3.2vw, 2rem);
-    color: var(--h-accent);
-    font-weight: 600;
-}
-
+.header__name-inline,
 .header__name {
     font-family: var(--hero-font, var(--h-font-display));
-    font-size: clamp(3rem, 9vw, 6.5rem);
-    font-weight: 600;
-    line-height: 1;
-    letter-spacing: -2px;
+    font-size: clamp(2.8rem, 8vw, 5.8rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
     color: var(--h-text-1);
     display: flex;
     gap: 0.25em;
     flex-wrap: wrap;
     justify-content: center;
+    margin: 0;
+    text-align: center;
 }
 
 .header__name-first {
@@ -513,25 +499,36 @@
     background-clip: text;
 }
 
-/* Typewriter */
-.header__role-wrap {
+/* ═══════════════════════════
+   STABILIZED TYPEWRITER ENGINE
+   ═══════════════════════════ */
+.header__role-wrap,
+.header__role-inline {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
     justify-content: center;
     font-family: var(--h-font-mono);
-    font-size: clamp(1rem, 3vw, 1.35rem);
+    font-size: clamp(1.05rem, 2.8vw, 1.45rem);
     color: var(--h-text-2);
+    min-height: 2.2rem; /* Prevents vertical CLS / layout jumping */
+    width: 100%;
+    text-align: center;
+    margin: 2px 0 6px;
 }
 
 .header__role-prefix {
     color: var(--h-text-3);
+    font-weight: 500;
+    flex-shrink: 0;
 }
 
 .header__role-text {
     color: var(--h-accent);
-    font-weight: 500;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
     min-width: 2ch;
 }
 
@@ -540,7 +537,7 @@
     color: var(--h-accent);
     font-weight: 300;
     animation: blink 0.9s step-end infinite;
-    margin-left: 1px;
+    margin-left: 2px;
 }
 
 /* Bio */
@@ -1344,21 +1341,23 @@
         box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
     }
 
-    .header__intro-inline {
-        flex-direction: column;
+    .header__title-block {
         gap: 4px;
+        margin: 2px 0;
     }
 
     .header__name-inline,
     .header__name {
-        font-size: clamp(1.8rem, 6.5vw, 2.5rem);
-        line-height: 1.18;
+        font-size: clamp(2rem, 7.5vw, 2.8rem);
+        line-height: 1.15;
         word-break: break-word;
     }
 
     .header__role-inline,
     .header__role-wrap {
-        font-size: 0.95rem;
+        font-size: clamp(0.92rem, 3.8vw, 1.1rem);
+        min-height: 1.9rem;
+        gap: 6px;
         flex-wrap: wrap;
         justify-content: center;
     }
