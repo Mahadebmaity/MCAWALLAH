@@ -13,13 +13,15 @@ export default function AdminLogin() {
     const { login } = useAuth();
     const navigate = useNavigate();
 
+    const [showPassword, setShowPassword] = useState(false);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
         setLoading(true);
 
         try {
-            const user = await login({ email, password });
+            const user = await login({ email: email.trim(), password: password.trim() });
             if (user.role === 'admin') {
                 navigate('/admin/dashboard');
             } else {
@@ -34,6 +36,12 @@ export default function AdminLogin() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleFillDefaults = () => {
+        setEmail('mahadeb@portfolio.com');
+        setPassword('Admin@123456');
+        setError(null);
     };
 
     return (
@@ -61,7 +69,7 @@ export default function AdminLogin() {
                         gap: '8px'
                     }}>
                         <i className="fa-solid fa-circle-exclamation"></i>
-                        {error}
+                        <span>{error}</span>
                     </div>
                 )}
 
@@ -79,9 +87,28 @@ export default function AdminLogin() {
                     </div>
 
                     <div className="adm-form-group">
-                        <label className="adm-label">Password</label>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <label className="adm-label">Password</label>
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: 'var(--adm-accent, #38bdf8)',
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                }}
+                            >
+                                <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                                {showPassword ? 'Hide' : 'Show'}
+                            </button>
+                        </div>
                         <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             required
                             className="adm-input"
                             value={password}
@@ -108,6 +135,25 @@ export default function AdminLogin() {
                             </>
                         )}
                     </button>
+
+                    <div style={{ marginTop: '14px', textAlign: 'center' }}>
+                        <button
+                            type="button"
+                            onClick={handleFillDefaults}
+                            style={{
+                                background: 'rgba(56, 189, 248, 0.08)',
+                                border: '1px solid rgba(56, 189, 248, 0.2)',
+                                borderRadius: '6px',
+                                color: '#38bdf8',
+                                fontSize: '11px',
+                                padding: '6px 12px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <i className="fa-solid fa-wand-magic-sparkles" style={{ marginRight: '5px' }}></i>
+                            Auto-fill Default Admin Credentials
+                        </button>
+                    </div>
                 </form>
 
                 <div style={{ marginTop: '24px', textAlign: 'center' }}>
