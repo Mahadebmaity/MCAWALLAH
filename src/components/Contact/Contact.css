@@ -15,6 +15,7 @@
     --ct-border: rgba(255, 255, 255, 0.08);
     --ct-input-bg: rgba(255, 255, 255, 0.05);
     --ct-input-border: rgba(255, 255, 255, 0.1);
+    --ct-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
     --ct-font-d: 'Syne', sans-serif;
     --ct-font-b: 'DM Sans', sans-serif;
     --ct-font-m: 'Fira Code', monospace;
@@ -22,14 +23,15 @@
 }
 
 [data-theme="light"] {
-    --ct-text-1: #0d0d0d;
-    --ct-text-2: #444;
-    --ct-text-3: #888;
-    --ct-bg: #f5f5fa;
-    --ct-card: rgba(0, 0, 0, 0.03);
+    --ct-text-1: #0f172a;
+    --ct-text-2: #334155;
+    --ct-text-3: #64748b;
+    --ct-bg: #f8fafc;
+    --ct-card: #ffffff;
     --ct-border: rgba(0, 0, 0, 0.08);
-    --ct-input-bg: rgba(0, 0, 0, 0.03);
-    --ct-input-border: rgba(0, 0, 0, 0.1);
+    --ct-input-bg: #f8fafc;
+    --ct-input-border: rgba(0, 0, 0, 0.12);
+    --ct-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
 }
 
 .contact {
@@ -184,7 +186,8 @@
     border: 1px solid var(--ct-border);
     border-radius: 12px;
     padding: 14px 18px;
-    transition: border-color var(--ct-t), transform 0.2s;
+    box-shadow: var(--ct-shadow);
+    transition: border-color var(--ct-t), transform 0.2s, box-shadow 0.2s;
 }
 
 .contact__card:hover {
@@ -304,6 +307,7 @@ a.contact__card-val:hover {
     border: 1px solid var(--ct-border);
     border-radius: 20px;
     padding: 36px;
+    box-shadow: var(--ct-shadow);
 }
 
 .contact__form {

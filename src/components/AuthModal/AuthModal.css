@@ -78,7 +78,10 @@
 .auth-modal__group { display: flex; flex-direction: column; gap: 5px; }
 .auth-modal__label {
   font-size: 0.73rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px;
-  color: #666; display: flex; align-items: center; gap: 5px;
+  color: #94a3b8; display: flex; align-items: center; gap: 5px;
+}
+[data-theme="light"] .auth-modal__label {
+  color: #475569;
 }
 .auth-modal__label i { color: #e84545; }
 .auth-modal__input {

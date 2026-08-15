@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { usePortfolioData } from "../../context/DataContext";
 import "./Contact.css";
 
 const SOCIAL_LINKS = [
@@ -20,17 +21,21 @@ function useInView(threshold = 0.1) {
 }
 
 export default function Contact() {
+    const { data, submitContactMessage } = usePortfolioData();
+    const settings = data?.settings || {};
+
     const [sectionRef, sectionIn] = useInView(0.1);
     const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
     const [errors, setErrors] = useState({});
     const [status, setStatus] = useState(null); // null | "sending" | "ok" | "err"
+    const [feedbackText, setFeedbackText] = useState("");
 
     const validate = () => {
         const e = {};
         if (!form.name.trim()) e.name = "Name is required";
         if (!/\S+@\S+\.\S+/.test(form.email)) e.email = "Valid email required";
         if (!form.subject.trim()) e.subject = "Subject is required";
-        if (form.message.trim().length < 15) e.message = "Message too short (min 15 chars)";
+        if (form.message.trim().length < 10) e.message = "Message too short (min 10 chars)";
         return e;
     };
 
@@ -39,21 +44,30 @@ export default function Contact() {
         if (errors[field]) setErrors((p) => { const n = { ...p }; delete n[field]; return n; });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const errs = validate();
         if (Object.keys(errs).length) { setErrors(errs); return; }
+        
         setErrors({});
         setStatus("sending");
-        setTimeout(() => {
+
+        try {
+            const res = await submitContactMessage(form);
             setStatus("ok");
+            setFeedbackText(res.message || "Message sent! I'll reply within 24 hours.");
             setForm({ name: "", email: "", subject: "", message: "" });
             setTimeout(() => setStatus(null), 5000);
-        }, 1500);
+        } catch (err) {
+            setStatus("err");
+            setFeedbackText(err.message || "Failed to send message. Please try again.");
+            setTimeout(() => setStatus(null), 5000);
+        }
     };
 
     return (
         <section id="contact" className="contact">
+            <span id="get-in-touch" style={{ position: "absolute", top: "-80px" }} aria-hidden="true" />
             <div className="contact__bg" aria-hidden="true">
                 <div className="contact__bg-blob contact__bg-blob--1" />
                 <div className="contact__bg-blob contact__bg-blob--2" />
@@ -89,9 +103,9 @@ export default function Contact() {
                         {/* Info cards */}
                         <div className="contact__cards">
                             {[
-                                { icon: "fa-solid fa-envelope", label: "Email", val: "you@email.com", href: "mailto:you@email.com" },
-                                { icon: "fa-solid fa-phone", label: "Phone", val: "+91 12345 67890", href: "tel:+911234567890" },
-                                { icon: "fa-solid fa-location-dot", label: "Location", val: "Haldia, West Bengal, India", href: null },
+                                { icon: "fa-solid fa-envelope", label: "Email", val: settings.contactEmail || "mahadeb@portfolio.com", href: `mailto:${settings.contactEmail || "mahadeb@portfolio.com"}` },
+                                { icon: "fa-solid fa-phone", label: "Phone", val: settings.contactPhone || "+91 12345 67890", href: `tel:${settings.contactPhone || "+911234567890"}` },
+                                { icon: "fa-solid fa-location-dot", label: "Location", val: settings.contactLocation || "Haldia, West Bengal, India", href: null },
                             ].map((c) => (
                                 <div key={c.label} className="contact__card">
                                     <div className="contact__card-icon">
@@ -197,7 +211,13 @@ export default function Contact() {
                             {status === "ok" && (
                                 <div className="contact__form-success">
                                     <i className="fa-solid fa-circle-check" />
-                                    Message sent! I'll reply within 24 hours.
+                                    {feedbackText}
+                                </div>
+                            )}
+
+                            {status === "err" && (
+                                <div className="contact__form-err" style={{ marginBottom: '14px', display: 'block', fontSize: '13px' }}>
+                                    <i className="fa-solid fa-circle-exclamation" /> {feedbackText}
                                 </div>
                             )}
 

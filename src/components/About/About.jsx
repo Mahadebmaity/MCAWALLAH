@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { usePortfolioData } from "../../context/DataContext";
 import "./About.css";
-// import profileImg from "./src/assests/Mahadeb.jpeg"
 
-const SKILLS = [
+const DEFAULT_SKILLS = [
     { name: "React", level: 90, icon: "fa-brands fa-react", color: "#61DAFB" },
     { name: "JavaScript", level: 85, icon: "fa-brands fa-js", color: "#F7DF1E" },
     { name: "Node.js", level: 78, icon: "fa-brands fa-node-js", color: "#68A063" },
@@ -13,7 +13,7 @@ const SKILLS = [
     { name: "TypeScript", level: 75, icon: "fa-solid fa-code", color: "#3178C6" },
 ];
 
-const TIMELINE = [
+const DEFAULT_TIMELINE = [
     {
         year: "2024",
         title: "Senior Frontend Developer",
@@ -44,7 +44,7 @@ const TIMELINE = [
     },
 ];
 
-const HOBBIES = [
+const DEFAULT_HOBBIES = [
     { icon: "fa-solid fa-gamepad", label: "Gaming" },
     { icon: "fa-solid fa-book-open", label: "Reading" },
     { icon: "fa-solid fa-music", label: "Music" },
@@ -92,10 +92,17 @@ function SkillBar({ skill, inView }) {
 }
 
 export default function About() {
+    const { data } = usePortfolioData();
+    const about = data?.about || {};
+
     const [heroRef, heroIn] = useInView(0.1);
     const [skillRef, skillIn] = useInView(0.2);
     const [timeRef, timeIn] = useInView(0.1);
     const [hobbyRef, hobbyIn] = useInView(0.2);
+
+    const skills = data?.skills?.length ? data.skills : DEFAULT_SKILLS;
+    const timeline = data?.timeline?.length ? data.timeline : DEFAULT_TIMELINE;
+    const hobbies = about.hobbies?.length ? about.hobbies : DEFAULT_HOBBIES;
 
     return (
         <section id="about" className="about">
@@ -126,7 +133,11 @@ export default function About() {
                     <div className="about__avatar-wrap">
                         <div className="about__avatar-ring" />
                         <div className="about__avatar">
-                            <i className="fa-solid fa-user about__avatar-icon" />
+                            {about.avatarUrl ? (
+                                <img src={about.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                            ) : (
+                                <i className="fa-solid fa-user about__avatar-icon" />
+                            )}
                         </div>
                         <div className="about__avatar-badge">
                             <i className="fa-solid fa-star" /> Available
@@ -136,27 +147,35 @@ export default function About() {
                     {/* Bio */}
                     <div className="about__bio">
                         <h2 className="about__name">
-                            Hi, I'm <span className="about__name-accent">Mahadeb Maity</span> 👋
+                            Hi, I'm <span className="about__name-accent">{about.displayName || "Mahadeb Maity"}</span> 👋
                         </h2>
-                        <p className="about__bio-text">
-                            I'm a passionate <strong>Full Stack Developer</strong> based in Haldia, West Bengal, India.
-                            I love turning complex problems into elegant, user-friendly solutions.
-                            With 3+ years of experience, I specialise in building fast, accessible,
-                            and beautiful web applications that people enjoy using.
-                        </p>
-                        <p className="about__bio-text">
-                            When I'm not coding, you'll find me exploring open source projects,
-                            sipping coffee, or levelling up in my favourite games.
-                        </p>
+                        {about.paragraphs?.length ? (
+                            about.paragraphs.map((p, idx) => (
+                                <p key={idx} className="about__bio-text">{p}</p>
+                            ))
+                        ) : (
+                            <>
+                                <p className="about__bio-text">
+                                    I'm a passionate <strong>Full Stack Developer</strong> based in Haldia, West Bengal, India.
+                                    I love turning complex problems into elegant, user-friendly solutions.
+                                    With 3+ years of experience, I specialise in building fast, accessible,
+                                    and beautiful web applications that people enjoy using.
+                                </p>
+                                <p className="about__bio-text">
+                                    When I'm not coding, you'll find me exploring open source projects,
+                                    sipping coffee, or levelling up in my favourite games.
+                                </p>
+                            </>
+                        )}
 
                         {/* Quick stats */}
                         <div className="about__quick-stats">
-                            {[
+                            {(about.quickStats?.length ? about.quickStats : [
                                 { icon: "fa-solid fa-code", val: "3+", label: "Years Coding" },
                                 { icon: "fa-solid fa-folder-open", val: "40+", label: "Projects Done" },
                                 { icon: "fa-solid fa-mug-hot", val: "∞", label: "Cups of Coffee" },
-                            ].map((s) => (
-                                <div key={s.label} className="about__quick-stat">
+                            ]).map((s, idx) => (
+                                <div key={idx} className="about__quick-stat">
                                     <i className={s.icon} />
                                     <strong>{s.val}</strong>
                                     <span>{s.label}</span>
@@ -164,9 +183,42 @@ export default function About() {
                             ))}
                         </div>
 
-                        <a href="/resume.pdf" download className="about__resume-btn">
-                            <i className="fa-solid fa-download" /> Download Resume
-                        </a>
+                        {/* Resume Actions (Admin Configured - up to 3 max) */}
+                        {(() => {
+                            const visibleResumes = (about.resumes?.length > 0)
+                                ? about.resumes.filter(r => r.isVisible !== false).slice(0, 3)
+                                : (about.resumeUrl ? [{ title: about.resumeLabel || "Download Resume", url: about.resumeUrl }] : []);
+
+                            if (visibleResumes.length === 0) return null;
+
+                            return (
+                                <div className="about__resume-group">
+                                    {visibleResumes.map((resItem, idx) => (
+                                        <div key={idx} className="about__resume-item-wrap">
+                                            <a
+                                                href={resItem.url}
+                                                download
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="about__resume-btn"
+                                                title={`Download ${resItem.title || 'Resume'}`}
+                                            >
+                                                <i className="fa-solid fa-download" /> {resItem.title || about.resumeLabel || "Download Resume"}
+                                            </a>
+                                            <a
+                                                href={resItem.url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="about__resume-preview-btn"
+                                                title={`Preview ${resItem.title || 'CV'} online`}
+                                            >
+                                                <i className="fa-solid fa-arrow-up-right-from-square" />
+                                            </a>
+                                        </div>
+                                    ))}
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
 
@@ -179,8 +231,8 @@ export default function About() {
                         <i className="fa-solid fa-wand-magic-sparkles" /> Skills &amp; Technologies
                     </h3>
                     <div className="about__skills-grid">
-                        {SKILLS.map((s) => (
-                            <SkillBar key={s.name} skill={s} inView={skillIn} />
+                        {skills.map((s) => (
+                            <SkillBar key={s._id || s.name} skill={s} inView={skillIn} />
                         ))}
                     </div>
                 </div>
@@ -194,14 +246,14 @@ export default function About() {
                         <i className="fa-solid fa-timeline" /> Experience &amp; Education
                     </h3>
                     <div className="about__timeline">
-                        {TIMELINE.map((item, i) => (
+                        {timeline.map((item, i) => (
                             <div
-                                key={i}
+                                key={item._id || i}
                                 className="about__timeline-item"
                                 style={{ animationDelay: `${i * 0.15}s` }}
                             >
                                 <div className="about__timeline-icon">
-                                    <i className={item.icon} />
+                                    <i className={item.icon || "fa-solid fa-briefcase"} />
                                 </div>
                                 <div className="about__timeline-content">
                                     <span className="about__timeline-year">{item.year}</span>
@@ -225,8 +277,8 @@ export default function About() {
                         <i className="fa-solid fa-heart" /> Hobbies &amp; Interests
                     </h3>
                     <div className="about__hobbies">
-                        {HOBBIES.map((h) => (
-                            <div key={h.label} className="about__hobby">
+                        {hobbies.map((h, idx) => (
+                            <div key={idx} className="about__hobby">
                                 <i className={h.icon} />
                                 <span>{h.label}</span>
                             </div>

@@ -29,14 +29,14 @@
 
 /* Light mode overrides */
 [data-theme="light"] {
-    --ft-bg: #f0f0f5;
-    --ft-bg-2: #e8e8f0;
-    --ft-bg-card: rgba(0, 0, 0, 0.03);
+    --ft-bg: #f8fafc;
+    --ft-bg-2: #f1f5f9;
+    --ft-bg-card: #ffffff;
     --ft-border: rgba(0, 0, 0, 0.08);
-    --ft-text-1: #0d0d0d;
-    --ft-text-2: #444;
-    --ft-text-3: #888;
-    --ft-input-bg: rgba(0, 0, 0, 0.04);
+    --ft-text-1: #0f172a;
+    --ft-text-2: #334155;
+    --ft-text-3: #64748b;
+    --ft-input-bg: #ffffff;
     --ft-input-border: rgba(0, 0, 0, 0.12);
 }
 
@@ -201,6 +201,7 @@
     border-radius: 10px;
     background: var(--ft-bg-card);
     border: 1px solid var(--ft-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     display: flex;
     align-items: center;
     justify-content: center;

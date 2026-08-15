@@ -1,19 +1,17 @@
 // src/components/Navbar/Navbar.jsx
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { usePortfolioData } from "../../context/DataContext";
 import AuthModal from "../AuthModal/AuthModal";
 import "./Navbar.css";
 
-const NAV_LINKS = [
+const DEFAULT_NAV_LINKS = [
     { id: "home", label: "Home", icon: "fa-solid fa-house" },
     { id: "about", label: "About", icon: "fa-solid fa-circle-user" },
     { id: "projects", label: "Projects", icon: "fa-solid fa-folder-open" },
     { id: "fun-game", label: "Fun Game", icon: "fa-solid fa-gamepad" },
-    { id: "contact", label: "Contact", icon: "fa-solid fa-envelope" },
-    { id: "get-in-touch", label: "Get in Touch", icon: "fa-solid fa-handshake" },
+    { id: "contact", label: "Get in Touch", icon: "fa-solid fa-handshake" },
 ];
-
-const BG_PRESETS = ["mesh", "aurora", "grid", "dots", "noise", "minimal"];
 
 export default function Navbar() {
     const {
@@ -22,6 +20,30 @@ export default function Navbar() {
         updateProfile, changePassword,
     } = useAuth();
 
+    const { data } = usePortfolioData();
+    const about = data?.about || {};
+    const navbarConfig = data?.navbar || {};
+
+    /* ── Configuration from Admin CMS ── */
+    const layoutStyle = navbarConfig.layoutStyle || "floating-dock"; // 'floating-dock' | 'cyber-capsule' | 'minimal-island' | 'full-width'
+    const logoText = navbarConfig.logoText || "Mahadeb";
+    const logoPrefix = navbarConfig.logoPrefix !== undefined ? navbarConfig.logoPrefix : "<";
+    const logoSuffix = navbarConfig.logoSuffix !== undefined ? navbarConfig.logoSuffix : "/>";
+    const showLogoPulse = navbarConfig.showLogoPulse !== false;
+    const showStatusBadge = navbarConfig.showStatusBadge || false;
+    const statusBadgeText = navbarConfig.statusBadgeText || "Available for work";
+    const showThemeToggle = navbarConfig.showThemeToggle !== false;
+    const showResumeButton = navbarConfig.showResumeButton !== false;
+    const showHireMeButton = navbarConfig.showHireMeButton || false;
+    const hireMeButtonText = navbarConfig.hireMeButtonText || "Let's Talk";
+    const hireMeStyle = navbarConfig.hireMeStyle || "gradient-glow"; // 'gradient-glow' | 'cyber-outline' | 'glassmorphic-pill' | 'accent-solid'
+    const hireMeIcon = navbarConfig.hireMeIcon !== undefined ? navbarConfig.hireMeIcon : "fa-solid fa-paper-plane";
+    const hireMeTarget = navbarConfig.hireMeTarget || "contact";
+
+    const activeNavLinks = (navbarConfig.navLinks?.length > 0)
+        ? navbarConfig.navLinks.filter(l => l.isVisible !== false)
+        : DEFAULT_NAV_LINKS;
+
     /* ── UI state ── */
     const [darkMode, setDarkMode] = useState(true);
     const [scrolled, setScrolled] = useState(false);
@@ -29,6 +51,7 @@ export default function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [showAuth, setShowAuth] = useState(false);
     const [dropdown, setDropdown] = useState(false);
+    const [resumeDropdown, setResumeDropdown] = useState(false);
     const [activePanel, setActivePanel] = useState(null); // "profile"|"avatar"|"prefs"|"password"
     const [panelOpen, setPanelOpen] = useState(false);
 
@@ -42,6 +65,7 @@ export default function Navbar() {
     const [prefsMsg, setPrefsMsg] = useState(null);
 
     const dropdownRef = useRef(null);
+    const resumeRef = useRef(null);
     const fileRef = useRef(null);
 
     /* ── sync prefs from logged-in user ── */
@@ -71,21 +95,24 @@ export default function Navbar() {
     useEffect(() => {
         const obs = new IntersectionObserver(
             (entries) => entries.forEach((e) => { if (e.isIntersecting) setActiveLink(e.target.id); }),
-            { threshold: 0.4 }
+            { threshold: 0.35 }
         );
-        NAV_LINKS.forEach(({ id }) => {
+        activeNavLinks.forEach(({ id }) => {
             const el = document.getElementById(id);
             if (el) obs.observe(el);
         });
         return () => obs.disconnect();
-    }, []);
+    }, [activeNavLinks]);
 
-    /* ── close dropdown on outside click ── */
+    /* ── close dropdowns on outside click ── */
     useEffect(() => {
         const fn = (e) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setDropdown(false);
                 closePanel();
+            }
+            if (resumeRef.current && !resumeRef.current.contains(e.target)) {
+                setResumeDropdown(false);
             }
         };
         document.addEventListener("mousedown", fn);
@@ -107,7 +134,8 @@ export default function Navbar() {
     const navClick = (id) => {
         setActiveLink(id);
         setMenuOpen(false);
-        const el = document.getElementById(id);
+        const targetId = (id === "get-in-touch" || id === "contact") ? "contact" : id;
+        const el = document.getElementById(targetId) || document.getElementById(id);
         if (el) el.scrollIntoView({ behavior: "smooth" });
     };
 
@@ -120,10 +148,32 @@ export default function Navbar() {
         }
     };
 
-    /* ── resume download ── */
-    const downloadResume = () => {
+    /* ── Dynamic Multi-Resume Management ── */
+    const visibleResumes = (about.resumes?.length > 0)
+        ? about.resumes.filter(r => r.isVisible !== false).slice(0, 3)
+        : (about.resumeUrl ? [{ title: about.resumeLabel || "Resume", url: about.resumeUrl }] : []);
+
+    const primaryResume = visibleResumes.find(r => r.isDefault) || visibleResumes[0] || {
+        title: about.resumeLabel || "Resume",
+        url: about.resumeUrl || "/resume.pdf"
+    };
+
+    const primaryButtonLabel = navbarConfig.resumeButtonText || about.resumeLabel || primaryResume.title || "Resume";
+
+    const downloadResume = (resumeItem, e) => {
+        if (e) e.stopPropagation();
+        const item = resumeItem || primaryResume;
+        const targetUrl = item?.url || about.resumeUrl || "/resume.pdf";
+
         const a = document.createElement("a");
-        a.href = "/resume.pdf"; a.download = "Resume.pdf"; a.click();
+        a.href = targetUrl;
+        a.setAttribute("download", (item?.title || "Resume").replace(/[^a-zA-Z0-9_-]/g, "_") + ".pdf");
+        a.target = "_blank";
+        a.rel = "noreferrer";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setResumeDropdown(false);
     };
 
     /* ── logout ── */
@@ -160,362 +210,314 @@ export default function Navbar() {
         }
     };
 
-    /* ── avatar upload ── */
+    /* ── avatar upload / remove ── */
     const handleAvatarFile = async (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        setAvatarStatus("uploading");
+        setAvatarStatus("Uploading...");
         try {
             await uploadAvatar(file);
-            setAvatarStatus("ok");
-            setTimeout(() => setAvatarStatus(null), 2500);
-        } catch {
-            setAvatarStatus("error");
+            setAvatarStatus("Avatar updated!");
+        } catch (err) {
+            setAvatarStatus(`Error: ${err.message}`);
+        }
+    };
+
+    const handleRemoveAvatar = async () => {
+        setAvatarStatus("Removing...");
+        try {
+            await removeAvatar();
+            setAvatarStatus("Avatar removed!");
+        } catch (err) {
+            setAvatarStatus(`Error: ${err.message}`);
         }
     };
 
     /* ── save preferences ── */
-    const savePrefs = async () => {
+    const savePrefs = async (e) => {
+        e.preventDefault();
         setPrefsMsg(null);
         try {
-            await savePreferences({ ...prefs, darkMode });
+            await savePreferences(prefs);
             setPrefsMsg({ ok: true, text: "Preferences saved!" });
-            setTimeout(() => setPrefsMsg(null), 2500);
         } catch (err) {
             setPrefsMsg({ ok: false, text: err.message });
         }
     };
 
-    /* ── avatar display helpers ── */
-    const avatarSrc = user?.avatar;
     const initials = user?.name
-        ? user.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
-        : "?";
+        ? user.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+        : "U";
+
+    const avatarSrc = user?.avatarUrl || null;
+
+    if (navbarConfig.isPublic === false) return null;
+
+    const dynamicNavStyles = {
+        "--nav-accent": navbarConfig.accentColor || "#e84545",
+        "--nav-radius": navbarConfig.borderRadius || "999px",
+        "--nav-blur": navbarConfig.blurStrength || "24px"
+    };
 
     return (
         <>
             {/* ════════════ NAVBAR ════════════ */}
-            <nav className={`navbar ${scrolled ? "navbar--scrolled" : ""}`}>
+            <header className={`navbar-wrapper navbar-wrapper--${layoutStyle} ${scrolled ? "navbar-wrapper--scrolled" : ""}`} style={dynamicNavStyles}>
+                <nav className={`navbar navbar--${layoutStyle} ${scrolled ? "navbar--scrolled" : ""}`}>
 
-                {/* Logo */}
-                <div className="navbar__logo" onClick={() => navClick("home")}>
-                    <span className="navbar__logo-bracket">&lt;</span>
-                    <span className="navbar__logo-name">Mahadeb</span>
-                    <span className="navbar__logo-bracket">/&gt;</span>
-                    <span className="navbar__logo-dot" />
-                </div>
+                    {/* Logo & Brand */}
+                    <div className="navbar__logo" onClick={() => navClick("home")} title="Scroll to top">
+                        {logoPrefix && <span className="navbar__logo-bracket">{logoPrefix}</span>}
+                        <span className="navbar__logo-name">{logoText}</span>
+                        {logoSuffix && <span className="navbar__logo-bracket">{logoSuffix}</span>}
+                        {showLogoPulse && <span className="navbar__logo-dot" />}
+                    </div>
 
-                {/* Desktop nav links */}
-                <ul className="navbar__links">
-                    {NAV_LINKS.map((l) => (
-                        <li key={l.id}>
-                            <button
-                                className={`navbar__link ${activeLink === l.id ? "navbar__link--active" : ""}`}
-                                onClick={() => navClick(l.id)}
-                            >
-                                <i className={l.icon} />
-                                <span>{l.label}</span>
-                                <span className="navbar__link-bar" />
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-
-                {/* Right actions */}
-                <div className="navbar__actions">
-
-                    {/* Resume download */}
-                    <button className="navbar__resume-btn" onClick={downloadResume} title="Download Resume">
-                        <i className="fa-solid fa-download" />
-                        <span className="navbar__resume-text">Resume</span>
-                    </button>
-
-                    {/* Dark / Light toggle */}
-                    <button className="navbar__theme-toggle" onClick={toggleDark} title="Toggle theme">
-                        <div className="navbar__toggle-track">
-                            <span className="navbar__toggle-sun"><i className="fa-solid fa-sun" /></span>
-                            <span className="navbar__toggle-moon"><i className="fa-solid fa-moon" /></span>
-                            <div className={`navbar__toggle-thumb ${darkMode ? "navbar__toggle-thumb--dark" : ""}`} />
+                    {/* Status Badge (Optional) */}
+                    {showStatusBadge && (
+                        <div className="navbar__status-pill">
+                            <span className="navbar__status-dot" />
+                            <span>{statusBadgeText}</span>
                         </div>
-                    </button>
-
-                    {/* ── Logged IN ── */}
-                    {user ? (
-                        <div className="navbar__user" ref={dropdownRef}>
-
-                            {/* Avatar button */}
-                            <button
-                                className={`navbar__avatar-btn ${dropdown ? "navbar__avatar-btn--open" : ""}`}
-                                onClick={() => { setDropdown(!dropdown); if (dropdown) closePanel(); }}
-                            >
-                                {avatarSrc
-                                    ? <img src={avatarSrc} alt={user.name} className="navbar__avatar-img" />
-                                    : <span className="navbar__avatar-initials">{initials}</span>
-                                }
-                                <i className={`fa-solid fa-chevron-down navbar__avatar-arrow ${dropdown ? "navbar__avatar-arrow--up" : ""}`} />
-                            </button>
-
-                            {/* ── Dropdown ── */}
-                            <div className={`navbar__dropdown ${dropdown ? "navbar__dropdown--open" : ""}`}>
-
-                                {/* Header */}
-                                <div className="navbar__dropdown-header">
-                                    <div className="navbar__dropdown-avatar">
-                                        {avatarSrc
-                                            ? <img src={avatarSrc} alt={user.name} />
-                                            : <span>{initials}</span>
-                                        }
-                                        <span className="navbar__dropdown-online" />
-                                    </div>
-                                    <div>
-                                        <p className="navbar__dropdown-name">{user.name}</p>
-                                        <p className="navbar__dropdown-email">{user.email}</p>
-                                        <span className="navbar__dropdown-role">{user.role}</span>
-                                    </div>
-                                </div>
-
-                                <div className="navbar__dropdown-divider" />
-
-                                {/* Menu items */}
-                                {[
-                                    { key: "profile", icon: "fa-solid fa-pen-to-square", label: "Edit Profile" },
-                                    { key: "avatar", icon: "fa-solid fa-camera", label: "Change Avatar / DP" },
-                                    { key: "prefs", icon: "fa-solid fa-sliders", label: "Preferences" },
-                                    { key: "password", icon: "fa-solid fa-lock", label: "Change Password" },
-                                ].map((item) => (
-                                    <button
-                                        key={item.key}
-                                        className={`navbar__dropdown-item ${activePanel === item.key ? "navbar__dropdown-item--active" : ""}`}
-                                        onClick={() => activePanel === item.key ? closePanel() : openPanel(item.key)}
-                                    >
-                                        <i className={item.icon} />
-                                        <span>{item.label}</span>
-                                        <i className={`fa-solid fa-chevron-right navbar__dropdown-item-arrow ${activePanel === item.key ? "navbar__dropdown-item-arrow--open" : ""}`} />
-                                    </button>
-                                ))}
-
-                                <div className="navbar__dropdown-divider" />
-
-                                <button className="navbar__dropdown-item navbar__dropdown-item--danger" onClick={handleLogout}>
-                                    <i className="fa-solid fa-right-from-bracket" />
-                                    <span>Sign Out</span>
-                                </button>
-                            </div>
-
-                            {/* ── Slide Panels ── */}
-                            {activePanel && (
-                                <div className={`navbar__panel ${panelOpen ? "navbar__panel--open" : ""}`}>
-
-                                    {/* Panel header */}
-                                    <div className="navbar__panel-header">
-                                        <button className="navbar__panel-back" onClick={closePanel}>
-                                            <i className="fa-solid fa-arrow-left" />
-                                        </button>
-                                        <h3 className="navbar__panel-title">
-                                            {activePanel === "profile" && "Edit Profile"}
-                                            {activePanel === "avatar" && "Change Avatar"}
-                                            {activePanel === "prefs" && "Preferences"}
-                                            {activePanel === "password" && "Change Password"}
-                                        </h3>
-                                    </div>
-
-                                    <div className="navbar__panel-body">
-
-                                        {/* ── PROFILE ── */}
-                                        {activePanel === "profile" && (
-                                            <form onSubmit={saveProfile} className="navbar__panel-form">
-                                                <div className="navbar__panel-group">
-                                                    <label><i className="fa-solid fa-user" /> Name</label>
-                                                    <input
-                                                        type="text" value={profileForm.name} placeholder="Your name"
-                                                        onChange={(e) => setProfileForm((p) => ({ ...p, name: e.target.value }))}
-                                                    />
-                                                </div>
-                                                <div className="navbar__panel-group">
-                                                    <label><i className="fa-solid fa-envelope" /> Email</label>
-                                                    <input
-                                                        type="email" value={profileForm.email} placeholder="your@email.com"
-                                                        onChange={(e) => setProfileForm((p) => ({ ...p, email: e.target.value }))}
-                                                    />
-                                                </div>
-                                                {profileMsg && (
-                                                    <p className={`navbar__panel-msg ${profileMsg.ok ? "navbar__panel-msg--ok" : "navbar__panel-msg--err"}`}>
-                                                        <i className={`fa-solid ${profileMsg.ok ? "fa-circle-check" : "fa-circle-exclamation"}`} />
-                                                        {profileMsg.text}
-                                                    </p>
-                                                )}
-                                                <button type="submit" className="navbar__panel-btn">
-                                                    <i className="fa-solid fa-floppy-disk" /> Save Changes
-                                                </button>
-                                            </form>
-                                        )}
-
-                                        {/* ── AVATAR ── */}
-                                        {activePanel === "avatar" && (
-                                            <div className="navbar__avatar-panel">
-                                                <div className="navbar__avatar-preview">
-                                                    {avatarSrc
-                                                        ? <img src={avatarSrc} alt="Current" />
-                                                        : <div className="navbar__avatar-placeholder"><i className="fa-solid fa-user" /></div>
-                                                    }
-                                                </div>
-                                                <button className="navbar__avatar-upload-btn" onClick={() => fileRef.current?.click()}>
-                                                    <i className="fa-solid fa-cloud-arrow-up" />
-                                                    {avatarStatus === "uploading" ? "Uploading…" : "Upload New Photo"}
-                                                </button>
-                                                <input
-                                                    ref={fileRef} type="file" accept="image/*"
-                                                    className="navbar__avatar-file-input"
-                                                    onChange={handleAvatarFile}
-                                                />
-                                                {avatarStatus === "ok" && <p className="navbar__panel-msg navbar__panel-msg--ok"><i className="fa-solid fa-circle-check" /> Avatar updated!</p>}
-                                                {avatarStatus === "error" && <p className="navbar__panel-msg navbar__panel-msg--err"><i className="fa-solid fa-circle-exclamation" /> Upload failed</p>}
-                                                <p className="navbar__avatar-hint">
-                                                    <i className="fa-solid fa-circle-info" /> JPEG, PNG, WEBP — max 5MB
-                                                </p>
-                                                {avatarSrc && (
-                                                    <button className="navbar__panel-btn navbar__panel-btn--danger" onClick={removeAvatar}>
-                                                        <i className="fa-solid fa-trash" /> Remove Photo
-                                                    </button>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {/* ── PREFERENCES ── */}
-                                        {activePanel === "prefs" && (
-                                            <div className="navbar__prefs-panel">
-                                                <div className="navbar__pref-row">
-                                                    <span><i className="fa-solid fa-circle-half-stroke" /> Dark Mode</span>
-                                                    <button
-                                                        className={`navbar__pref-toggle ${darkMode ? "navbar__pref-toggle--on" : ""}`}
-                                                        onClick={toggleDark}
-                                                    >
-                                                        <span className="navbar__pref-toggle-thumb" />
-                                                    </button>
-                                                </div>
-
-                                                <div className="navbar__pref-section">
-                                                    <p className="navbar__pref-label"><i className="fa-solid fa-image" /> Background Style</p>
-                                                    <div className="navbar__pref-bg-grid">
-                                                        {BG_PRESETS.map((bg) => (
-                                                            <button
-                                                                key={bg}
-                                                                className={`navbar__pref-bg-btn ${prefs.background === bg ? "navbar__pref-bg-btn--active" : ""}`}
-                                                                onClick={() => setPrefs((p) => ({ ...p, background: bg }))}
-                                                            >
-                                                                {bg}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </div>
-
-                                                <div className="navbar__pref-section">
-                                                    <p className="navbar__pref-label"><i className="fa-solid fa-palette" /> Accent Color</p>
-                                                    <div className="navbar__pref-colors">
-                                                        {["#e84545", "#2e86de", "#27ae60", "#8e44ad", "#f39c12", "#16a085"].map((c) => (
-                                                            <button
-                                                                key={c}
-                                                                className={`navbar__pref-color ${prefs.accentColor === c ? "navbar__pref-color--active" : ""}`}
-                                                                style={{ background: c }}
-                                                                onClick={() => setPrefs((p) => ({ ...p, accentColor: c }))}
-                                                                title={c}
-                                                            />
-                                                        ))}
-                                                        <input
-                                                            type="color" value={prefs.accentColor}
-                                                            onChange={(e) => setPrefs((p) => ({ ...p, accentColor: e.target.value }))}
-                                                            className="navbar__pref-color-custom"
-                                                            title="Custom color"
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                {prefsMsg && (
-                                                    <p className={`navbar__panel-msg ${prefsMsg.ok ? "navbar__panel-msg--ok" : "navbar__panel-msg--err"}`}>
-                                                        <i className={`fa-solid ${prefsMsg.ok ? "fa-circle-check" : "fa-circle-exclamation"}`} />
-                                                        {prefsMsg.text}
-                                                    </p>
-                                                )}
-                                                <button className="navbar__panel-btn" onClick={savePrefs}>
-                                                    <i className="fa-solid fa-floppy-disk" /> Save Preferences
-                                                </button>
-                                            </div>
-                                        )}
-
-                                        {/* ── CHANGE PASSWORD ── */}
-                                        {activePanel === "password" && (
-                                            <form onSubmit={savePassword} className="navbar__panel-form">
-                                                {[
-                                                    { field: "current", label: "Current Password", icon: "fa-lock" },
-                                                    { field: "next", label: "New Password", icon: "fa-lock-open" },
-                                                    { field: "confirm", label: "Confirm New", icon: "fa-lock" },
-                                                ].map(({ field, label, icon }) => (
-                                                    <div key={field} className="navbar__panel-group">
-                                                        <label><i className={`fa-solid ${icon}`} /> {label}</label>
-                                                        <input
-                                                            type="password" placeholder="••••••••"
-                                                            value={pwForm[field]}
-                                                            onChange={(e) => setPwForm((p) => ({ ...p, [field]: e.target.value }))}
-                                                        />
-                                                    </div>
-                                                ))}
-                                                {pwMsg && (
-                                                    <p className={`navbar__panel-msg ${pwMsg.ok ? "navbar__panel-msg--ok" : "navbar__panel-msg--err"}`}>
-                                                        <i className={`fa-solid ${pwMsg.ok ? "fa-circle-check" : "fa-circle-exclamation"}`} />
-                                                        {pwMsg.text}
-                                                    </p>
-                                                )}
-                                                <button type="submit" className="navbar__panel-btn">
-                                                    <i className="fa-solid fa-key" /> Change Password
-                                                </button>
-                                            </form>
-                                        )}
-
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                    ) : (
-                        /* ── Logged OUT ── */
-                        <button className="navbar__signin-btn" onClick={() => setShowAuth(true)}>
-                            <i className="fa-solid fa-right-to-bracket" /> Sign In
-                        </button>
                     )}
 
-                    {/* Hamburger */}
-                    <button
-                        className={`navbar__hamburger ${menuOpen ? "navbar__hamburger--open" : ""}`}
-                        onClick={() => setMenuOpen(!menuOpen)}
-                        aria-label="Toggle menu"
-                    >
-                        <span /><span /><span />
-                    </button>
-                </div>
-
-                {/* ── Mobile Drawer ── */}
-                <div className={`navbar__drawer ${menuOpen ? "navbar__drawer--open" : ""}`}>
-                    <ul className="navbar__drawer-links">
-                        {NAV_LINKS.map((l) => (
+                    {/* Desktop Nav Links */}
+                    <ul className="navbar__links">
+                        {activeNavLinks.map((l) => (
                             <li key={l.id}>
                                 <button
-                                    className={`navbar__drawer-link ${activeLink === l.id ? "navbar__drawer-link--active" : ""}`}
+                                    className={`navbar__link ${activeLink === l.id ? "navbar__link--active" : ""}`}
                                     onClick={() => navClick(l.id)}
                                 >
-                                    <i className={l.icon} /> {l.label}
+                                    {l.icon && <i className={l.icon} />}
+                                    <span>{l.label}</span>
+                                    <span className="navbar__link-bar" />
                                 </button>
                             </li>
                         ))}
-                        <li>
-                            <button className="navbar__drawer-link navbar__drawer-resume" onClick={downloadResume}>
-                                <i className="fa-solid fa-download" /> Download Resume
-                            </button>
-                        </li>
                     </ul>
-                </div>
 
-                {menuOpen && <div className="navbar__backdrop" onClick={() => setMenuOpen(false)} />}
-            </nav>
+                    {/* Right Actions */}
+                    <div className="navbar__actions">
+
+                        {/* Resume Action / Multi-Version Dropdown */}
+                        {showResumeButton && visibleResumes.length > 0 && (
+                            <div className="navbar__resume-wrapper" ref={resumeRef}>
+                                {visibleResumes.length === 1 ? (
+                                    <button
+                                        className="navbar__resume-btn"
+                                        onClick={(e) => downloadResume(primaryResume, e)}
+                                        title={`Download ${primaryButtonLabel}`}
+                                    >
+                                        <i className="fa-solid fa-download" />
+                                        <span className="navbar__resume-text">{primaryButtonLabel}</span>
+                                    </button>
+                                ) : (
+                                    <>
+                                        <button
+                                            className={`navbar__resume-btn ${resumeDropdown ? "navbar__resume-btn--active" : ""}`}
+                                            onClick={() => setResumeDropdown(!resumeDropdown)}
+                                            title="View Available Resumes"
+                                        >
+                                            <i className="fa-solid fa-file-pdf" />
+                                            <span className="navbar__resume-text">{primaryButtonLabel}</span>
+                                            <span className="navbar__resume-badge">{visibleResumes.length}</span>
+                                            <i className={`fa-solid fa-chevron-down navbar__resume-arrow ${resumeDropdown ? "navbar__resume-arrow--open" : ""}`} />
+                                        </button>
+
+                                        {resumeDropdown && (
+                                            <div className="navbar__resume-dropdown">
+                                                <div className="navbar__resume-dropdown-header">
+                                                    <span>Available Resumes</span>
+                                                    <span style={{ fontSize: '11px', color: 'var(--accent)' }}>{visibleResumes.length} versions</span>
+                                                </div>
+                                                <div className="navbar__resume-dropdown-list">
+                                                    {visibleResumes.map((r, idx) => (
+                                                        <div key={idx} className="navbar__resume-dropdown-item">
+                                                            <div className="navbar__resume-dropdown-info">
+                                                                <i className="fa-solid fa-file-pdf" />
+                                                                <span className="navbar__resume-dropdown-title">{r.title || r.fileName || `Resume ${idx + 1}`}</span>
+                                                            </div>
+                                                            <div className="navbar__resume-dropdown-actions">
+                                                                <a
+                                                                    href={r.url}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="navbar__resume-icon-btn"
+                                                                    title="Preview Online"
+                                                                    onClick={() => setResumeDropdown(false)}
+                                                                >
+                                                                    <i className="fa-solid fa-arrow-up-right-from-square" />
+                                                                </a>
+                                                                <button
+                                                                    type="button"
+                                                                    className="navbar__resume-icon-btn navbar__resume-icon-btn--dl"
+                                                                    title="Download File"
+                                                                    onClick={(e) => downloadResume(r, e)}
+                                                                >
+                                                                    <i className="fa-solid fa-download" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        )}
+
+                        {/* "Let's Talk" / "Hire Me" Direct CTA */}
+                        {showHireMeButton && (
+                            <button
+                                className={`navbar__cta-btn navbar__cta-btn--${hireMeStyle}`}
+                                onClick={() => navClick(hireMeTarget || "contact")}
+                            >
+                                <span>{hireMeButtonText || "Let's Talk"}</span>
+                                {hireMeIcon && hireMeIcon !== 'none' && (
+                                    <i className={hireMeIcon} style={{ fontSize: '11px' }} />
+                                )}
+                            </button>
+                        )}
+
+                        {/* Dark / Light Toggle */}
+                        {showThemeToggle && (
+                            <button className="navbar__theme-toggle" onClick={toggleDark} title="Toggle theme">
+                                <div className="navbar__toggle-track">
+                                    <span className="navbar__toggle-sun"><i className="fa-solid fa-sun" /></span>
+                                    <span className="navbar__toggle-moon"><i className="fa-solid fa-moon" /></span>
+                                    <div className={`navbar__toggle-thumb ${darkMode ? "navbar__toggle-thumb--dark" : ""}`} />
+                                </div>
+                            </button>
+                        )}
+
+                        {/* ── Logged IN User ── */}
+                        {user ? (
+                            <div className="navbar__user" ref={dropdownRef}>
+                                <button
+                                    className={`navbar__avatar-btn ${dropdown ? "navbar__avatar-btn--open" : ""}`}
+                                    onClick={() => { setDropdown(!dropdown); if (dropdown) closePanel(); }}
+                                >
+                                    {avatarSrc
+                                        ? <img src={avatarSrc} alt={user.name} className="navbar__avatar-img" />
+                                        : <span className="navbar__avatar-initials">{initials}</span>
+                                    }
+                                    <i className={`fa-solid fa-chevron-down navbar__avatar-arrow ${dropdown ? "navbar__avatar-arrow--up" : ""}`} />
+                                </button>
+
+                                {/* Dropdown */}
+                                <div className={`navbar__dropdown ${dropdown ? "navbar__dropdown--open" : ""}`}>
+                                    <div className="navbar__dropdown-header">
+                                        <div className="navbar__dropdown-avatar">
+                                            {avatarSrc
+                                                ? <img src={avatarSrc} alt={user.name} />
+                                                : <span>{initials}</span>
+                                            }
+                                            <span className="navbar__dropdown-online" />
+                                        </div>
+                                        <div>
+                                            <p className="navbar__dropdown-name">{user.name}</p>
+                                            <p className="navbar__dropdown-email">{user.email}</p>
+                                            <span className="navbar__dropdown-role">{user.role}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="navbar__dropdown-divider" />
+
+                                    {/* Admin Studio Quick Link */}
+                                    {user?.role === 'admin' && (
+                                        <a
+                                            href="/admin/dashboard"
+                                            className="navbar__dropdown-item"
+                                            style={{ color: 'var(--adm-primary, #38bdf8)', textDecoration: 'none' }}
+                                        >
+                                            <i className="fa-solid fa-gauge-high" />
+                                            <span>Admin Studio CMS</span>
+                                            <i className="fa-solid fa-chevron-right navbar__dropdown-item-arrow" />
+                                        </a>
+                                    )}
+
+                                    {[
+                                        { key: "profile", icon: "fa-solid fa-pen-to-square", label: "Edit Profile" },
+                                        { key: "avatar", icon: "fa-solid fa-camera", label: "Change Avatar / DP" },
+                                        { key: "prefs", icon: "fa-solid fa-sliders", label: "Preferences" },
+                                        { key: "password", icon: "fa-solid fa-lock", label: "Change Password" },
+                                    ].map(({ key, icon, label }) => (
+                                        <button
+                                            key={key}
+                                            className={`navbar__dropdown-item ${activePanel === key ? "navbar__dropdown-item--active" : ""}`}
+                                            onClick={() => openPanel(key)}
+                                        >
+                                            <i className={icon} />
+                                            <span>{label}</span>
+                                            <i className="fa-solid fa-chevron-right navbar__dropdown-item-arrow" />
+                                        </button>
+                                    ))}
+
+                                    <div className="navbar__dropdown-divider" />
+
+                                    <button className="navbar__dropdown-item navbar__dropdown-item--logout" onClick={handleLogout}>
+                                        <i className="fa-solid fa-arrow-right-from-bracket" />
+                                        <span>Logout</span>
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <button className="navbar__signin-btn" onClick={() => setShowAuth(true)}>
+                                <i className="fa-solid fa-right-to-bracket" /> Sign In
+                            </button>
+                        )}
+
+                        {/* Hamburger */}
+                        <button
+                            className={`navbar__hamburger ${menuOpen ? "navbar__hamburger--open" : ""}`}
+                            onClick={() => setMenuOpen(!menuOpen)}
+                            aria-label="Toggle menu"
+                        >
+                            <span /><span /><span />
+                        </button>
+                    </div>
+
+                    {/* ── Mobile Drawer ── */}
+                    <div className={`navbar__drawer ${menuOpen ? "navbar__drawer--open" : ""}`}>
+                        <ul className="navbar__drawer-links">
+                            {activeNavLinks.map((l) => (
+                                <li key={l.id}>
+                                    <button
+                                        className={`navbar__drawer-link ${activeLink === l.id ? "navbar__drawer-link--active" : ""}`}
+                                        onClick={() => navClick(l.id)}
+                                    >
+                                        {l.icon && <i className={l.icon} />} {l.label}
+                                    </button>
+                                </li>
+                            ))}
+                            {showResumeButton && visibleResumes.map((r, idx) => (
+                                <li key={`resume-${idx}`}>
+                                    <button
+                                        className="navbar__drawer-link navbar__drawer-resume"
+                                        onClick={(e) => { setMenuOpen(false); downloadResume(r, e); }}
+                                    >
+                                        <i className="fa-solid fa-download" /> {r.title || primaryButtonLabel}
+                                    </button>
+                                </li>
+                            ))}
+                            {showHireMeButton && (
+                                <li>
+                                    <button
+                                        className="navbar__drawer-link navbar__drawer-cta"
+                                        onClick={() => navClick(hireMeTarget || "contact")}
+                                    >
+                                        <i className="fa-solid fa-paper-plane" /> {hireMeButtonText || "Let's Talk"}
+                                    </button>
+                                </li>
+                            )}
+                        </ul>
+                    </div>
+
+                    {menuOpen && <div className="navbar__backdrop" onClick={() => setMenuOpen(false)} />}
+                </nav>
+            </header>
 
             {/* Auth Modal */}
             {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}

@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { usePortfolioData } from "../../context/DataContext";
 import "./Projects.css";
 
-const CATEGORIES = ["All", "React", "Full Stack", "Python", "UI/UX"];
-
-const PROJECTS = [
+const DEFAULT_PROJECTS = [
     {
         id: 1,
         title: "Portfolio Website",
@@ -105,13 +104,19 @@ function useInView(threshold = 0.1) {
 }
 
 export default function Projects() {
+    const { data } = usePortfolioData();
     const [active, setActive] = useState("All");
     const [headerRef, headerIn] = useInView(0.1);
     const [gridRef, gridIn] = useInView(0.05);
 
+    const projectList = data?.projects?.length ? data.projects : DEFAULT_PROJECTS;
+
+    // Dynamically derive categories from project list
+    const categories = ["All", ...Array.from(new Set(projectList.map(p => p.category || "React")))];
+
     const filtered = active === "All"
-        ? PROJECTS
-        : PROJECTS.filter((p) => p.category === active);
+        ? projectList
+        : projectList.filter((p) => p.category === active);
 
     return (
         <section id="projects" className="projects">
@@ -146,7 +151,7 @@ export default function Projects() {
 
                 {/* Filter Tabs */}
                 <div className="projects__filters">
-                    {CATEGORIES.map((cat) => (
+                    {categories.map((cat) => (
                         <button
                             key={cat}
                             className={`projects__filter ${active === cat ? "projects__filter--active" : ""}`}
@@ -162,58 +167,69 @@ export default function Projects() {
                     className={`projects__grid projects__reveal ${gridIn ? "projects__reveal--in" : ""}`}
                     ref={gridRef}
                 >
-                    {filtered.map((p, i) => (
-                        <div
-                            key={p.id}
-                            className="projects__card"
-                            style={{ animationDelay: `${i * 0.08}s`, "--card-color": p.color }}
-                        >
-                            {/* Card top */}
-                            <div className="projects__card-top">
-                                <div className="projects__card-icon" style={{ background: `${p.color}22`, border: `1px solid ${p.color}44` }}>
-                                    <i className={p.icon} style={{ color: p.color }} />
+                    {filtered.map((p, i) => {
+                        const tags = Array.isArray(p.tags) ? p.tags : (p.tags ? p.tags.split(',') : []);
+                        return (
+                            <div
+                                key={p._id || p.id || i}
+                                className="projects__card"
+                                style={{ animationDelay: `${i * 0.08}s`, "--card-color": p.color || "#e84545" }}
+                            >
+                                {/* Card top */}
+                                <div className="projects__card-top">
+                                    <div className="projects__card-icon" style={{ background: `${p.color || '#e84545'}22`, border: `1px solid ${p.color || '#e84545'}44` }}>
+                                        <i className={p.icon || "fa-solid fa-globe"} style={{ color: p.color || "#e84545" }} />
+                                    </div>
+                                    <span className={`projects__card-status projects__card-status--${p.status === "Live" ? "live" : "oss"}`}>
+                                        <span className="projects__status-dot" />
+                                        {p.status || "Live"}
+                                    </span>
                                 </div>
-                                <span className={`projects__card-status projects__card-status--${p.status === "Live" ? "live" : "oss"}`}>
-                                    <span className="projects__status-dot" />
-                                    {p.status}
-                                </span>
-                            </div>
 
-                            {/* Info */}
-                            <h3 className="projects__card-title">{p.title}</h3>
-                            <p className="projects__card-desc">{p.desc}</p>
+                                {p.coverImage && (
+                                    <div style={{ height: '150px', borderRadius: '10px', overflow: 'hidden', margin: '10px 0', background: '#000' }}>
+                                        <img src={p.coverImage} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    </div>
+                                )}
 
-                            {/* Tags */}
-                            <div className="projects__card-tags">
-                                {p.tags.map((t) => (
-                                    <span key={t} className="projects__card-tag">{t}</span>
-                                ))}
-                            </div>
+                                {/* Info */}
+                                <h3 className="projects__card-title">{p.title}</h3>
+                                <p className="projects__card-desc">{p.desc}</p>
 
-                            {/* Footer */}
-                            <div className="projects__card-footer">
-                                <div className="projects__card-stats">
-                                    <span><i className="fa-solid fa-star" /> {p.stars}</span>
-                                    <span><i className="fa-solid fa-code-fork" /> {p.forks}</span>
+                                {/* Tags */}
+                                <div className="projects__card-tags">
+                                    {tags.map((t, idx) => (
+                                        <span key={idx} className="projects__card-tag">{t.trim()}</span>
+                                    ))}
                                 </div>
-                                <div className="projects__card-links">
-                                    <a href={p.github} target="_blank" rel="noopener noreferrer"
-                                        className="projects__card-link" title="GitHub">
-                                        <i className="fa-brands fa-github" />
-                                    </a>
-                                    {p.live && (
-                                        <a href={p.live} target="_blank" rel="noopener noreferrer"
-                                            className="projects__card-link projects__card-link--live" title="Live Demo">
-                                            <i className="fa-solid fa-arrow-up-right-from-square" />
-                                        </a>
-                                    )}
-                                </div>
-                            </div>
 
-                            {/* Hover accent bar */}
-                            <div className="projects__card-bar" style={{ background: p.color }} />
-                        </div>
-                    ))}
+                                {/* Footer */}
+                                <div className="projects__card-footer">
+                                    <div className="projects__card-stats">
+                                        <span><i className="fa-solid fa-star" /> {p.stars || 0}</span>
+                                        <span><i className="fa-solid fa-code-fork" /> {p.forks || 0}</span>
+                                    </div>
+                                    <div className="projects__card-links">
+                                        {p.github && (
+                                            <a href={p.github} target="_blank" rel="noopener noreferrer"
+                                                className="projects__card-link" title="GitHub">
+                                                <i className="fa-brands fa-github" />
+                                            </a>
+                                        )}
+                                        {p.live && (
+                                            <a href={p.live} target="_blank" rel="noopener noreferrer"
+                                                className="projects__card-link projects__card-link--live" title="Live Demo">
+                                                <i className="fa-solid fa-arrow-up-right-from-square" />
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Hover accent bar */}
+                                <div className="projects__card-bar" style={{ background: p.color || "#e84545" }} />
+                            </div>
+                        );
+                    })}
                 </div>
 
                 {/* GitHub CTA */}

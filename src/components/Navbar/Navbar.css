@@ -8,22 +8,22 @@
    CSS VARIABLES
 ══════════════════════════ */
 :root {
-  --nav-bg: rgba(251, 233, 233, 0.75);
-  --nav-bg-scrolled: rgba(255, 255, 255, 0.96);
+  --nav-bg: rgba(255, 255, 255, 0.85);
+  --nav-bg-scrolled: rgba(255, 255, 255, 0.98);
   --nav-border: rgba(0, 0, 0, 0.08);
   --nav-shadow: 0 4px 32px rgba(0, 0, 0, 0.07);
-  --text-primary: #0d0d0d;
-  --text-secondary: #555;
-  --text-muted: #999;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
   --accent: #e84545;
   --accent-glow: rgba(232, 69, 69, 0.18);
-  --btn-bg: #0d0d0d;
-  --btn-text: #fff;
-  --dropdown-bg: #fff;
+  --btn-bg: #0f172a;
+  --btn-text: #ffffff;
+  --dropdown-bg: #ffffff;
   --dropdown-shadow: 0 20px 60px rgba(0, 0, 0, 0.13);
-  --dropdown-border: rgba(0, 0, 0, 0.07);
-  --input-bg: rgba(0, 0, 0, 0.04);
-  --input-border: rgba(0, 0, 0, 0.1);
+  --dropdown-border: rgba(0, 0, 0, 0.08);
+  --input-bg: #f8fafc;
+  --input-border: rgba(0, 0, 0, 0.12);
   --nav-height: 68px;
   --font-d: 'Syne', sans-serif;
   --font-b: 'DM Sans', sans-serif;
@@ -57,25 +57,101 @@
 }
 
 /* ══════════════════════════
-   NAVBAR SHELL
-══════════════════════════ */
-.navbar {
+   NAVBAR WRAPPER & LAYOUT PRESETS
+   ══════════════════════════ */
+.navbar-wrapper {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  transition: all var(--t);
+}
+
+.navbar {
+  position: relative;
   height: var(--nav-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   padding: 0 clamp(1rem, 3vw, 2.5rem);
   background: var(--nav-bg);
   border-bottom: 1px solid var(--nav-border);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(var(--nav-blur, 20px)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--nav-blur, 20px)) saturate(160%);
   font-family: var(--font-b);
-  transition: background var(--t), box-shadow var(--t);
+  pointer-events: auto;
+  transition: all var(--t);
+}
+
+/* 1. Floating Frosted Glass Dock (macOS island) */
+.navbar-wrapper--floating-dock .navbar {
+  top: 14px;
+  width: max-content;
+  max-width: min(96vw, 1320px);
+  border-radius: var(--nav-radius, 999px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.35);
+  background: var(--nav-bg);
+  padding: 0 24px;
+  gap: 18px;
+}
+
+.navbar-wrapper--floating-dock.navbar-wrapper--scrolled .navbar {
+  top: 8px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* 2. Cyber Neon Capsule */
+.navbar-wrapper--cyber-capsule .navbar {
+  top: 14px;
+  width: max-content;
+  max-width: min(96vw, 1320px);
+  border-radius: 14px;
+  background: rgba(6, 10, 25, 0.92);
+  border: 1.5px solid var(--nav-accent, var(--accent));
+  box-shadow: 0 0 25px color-mix(in srgb, var(--nav-accent, var(--accent)) 40%, transparent), inset 0 0 15px color-mix(in srgb, var(--nav-accent, var(--accent)) 15%, transparent);
+  padding: 0 24px;
+  gap: 16px;
+}
+
+[data-theme="light"] .navbar-wrapper--cyber-capsule .navbar {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+/* 3. Minimalist Island Pill */
+.navbar-wrapper--minimal-island .navbar {
+  top: 14px;
+  width: max-content;
+  max-width: min(96vw, 1260px);
+  border-radius: var(--nav-radius, 999px);
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+  padding: 0 22px;
+  gap: 16px;
+}
+
+[data-theme="light"] .navbar-wrapper--minimal-island .navbar {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* 4. Full Width Classic */
+.navbar-wrapper--full-width .navbar {
+  top: 0;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 0;
+  border-bottom: 1px solid var(--nav-border);
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.25);
+  padding: 0 clamp(1rem, 3vw, 2.5rem);
 }
 
 .navbar--scrolled {
@@ -145,22 +221,23 @@
 .navbar__links {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   list-style: none;
+  flex-shrink: 0;
 }
 
 .navbar__link {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 13px;
+  padding: 6px 12px;
   background: none;
   border: none;
   font-family: var(--font-b);
-  font-size: 0.855rem;
+  font-size: 0.84rem;
   font-weight: 500;
   color: var(--text-secondary);
-  border-radius: 10px;
+  border-radius: 999px;
   cursor: pointer;
   position: relative;
   white-space: nowrap;
@@ -216,14 +293,20 @@
 .navbar__actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
-/* Resume button */
+/* Resume button & dropdown */
+.navbar__resume-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
 .navbar__resume-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   padding: 7px 14px;
   background: transparent;
   color: var(--text-primary);
@@ -236,11 +319,243 @@
   transition: all var(--t);
 }
 
-.navbar__resume-btn:hover {
+.navbar__resume-btn:hover,
+.navbar__resume-btn--active {
   border-color: var(--accent);
   color: var(--accent);
   background: var(--accent-glow);
   transform: translateY(-1px);
+}
+
+.navbar__resume-badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+  line-height: 1.2;
+}
+
+.navbar__resume-arrow {
+  font-size: 0.65rem;
+  transition: transform 0.2s ease;
+}
+
+.navbar__resume-arrow--open {
+  transform: rotate(180deg);
+}
+
+/* ══════════════════════════
+   "LET'S TALK" / CTA BUTTON PRESETS
+   ══════════════════════════ */
+.navbar__cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-family: var(--font-b);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  white-space: nowrap;
+  transition: all var(--t);
+}
+
+/* 1. Gradient Glow */
+.navbar__cta-btn--gradient-glow {
+  background: linear-gradient(135deg, var(--nav-accent, var(--accent)), #ff6b6b);
+  color: #ffffff;
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--nav-accent, var(--accent)) 40%, transparent);
+}
+
+.navbar__cta-btn--gradient-glow:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 6px 25px color-mix(in srgb, var(--nav-accent, var(--accent)) 60%, transparent);
+}
+
+/* 2. Cyber Outline */
+.navbar__cta-btn--cyber-outline {
+  background: color-mix(in srgb, var(--nav-accent, var(--accent)) 10%, transparent);
+  color: var(--nav-accent, var(--accent));
+  border: 1.5px solid var(--nav-accent, var(--accent));
+  box-shadow: 0 0 15px color-mix(in srgb, var(--nav-accent, var(--accent)) 25%, transparent);
+}
+
+.navbar__cta-btn--cyber-outline:hover {
+  background: var(--nav-accent, var(--accent));
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px color-mix(in srgb, var(--nav-accent, var(--accent)) 60%, transparent);
+}
+
+/* 3. Glassmorphic Floating Pill */
+.navbar__cta-btn--glassmorphic-pill {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .navbar__cta-btn--glassmorphic-pill {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.navbar__cta-btn--glassmorphic-pill:hover {
+  border-color: var(--nav-accent, var(--accent));
+  color: var(--nav-accent, var(--accent));
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-2px);
+}
+
+/* 4. Solid Accent */
+.navbar__cta-btn--accent-solid {
+  background: var(--nav-accent, var(--accent));
+  color: #ffffff;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--nav-accent, var(--accent)) 35%, transparent);
+}
+
+.navbar__cta-btn--accent-solid:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.15);
+  box-shadow: 0 6px 22px color-mix(in srgb, var(--nav-accent, var(--accent)) 55%, transparent);
+}
+
+.navbar__cta-btn:active {
+  transform: scale(0.97);
+}
+
+.navbar__resume-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 250px;
+  background: rgba(13, 17, 23, 0.95);
+  border: 1px solid var(--nav-border);
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+  padding: 8px;
+  z-index: 1000;
+  animation: navDropdownFade 0.2s ease;
+}
+
+[data-theme="light"] .navbar__resume-dropdown {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1);
+}
+
+.navbar__resume-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px 8px;
+  border-bottom: 1px solid var(--nav-border);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.navbar__resume-dropdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.navbar__resume-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid transparent;
+  gap: 10px;
+  transition: all 0.2s ease;
+}
+
+.navbar__resume-dropdown-item:hover {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+}
+
+.navbar__resume-dropdown-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navbar__resume-dropdown-info i {
+  color: #e84545;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.navbar__resume-dropdown-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navbar__resume-dropdown-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.navbar__resume-icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--nav-border);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.navbar__resume-icon-btn:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.navbar__resume-icon-btn--dl {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.navbar__resume-icon-btn--dl:hover {
+  filter: brightness(1.15);
+}
+
+@keyframes navDropdownFade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Theme toggle */
@@ -1097,11 +1412,23 @@
   }
 } */
 
-/* ── MOBILE FIX ── */
 @media (max-width: 768px) {
+  .navbar-wrapper--floating-dock .navbar,
+  .navbar-wrapper--cyber-capsule .navbar,
+  .navbar-wrapper--minimal-island .navbar {
+    top: 8px;
+    width: calc(100% - 16px);
+    border-radius: 16px;
+  }
+
   .navbar {
     padding: 0 12px;
-    height: 60px;
+    height: 58px;
+  }
+
+  /* Status pill hidden on mobile navbar, shown in drawer */
+  .navbar__status-pill {
+    display: none;
   }
 
   /* Logo smaller */
