@@ -264,25 +264,25 @@ export default function StandaloneArcadeWindow() {
             <main style={{
                 flex: 1,
                 display: 'flex',
-                gap: '24px',
+                gap: '20px',
                 justifyContent: 'center',
-                padding: '16px 24px 36px',
+                padding: '14px clamp(10px, 3vw, 24px) 36px',
                 flexWrap: 'wrap'
             }}>
                 {/* Active Game Stage Card */}
                 <div style={{
                     background: 'var(--adm-surface, rgba(15,23,42,0.6))',
                     border: '1px solid var(--adm-border, rgba(255,255,255,0.08))',
-                    borderRadius: '24px',
-                    padding: '32px',
+                    borderRadius: 'clamp(16px, 4vw, 24px)',
+                    padding: 'clamp(16px, 4vw, 32px)',
                     boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
                     maxWidth: '820px',
                     width: '100%',
                     position: 'relative'
                 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
                         <div>
-                            <h2 style={{ margin: 0, fontSize: '22px', fontWeight: '800', fontFamily: 'var(--gm-font-d)' }}>
+                            <h2 style={{ margin: 0, fontSize: 'clamp(18px, 4vw, 22px)', fontWeight: '800', fontFamily: 'var(--gm-font-d)' }}>
                                 {currentGame.title}
                             </h2>
                         </div>
@@ -323,11 +323,12 @@ export default function StandaloneArcadeWindow() {
 
                 {/* Session Run History & Telemetry Panel */}
                 <div style={{
-                    width: '320px',
+                    width: '100%',
+                    maxWidth: '360px',
                     background: 'var(--adm-surface, rgba(15,23,42,0.6))',
                     border: '1px solid var(--adm-border, rgba(255,255,255,0.08))',
                     borderRadius: '20px',
-                    padding: '22px',
+                    padding: 'clamp(16px, 3vw, 22px)',
                     boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
                     display: 'flex',
                     flexDirection: 'column',

@@ -689,12 +689,13 @@ a.footer__contact-val:hover {
 /* Mobile */
 @media (max-width: 640px) {
     .footer__inner {
-        padding: 60px 1.25rem 0;
+        padding: 50px 16px 0;
     }
 
     .footer__grid {
         grid-template-columns: 1fr;
         gap: 28px;
+        padding-bottom: 36px;
     }
 
     .footer__form-row {
@@ -704,7 +705,14 @@ a.footer__contact-val:hover {
     .footer__bottom {
         flex-direction: column;
         text-align: center;
-        gap: 8px;
+        gap: 12px;
+        padding: 20px 0;
+    }
+
+    .footer__bottom-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
     }
 
     .footer__form-btn {
@@ -715,6 +723,8 @@ a.footer__contact-val:hover {
     .footer__back-top {
         bottom: 16px;
         right: 16px;
+        width: 40px;
+        height: 40px;
     }
 }
 
@@ -724,13 +734,12 @@ a.footer__contact-val:hover {
     }
 
     .footer__social {
-        width: 34px;
-        height: 34px;
+        width: 36px;
+        height: 36px;
         font-size: 0.85rem;
     }
 
-    .footer__bottom-links {
-        flex-wrap: wrap;
-        justify-content: center;
+    .footer__copyright {
+        font-size: 0.78rem;
     }
-}
+}

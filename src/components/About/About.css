@@ -583,21 +583,32 @@
 
 @media (max-width: 640px) {
     .about {
-        padding: 64px 0;
+        padding: 60px 0;
     }
 
     .about__container {
-        gap: 40px;
+        gap: 36px;
         padding: 0 16px;
     }
 
     .about__avatar {
-        width: 150px;
-        height: 150px;
+        width: 140px;
+        height: 140px;
     }
 
-    .about__hero-name {
-        font-size: 1.8rem;
+    .about__avatar-ring {
+        width: 165px;
+        height: 165px;
+    }
+
+    .about__name {
+        font-size: 1.75rem;
+        line-height: 1.25;
+        text-align: center;
+    }
+
+    .about__bio-text {
+        font-size: 0.9rem;
     }
 
     .about__quick-stats {
@@ -622,29 +633,74 @@
 
     .about__resume-item-wrap {
         width: 100%;
+        display: flex;
         justify-content: space-between;
+        gap: 6px;
     }
 
     .about__resume-btn {
         flex: 1;
         justify-content: center;
-        padding: 10px 16px;
-        font-size: 0.85rem;
+        padding: 10px 14px;
+        font-size: 0.84rem;
+    }
+
+    .about__resume-preview-btn {
+        padding: 10px 14px;
+        font-size: 0.84rem;
     }
 
     .about__skills-grid {
         grid-template-columns: 1fr;
-        gap: 18px;
+        gap: 16px;
+    }
+
+    /* Timeline on mobile */
+    .about__timeline {
+        padding-left: 20px;
+    }
+
+    .about__timeline::before {
+        left: 11px;
+    }
+
+    .about__timeline-item {
+        padding: 0 0 28px 14px;
+        gap: 12px;
+    }
+
+    .about__timeline-icon {
+        left: -16px;
+        width: 30px;
+        height: 30px;
+        font-size: 0.75rem;
+    }
+
+    .about__timeline-content {
+        padding: 14px 14px;
+    }
+
+    .about__timeline-title {
+        font-size: 0.95rem;
+    }
+
+    .about__timeline-desc {
+        font-size: 0.82rem;
     }
 }
 
 @media (max-width: 420px) {
-    .about__hero-name {
-        font-size: 1.55rem;
+    .about__name {
+        font-size: 1.45rem;
+    }
+
+    .about__quick-stats {
+        grid-template-columns: 1fr;
+        gap: 8px;
     }
 
     .about__hobby {
-        padding: 8px 14px;
-        font-size: 0.8rem;
+        padding: 8px 12px;
+        font-size: 0.78rem;
     }
-}
+}

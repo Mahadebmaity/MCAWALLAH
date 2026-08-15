@@ -260,7 +260,7 @@ export default function Puzzle2048({ onGameOver, bestScore }) {
             </div>
 
             {/* 2048 Grid Canvas Card */}
-            <div className="game__canvas-wrap" ref={boardRef} style={{ width: '400px', height: '400px', background: '#bbada0', padding: '14px', borderRadius: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', userSelect: 'none', position: 'relative' }}>
+            <div className="game__canvas-wrap" ref={boardRef} style={{ width: '100%', maxWidth: '400px', aspectRatio: '1 / 1', background: '#bbada0', padding: '12px', borderRadius: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', userSelect: 'none', position: 'relative' }}>
                 {board.map((row, r) => (
                     <div key={r} style={{ display: 'flex', gap: '10px', height: '22%' }}>
                         {row.map((cell, c) => {

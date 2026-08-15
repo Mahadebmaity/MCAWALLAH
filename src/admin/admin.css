@@ -746,3 +746,24 @@ input:checked + .adm-slider:before {
 .adm-toast-close:hover {
     color: #fff;
 }
+
+@media (max-width: 480px) {
+    .adm-toast-container {
+        top: 14px;
+        left: 12px;
+        right: 12px;
+        min-width: unset;
+        max-width: calc(100vw - 24px);
+        padding: 12px 14px;
+        border-radius: 12px;
+    }
+
+    .adm-toast-title {
+        font-size: 14px;
+    }
+
+    .adm-toast-message {
+        font-size: 12px;
+    }
+}
+

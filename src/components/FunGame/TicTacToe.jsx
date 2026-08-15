@@ -202,16 +202,17 @@ export default function TicTacToe({ onGameOver, bestScore }) {
 
             {/* 3x3 Tic Tac Toe Grid Canvas */}
             <div className="game__canvas-wrap" style={{
-                width: '380px',
-                height: '380px',
+                width: '100%',
+                maxWidth: '380px',
+                aspectRatio: '1 / 1',
                 background: 'var(--adm-surface-2, rgba(15,23,42,0.6))',
                 border: '1px solid var(--gm-border)',
                 borderRadius: '18px',
-                padding: '16px',
+                padding: '14px',
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',
                 gridTemplateRows: 'repeat(3, 1fr)',
-                gap: '12px',
+                gap: '10px',
                 position: 'relative'
             }}>
                 {board.map((cell, idx) => {

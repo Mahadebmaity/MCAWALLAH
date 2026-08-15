@@ -1027,265 +1027,9 @@
     filter: brightness(1.1);
 }
 
-/* ═══════════════════════════
-   RESPONSIVE
-   ═══════════════════════════ */
-@media (max-width: 700px) {
-    .header {
-        padding: 90px 1.5rem 160px;
-    }
-
-    .header__stats {
-        bottom: 72px;
-        gap: 0;
-    }
-
-    .header__stat {
-        padding: 10px 16px;
-    }
-
-    .header__stat-value {
-        font-size: 1.2rem;
-    }
-
-    .header__bg-picker {
-        top: 74px;
-        right: 12px;
-    }
-
-    .header__name {
-        letter-spacing: -1.5px;
-    }
-}
-
-@media (max-width: 420px) {
-    .header__stats {
-        flex-wrap: wrap;
-        width: calc(100% - 3rem);
-        justify-content: center;
-    }
-
-    .header__stat {
-        border-right: none;
-        border-bottom: 1px solid var(--h-stats-border);
-    }
-
-    .header__stat:last-child {
-        border-bottom: none;
-    }
-}
-
-
 /* ═══════════════════════════════════════════════════
-   HEADER RESPONSIVE FIX — paste this at the very
-   BOTTOM of your existing Header.css file
+   PRESET THEMES & MODERN LAYOUT COMPONENTS
    ═══════════════════════════════════════════════════ */
-
-/* ── Replace / Override the existing @media blocks ── */
-
-/* ─── Large tablet (≤ 1024px) ─── */
-@media (max-width: 1024px) {
-    .header {
-        padding: 90px 1.5rem 140px;
-    }
-
-    .header__name {
-        font-size: clamp(2.6rem, 7vw, 4.5rem);
-    }
-
-    .header__stats {
-        bottom: 52px;
-    }
-
-    .header__stat {
-        padding: 12px 20px;
-    }
-}
-
-/* ─── Tablet (≤ 768px) ─── */
-@media (max-width: 768px) {
-    .header {
-        padding: 88px 1.25rem 180px;
-        /* more bottom room for stats */
-        min-height: 100svh;
-        /* use svh on mobile to avoid browser chrome issues */
-    }
-
-    /* Name */
-    .header__name {
-        font-size: clamp(2.2rem, 10vw, 3.5rem);
-        letter-spacing: -1px;
-        gap: 0.15em;
-    }
-
-    /* Typewriter row */
-    .header__role-wrap {
-        font-size: clamp(0.85rem, 3.5vw, 1.1rem);
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    /* Bio */
-    .header__bio {
-        font-size: 0.9rem;
-    }
-
-    /* CTAs — stack vertically */
-    .header__ctas {
-        flex-direction: column;
-        align-items: stretch;
-        width: 100%;
-        max-width: 320px;
-    }
-
-    .header__cta {
-        justify-content: center;
-        padding: 13px 20px;
-    }
-
-    /* Stats — 2 per row */
-    .header__stats {
-        bottom: 60px;
-        width: calc(100% - 2.5rem);
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        border-radius: 14px;
-        left: 50%;
-        transform: translateX(-50%);
-    }
-
-    .header__stat {
-        border-right: none;
-        border-bottom: 1px solid var(--h-stats-border);
-        padding: 12px 10px;
-    }
-
-    .header__stat:nth-child(odd) {
-        border-right: 1px solid var(--h-stats-border);
-    }
-
-    .header__stat:nth-child(3),
-    .header__stat:nth-child(4) {
-        border-bottom: none;
-    }
-
-    .header__stat-value {
-        font-size: 1.3rem;
-    }
-
-    /* Background picker — smaller */
-    .header__bg-picker {
-        top: 72px;
-        right: 10px;
-    }
-
-    .header__bg-trigger {
-        padding: 6px 10px;
-    }
-
-    .header__bg-trigger-label {
-        display: none;
-    }
-
-    /* hide label, keep icon only */
-    .header__bg-panel {
-        width: 190px;
-        right: -4px;
-    }
-
-    /* Particles — fewer visible */
-    .header__particle:nth-child(n+20) {
-        display: none;
-    }
-}
-
-/* ─── Mobile (≤ 480px) ─── */
-@media (max-width: 480px) {
-    .header {
-        padding: 84px 1rem 190px;
-        text-align: center;
-    }
-
-    .header__content {
-        gap: 14px;
-    }
-
-    .header__greeting {
-        font-size: 0.85rem;
-    }
-
-    .header__name {
-        font-size: clamp(2rem, 12vw, 3rem);
-        letter-spacing: -0.5px;
-    }
-
-    .header__badge {
-        font-size: 0.7rem;
-        padding: 5px 12px;
-    }
-
-    /* Stack pills tighter */
-    .header__stack {
-        gap: 6px;
-    }
-
-    .header__pill {
-        font-size: 0.7rem;
-        padding: 4px 10px;
-    }
-
-    /* Social icons smaller */
-    .header__social {
-        width: 36px;
-        height: 36px;
-        font-size: 0.85rem;
-    }
-
-    /* CTA full width */
-    .header__ctas {
-        max-width: 100%;
-    }
-
-    /* Stats 2-col stays, but smaller font */
-    .header__stats {
-        bottom: 64px;
-    }
-
-    .header__stat-value {
-        font-size: 1.15rem;
-    }
-
-    .header__stat-label {
-        font-size: 0.6rem;
-    }
-
-    /* Scroll indicator */
-    .header__scroll-down {
-        bottom: 12px;
-    }
-}
-
-/* ─── Very small (≤ 360px) ─── */
-@media (max-width: 360px) {
-    .header__name {
-        font-size: 1.9rem;
-    }
-
-    .header__stat {
-        padding: 10px 8px;
-    }
-
-    .header__stat-value {
-        font-size: 1rem;
-    }
-}
-
-/* ── Fix: prevent horizontal scroll on all screen sizes ── */
-.header {
-    overflow-x: hidden;
-    box-sizing: border-box;
-    width: 100%;
-}
 
 /* ══════════════════════════════════════════════════════
    1. ULTRA-MODERN GLASSMORPHIC FLOATING CAPSULE
@@ -1522,20 +1266,28 @@
    ══════════════════════════════════════════════════════ */
 
 @media (max-width: 1024px) {
+    .header {
+        padding: 90px 1.5rem 80px;
+    }
+
     .header__split-grid {
         grid-template-columns: 1fr 1fr;
-        gap: 32px;
+        gap: 28px;
+    }
+
+    .header__editorial-title {
+        font-size: clamp(2.8rem, 6vw, 4.2rem);
     }
 }
 
 @media (max-width: 900px) {
     .header {
-        padding: 90px 20px 80px;
+        padding: 84px 18px 76px;
     }
 
     .header__split-grid {
         grid-template-columns: 1fr;
-        gap: 36px;
+        gap: 32px;
     }
     .header__split-left {
         align-items: center;
@@ -1550,77 +1302,109 @@
     .header__split-left .header__ctas {
         justify-content: center !important;
     }
+
+    .header__bg-panel {
+        max-width: min(320px, calc(100vw - 24px));
+    }
 }
 
 @media (max-width: 640px) {
     .header {
-        padding: 80px 14px 70px;
+        padding: 76px 14px 64px;
         min-height: auto;
+    }
+
+    /* Background Picker Widget on mobile */
+    .header__bg-picker-widget {
+        max-width: calc(100vw - 20px);
+    }
+
+    .header__bg-trigger-pill {
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+
+    .header__bg-panel {
+        width: 280px;
+        max-width: calc(100vw - 24px);
+        right: 0;
+    }
+
+    .header__bg-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
     }
 
     /* Glassmorphic Capsule on Mobile */
     .header__glass-capsule {
-        padding: 26px 16px 20px;
-        border-radius: 20px;
-        gap: 16px;
-        margin: 0 auto 20px;
+        padding: 24px 16px 18px;
+        border-radius: 18px;
+        gap: 14px;
+        margin: 0 auto 16px;
         box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
     }
 
     .header__intro-inline {
         flex-direction: column;
-        gap: 6px;
+        gap: 4px;
     }
 
-    .header__name-inline {
-        font-size: clamp(1.8rem, 6.5vw, 2.6rem);
-        line-height: 1.2;
+    .header__name-inline,
+    .header__name {
+        font-size: clamp(1.8rem, 6.5vw, 2.5rem);
+        line-height: 1.18;
+        word-break: break-word;
     }
 
-    .header__role-inline {
-        font-size: 1.05rem;
+    .header__role-inline,
+    .header__role-wrap {
+        font-size: 0.95rem;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .header__bio {
         font-size: 0.88rem;
         line-height: 1.6;
         padding: 0 4px;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
     }
 
     .header__stack {
         gap: 6px 8px;
         justify-content: center;
+        flex-wrap: wrap;
     }
 
     .header__pill {
-        padding: 6px 12px;
-        font-size: 0.76rem;
+        padding: 5px 10px;
+        font-size: 0.74rem;
     }
 
     .header__ctas {
         flex-direction: column;
         width: 100%;
-        max-width: 300px;
+        max-width: 280px;
         gap: 10px;
     }
 
     .header__cta {
         width: 100%;
         justify-content: center;
-        padding: 12px 20px;
-        font-size: 0.9rem;
+        padding: 12px 18px;
+        font-size: 0.88rem;
     }
 
     .header__socials {
         gap: 8px;
         justify-content: center;
+        flex-wrap: wrap;
     }
 
     .header__social {
         width: 38px;
         height: 38px;
-        font-size: 0.95rem;
+        font-size: 0.92rem;
     }
 
     /* 2x2 Grid for stats on mobile */
@@ -1629,18 +1413,19 @@
         grid-template-columns: repeat(2, 1fr);
         width: 100%;
         gap: 8px;
-        padding: 12px;
+        padding: 10px;
         border-radius: 14px;
-        margin-bottom: 16px;
+        margin-top: 8px;
+        margin-bottom: 12px;
     }
 
     .header__stat {
-        padding: 8px 6px;
+        padding: 8px 4px;
         text-align: center;
     }
 
     .header__stat-value {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
     }
 
     .header__stat-label {
@@ -1654,42 +1439,56 @@
     }
 
     .header__code-body {
-        padding: 14px;
+        padding: 12px;
         font-size: 11.5px;
+        overflow-x: auto;
     }
 
     /* Editorial on mobile */
     .header__editorial-title {
-        font-size: clamp(2.4rem, 8vw, 3.4rem);
+        font-size: clamp(2.2rem, 7.5vw, 3.2rem);
+        line-height: 1.1;
     }
 
     /* Hologram on mobile */
     .header__hologram-wrap {
-        padding: 24px 14px;
+        padding: 22px 12px;
         border-radius: 14px;
+        gap: 14px;
     }
 
     /* Scroll mouse indicator */
     .header__scroll-indicator {
-        bottom: 12px;
+        bottom: 8px;
     }
 }
 
 @media (max-width: 380px) {
     .header {
-        padding: 70px 10px 60px;
+        padding: 68px 10px 52px;
     }
 
     .header__glass-capsule {
-        padding: 20px 12px 16px;
+        padding: 18px 10px 14px;
+        border-radius: 14px;
     }
 
     .header__name-inline,
     .header__name {
-        font-size: 1.65rem;
+        font-size: 1.55rem;
     }
 
     .header__stat-value {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
     }
-}
+
+    .header__stat-label {
+        font-size: 0.6rem;
+    }
+
+    .header__cta {
+        padding: 10px 14px;
+        font-size: 0.82rem;
+    }
+}
+

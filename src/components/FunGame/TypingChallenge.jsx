@@ -306,12 +306,14 @@ export default function TypingChallenge({ onGameOver, bestScore }) {
             </div>
 
             {/* Right Typing Arena & Visual Keyboard */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '460px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', maxWidth: '460px' }}>
                 <div className="game__canvas-wrap" style={{
-                    minHeight: '260px',
+                    minHeight: '240px',
+                    width: '100%',
+                    maxWidth: '100%',
                     background: 'var(--gm-card)',
                     border: '1px solid var(--gm-border)',
-                    padding: '20px',
+                    padding: '16px',
                     borderRadius: '16px',
                     display: 'flex',
                     flexDirection: 'column',
@@ -321,16 +323,17 @@ export default function TypingChallenge({ onGameOver, bestScore }) {
                     {/* Prompt Character Stream */}
                     <div style={{
                         fontFamily: 'var(--gm-font-m)',
-                        fontSize: '16px',
-                        lineHeight: '1.9',
+                        fontSize: '15px',
+                        lineHeight: '1.8',
                         color: 'var(--gm-text-3)',
                         background: 'var(--adm-surface-2, rgba(0,0,0,0.2))',
-                        padding: '16px',
+                        padding: '14px',
                         borderRadius: '12px',
                         border: '1px solid var(--gm-border)',
-                        minHeight: '110px',
+                        minHeight: '90px',
                         userSelect: 'none',
-                        letterSpacing: '0.5px'
+                        letterSpacing: '0.5px',
+                        wordBreak: 'break-word'
                     }}>
                         {targetText.split('').map((char, index) => {
                             let color = 'var(--gm-text-3)';
@@ -417,18 +420,20 @@ export default function TypingChallenge({ onGameOver, bestScore }) {
                     background: 'var(--gm-card)',
                     border: '1px solid var(--gm-border)',
                     borderRadius: '14px',
-                    padding: '10px',
+                    padding: '8px',
                     boxShadow: 'var(--gm-shadow)',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '4px',
-                    userSelect: 'none'
+                    userSelect: 'none',
+                    overflowX: 'auto',
+                    width: '100%'
                 }}>
                     <div style={{ fontSize: '10px', color: 'var(--gm-text-3)', textTransform: 'uppercase', textAlign: 'center', marginBottom: '2px', fontWeight: '700' }}>
                         Touch Typing Visual Guide
                     </div>
                     {KEYBOARD_ROWS.map((row, rIdx) => (
-                        <div key={rIdx} style={{ display: 'flex', gap: '3px', justifyContent: 'center' }}>
+                        <div key={rIdx} style={{ display: 'flex', gap: '2px', justifyContent: 'center' }}>
                             {row.map((k, kIdx) => {
                                 const isNext = (k === "Space" && nextChar === " ") || (k.toLowerCase() === nextChar);
                                 const isSpace = k === "Space";
@@ -436,18 +441,19 @@ export default function TypingChallenge({ onGameOver, bestScore }) {
                                     <div
                                         key={kIdx}
                                         style={{
-                                            padding: isSpace ? '4px 60px' : '4px 7px',
+                                            padding: isSpace ? '4px clamp(20px, 6vw, 50px)' : '4px clamp(3px, 1vw, 6px)',
                                             borderRadius: '4px',
                                             background: isNext ? 'var(--gm-accent)' : 'var(--adm-surface-2, rgba(255,255,255,0.04))',
                                             color: isNext ? '#fff' : 'var(--gm-text-2)',
-                                            fontSize: '11px',
+                                            fontSize: 'clamp(9px, 2.2vw, 11px)',
                                             fontFamily: 'var(--gm-font-m)',
                                             border: `1px solid ${isNext ? 'var(--gm-accent)' : 'var(--gm-border)'}`,
                                             textAlign: 'center',
                                             fontWeight: isNext ? '800' : '500',
                                             transform: isNext ? 'scale(1.1)' : 'none',
                                             transition: 'all 0.1s ease',
-                                            boxShadow: isNext ? '0 0 10px var(--gm-glow)' : 'none'
+                                            boxShadow: isNext ? '0 0 10px var(--gm-glow)' : 'none',
+                                            flexShrink: 0
                                         }}
                                     >
                                         {k}
