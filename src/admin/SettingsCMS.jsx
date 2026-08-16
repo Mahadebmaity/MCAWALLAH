@@ -342,10 +342,10 @@ export default function SettingsCMS() {
                 <div style={{ background: 'var(--adm-surface)', padding: '12px 16px', borderRadius: '10px', marginBottom: '20px', border: '1px solid var(--adm-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                     <div>
                         <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--adm-text-main)' }}>
-                            Active Admin: <span style={{ color: 'var(--adm-primary)' }}>{user?.name || 'Mahadeb Maity'}</span> ({user?.email || 'mahadeb@portfolio.com'})
+                            Active Admin: <span style={{ color: 'var(--adm-primary)' }}>{user?.name || 'Mahadeb Maity'}</span> ({user?.email || 'admin@portfolio.com'})
                         </div>
                         <div style={{ fontSize: '11px', color: 'var(--adm-text-muted)', marginTop: '2px' }}>
-                            Default Credentials: <code style={{ background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: '4px' }}>mahadeb@portfolio.com</code> / <code style={{ background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: '4px' }}>Admin@123456</code>
+                            Security Status: <span style={{ color: '#10b981', fontWeight: '600' }}>● Password Protected &amp; Encrypted</span>
                         </div>
                     </div>
                     <button
@@ -356,7 +356,7 @@ export default function SettingsCMS() {
                         style={{ fontSize: '12px', padding: '6px 12px', borderColor: 'rgba(234, 179, 8, 0.4)', color: '#eab308' }}
                         title="Reset email & password back to factory defaults"
                     >
-                        <i className="fa-solid fa-rotate-left" /> {resettingDefaults ? 'Resetting...' : 'Reset to Default Credentials'}
+                        <i className="fa-solid fa-rotate-left" /> {resettingDefaults ? 'Resetting...' : 'Reset Default Access'}
                     </button>
                 </div>
 
