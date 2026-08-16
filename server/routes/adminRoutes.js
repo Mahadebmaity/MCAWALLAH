@@ -16,6 +16,9 @@ import {
     getUsersDirectory,
     updateUserRole,
     deleteUser,
+    toggleUserStatus,
+    adminResetUserPassword,
+    getUserActivityDetails,
     getActivityLogs,
     clearActivityLogs
 } from '../controllers/adminController.js';
@@ -33,6 +36,9 @@ router.get('/overview', getAdminOverview);
 // Registered Users Management
 router.get('/users', getUsersDirectory);
 router.patch('/users/:id/role', updateUserRole);
+router.patch('/users/:id/status', toggleUserStatus);
+router.post('/users/:id/reset-password', adminResetUserPassword);
+router.get('/users/:id/activity', getUserActivityDetails);
 router.delete('/users/:id', deleteUser);
 
 // Live Activity & Workflow Telemetry

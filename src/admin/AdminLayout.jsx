@@ -7,7 +7,7 @@ import './admin.css';
 
 const NAV_ITEMS = [
     { to: '/admin/dashboard', icon: 'fa-solid fa-gauge-high', label: 'Dashboard' },
-    { to: '/admin/users-activity', icon: 'fa-solid fa-users-viewfinder', label: 'Users & Activity Logs' },
+    { to: '/admin/users-activity', icon: 'fa-solid fa-users-gear', label: 'User Management' },
     { to: '/admin/navbar', icon: 'fa-solid fa-compass', label: 'Navbar & Menu' },
     { to: '/admin/hero', icon: 'fa-solid fa-wand-magic-sparkles', label: 'Hero & Header' },
     { to: '/admin/about', icon: 'fa-solid fa-circle-user', label: 'About Me' },

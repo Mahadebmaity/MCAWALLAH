@@ -522,6 +522,76 @@ export const deleteUser = async (req, res) => {
     }
 };
 
+// @desc Toggle User Suspension (Ban / Unban)
+// @route PATCH /api/admin/users/:id/status
+export const toggleUserStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { isSuspended } = req.body;
+
+        if (id === req.user._id.toString()) {
+            return res.status(400).json({ message: 'You cannot suspend your own admin account.' });
+        }
+
+        const user = await User.findByIdAndUpdate(id, { isSuspended }, { new: true }).select('-password');
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        res.json({ message: `User ${isSuspended ? 'suspended' : 'reactivated'} successfully`, user });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Admin Reset User Password
+// @route POST /api/admin/users/:id/reset-password
+export const adminResetUserPassword = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { newPassword } = req.body;
+
+        if (!newPassword || newPassword.length < 6) {
+            return res.status(400).json({ message: 'Password must be at least 6 characters.' });
+        }
+
+        const user = await User.findById(id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        user.password = newPassword;
+        await user.save();
+
+        res.json({ message: `Password for ${user.name} has been reset successfully.` });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Get Specific User Activity & History
+// @route GET /api/admin/users/:id/activity
+export const getUserActivityDetails = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findById(id).select('-password').lean();
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const [activity, gameScores] = await Promise.all([
+            ActivityLog.find({
+                $or: [{ user: id }, { userEmail: user.email }]
+            }).sort({ createdAt: -1 }).limit(50).lean(),
+            GameScore.find({
+                $or: [{ user: id }, { playerName: user.name }]
+            }).sort({ createdAt: -1 }).lean()
+        ]);
+
+        res.json({
+            user,
+            activity,
+            gameScores
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 // @desc Get Live Activity & Workflow Telemetry Logs
 // @route GET /api/admin/activity-logs
 export const getActivityLogs = async (req, res) => {

@@ -48,6 +48,10 @@ const userSchema = new mongoose.Schema({
     device: {
         type: String,
         default: ''
+    },
+    isSuspended: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

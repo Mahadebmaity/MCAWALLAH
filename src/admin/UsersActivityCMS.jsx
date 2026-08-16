@@ -21,6 +21,22 @@ export default function UsersActivityCMS() {
     const [userSearch, setUserSearch] = useState('');
     const [userRoleFilter, setUserRoleFilter] = useState('all');
 
+    // Message to User Modal state
+    const [messageModalUser, setMessageModalUser] = useState(null);
+    const [msgSubject, setMsgSubject] = useState('');
+    const [msgBody, setMsgBody] = useState('');
+    const [copiedEmail, setCopiedEmail] = useState(false);
+
+    // Reset Password Modal state
+    const [resetPwModalUser, setResetPwModalUser] = useState(null);
+    const [newPasswordInput, setNewPasswordInput] = useState('');
+    const [resettingPw, setResettingPw] = useState(false);
+
+    // User Activity History Drawer state
+    const [historyModalUser, setHistoryModalUser] = useState(null);
+    const [userHistoryData, setUserHistoryData] = useState(null);
+    const [loadingHistory, setLoadingHistory] = useState(false);
+
     // Activity Logs state
     const [activityData, setActivityData] = useState({
         logs: [],
@@ -95,6 +111,98 @@ export default function UsersActivityCMS() {
         }
     };
 
+    // Toggle User Suspension (Ban / Activate)
+    const handleToggleSuspension = async (userId, userName, currentSuspended) => {
+        const nextState = !currentSuspended;
+        if (!window.confirm(`${nextState ? 'Suspend / Block' : 'Reactivate'} access for "${userName}"?`)) return;
+        try {
+            const res = await authFetch(`${API_BASE}/admin/users/${userId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isSuspended: nextState })
+            });
+
+            if (res.ok) {
+                setToast({
+                    type: 'success',
+                    title: nextState ? 'User Suspended 🚫' : 'User Reactivated ✅',
+                    message: `${userName} account access has been ${nextState ? 'suspended' : 'reactivated'}.`
+                });
+                fetchAllData();
+            } else {
+                const err = await res.json();
+                throw new Error(err.message || 'Failed to update user status');
+            }
+        } catch (err) {
+            setToast({
+                type: 'error',
+                title: 'Status Update Error',
+                message: err.message
+            });
+        }
+    };
+
+    // Admin Reset User Password
+    const handleResetPasswordSubmit = async (e) => {
+        e.preventDefault();
+        if (!newPasswordInput || newPasswordInput.length < 6) {
+            setToast({
+                type: 'error',
+                title: 'Invalid Password',
+                message: 'Password must be at least 6 characters.'
+            });
+            return;
+        }
+
+        setResettingPw(true);
+        try {
+            const res = await authFetch(`${API_BASE}/admin/users/${resetPwModalUser._id}/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ newPassword: newPasswordInput })
+            });
+
+            if (res.ok) {
+                setToast({
+                    type: 'success',
+                    title: 'Password Reset! 🔑',
+                    message: `Password for ${resetPwModalUser.name} has been updated.`
+                });
+                setResetPwModalUser(null);
+                setNewPasswordInput('');
+            } else {
+                const err = await res.json();
+                throw new Error(err.message || 'Failed to reset password');
+            }
+        } catch (err) {
+            setToast({
+                type: 'error',
+                title: 'Password Reset Error',
+                message: err.message
+            });
+        } finally {
+            setResettingPw(false);
+        }
+    };
+
+    // Open User History
+    const handleOpenHistory = async (user) => {
+        setHistoryModalUser(user);
+        setLoadingHistory(true);
+        setUserHistoryData(null);
+        try {
+            const res = await authFetch(`${API_BASE}/admin/users/${user._id}/activity`);
+            if (res.ok) {
+                const json = await res.json();
+                setUserHistoryData(json);
+            }
+        } catch (err) {
+            console.error('Failed to load user history:', err);
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
+
     // Delete User
     const handleDeleteUser = async (userId, userName) => {
         if (!window.confirm(`Are you sure you want to delete user account "${userName}"? This cannot be undone.`)) return;
@@ -148,9 +256,31 @@ export default function UsersActivityCMS() {
         }
     };
 
+    // Open Message Modal
+    const handleOpenMessageModal = (user) => {
+        setMessageModalUser(user);
+        setMsgSubject(`Message from Admin - ${currentAdmin?.name || 'Mahadeb Maity'}`);
+        setMsgBody(`Hi ${user.name},\n\nHope you are enjoying the portfolio!\n\nBest regards,\nMahadeb Maity`);
+    };
+
+    const handleCopyEmail = (emailStr) => {
+        if (!emailStr) return;
+        navigator.clipboard.writeText(emailStr);
+        setCopiedEmail(true);
+        setToast({
+            type: 'success',
+            title: 'Email Copied 📋',
+            message: `${emailStr} copied to clipboard.`
+        });
+        setTimeout(() => setCopiedEmail(false), 3000);
+    };
+
     // Filter Users
     const filteredUsers = (usersData.users || []).filter(u => {
-        const matchesRole = userRoleFilter === 'all' || u.role === userRoleFilter;
+        const matchesRole = userRoleFilter === 'all' ||
+            (userRoleFilter === 'admin' && u.role === 'admin') ||
+            (userRoleFilter === 'user' && u.role === 'user') ||
+            (userRoleFilter === 'suspended' && u.isSuspended);
         const matchesSearch = u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
             u.email.toLowerCase().includes(userSearch.toLowerCase());
         return matchesRole && matchesSearch;
@@ -185,7 +315,15 @@ export default function UsersActivityCMS() {
         }
     };
 
-    if (loading) return <div style={{ textAlign: 'center', padding: '60px' }}>Loading Users &amp; Activity Telemetry...</div>;
+    if (loading) return <div style={{ textAlign: 'center', padding: '60px' }}>Loading User Management Studio...</div>;
+
+    const gmailComposeUrl = messageModalUser
+        ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(messageModalUser.email)}&su=${encodeURIComponent(msgSubject)}&body=${encodeURIComponent(msgBody)}`
+        : '#';
+
+    const mailtoUrl = messageModalUser
+        ? `mailto:${messageModalUser.email}?subject=${encodeURIComponent(msgSubject)}&body=${encodeURIComponent(msgBody)}`
+        : '#';
 
     return (
         <div>
@@ -216,13 +354,13 @@ export default function UsersActivityCMS() {
                             borderRadius: '999px',
                             marginBottom: '10px'
                         }}>
-                            <i className="fa-solid fa-satellite-dish" style={{ animation: 'pulse 1.5s infinite' }} /> Real-Time Telemetry &amp; Directory
+                            <i className="fa-solid fa-users-gear" /> User Control Center &amp; Live Telemetry
                         </span>
                         <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#ffffff', margin: '4px 0 8px 0' }}>
-                            Users &amp; Workflow Activity Tracker
+                            User Management Studio
                         </h2>
                         <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0, maxWidth: '680px', lineHeight: '1.5' }}>
-                            Track registered users, active sessions, and observe real-time user workflow records (button clicks, resume downloads, game plays, and contact inquiries).
+                            View who has signed up &amp; logged in, control user permissions, send direct email messages, reset passwords, and track real-time workflows.
                         </p>
                     </div>
 
@@ -235,7 +373,7 @@ export default function UsersActivityCMS() {
                             disabled={refreshing}
                         >
                             <i className={`fa-solid fa-rotate ${refreshing ? 'fa-spin' : ''}`} />
-                            {refreshing ? 'Refreshing...' : 'Refresh Live Feed'}
+                            {refreshing ? 'Refreshing...' : 'Refresh'}
                         </button>
                     </div>
                 </div>
@@ -260,7 +398,7 @@ export default function UsersActivityCMS() {
                             transition: 'all 0.2s ease'
                         }}
                     >
-                        <i className="fa-solid fa-users" /> Registered Users ({usersData.totalUsers})
+                        <i className="fa-solid fa-users-gear" /> Registered Users ({usersData.totalUsers})
                     </button>
 
                     <button
@@ -281,13 +419,13 @@ export default function UsersActivityCMS() {
                             transition: 'all 0.2s ease'
                         }}
                     >
-                        <i className="fa-solid fa-list-check" /> Live Activity &amp; Workflow Stream ({activityData.totalEvents})
+                        <i className="fa-solid fa-list-check" /> Live Workflow Stream ({activityData.totalEvents})
                     </button>
                 </div>
             </div>
 
             {/* ══════════════════════════════════════════════════════════════
-                 TAB 1: REGISTERED USERS DIRECTORY
+                 TAB 1: USER MANAGEMENT DIRECTORY & ACTIONS
             ══════════════════════════════════════════════════════════════ */}
             {activeTab === 'users' && (
                 <div>
@@ -299,7 +437,7 @@ export default function UsersActivityCMS() {
                             </div>
                             <div className="adm-stat-content">
                                 <h3 className="adm-stat-val">{usersData.totalUsers}</h3>
-                                <p className="adm-stat-label">Total Registered Users</p>
+                                <p className="adm-stat-label">Total Users</p>
                             </div>
                         </div>
 
@@ -338,7 +476,7 @@ export default function UsersActivityCMS() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px', marginBottom: '18px' }}>
                             <h3 className="adm-card-title" style={{ margin: 0 }}>
                                 <i className="fa-solid fa-address-book" style={{ color: 'var(--adm-primary)' }} />
-                                User Accounts Directory ({filteredUsers.length})
+                                User Directory &amp; Permissions ({filteredUsers.length})
                             </h3>
 
                             {/* Search & Filters */}
@@ -357,13 +495,14 @@ export default function UsersActivityCMS() {
 
                                 <select
                                     className="adm-select"
-                                    style={{ width: '130px', height: '36px', fontSize: '12px', padding: '4px 8px' }}
+                                    style={{ width: '140px', height: '36px', fontSize: '12px', padding: '4px 8px' }}
                                     value={userRoleFilter}
                                     onChange={(e) => setUserRoleFilter(e.target.value)}
                                 >
-                                    <option value="all">All Roles</option>
+                                    <option value="all">All Accounts</option>
                                     <option value="admin">Admins Only</option>
                                     <option value="user">Users Only</option>
+                                    <option value="suspended">Suspended Users</option>
                                 </select>
                             </div>
                         </div>
@@ -373,12 +512,12 @@ export default function UsersActivityCMS() {
                             <table className="adm-table">
                                 <thead>
                                     <tr>
-                                        <th>User</th>
-                                        <th>Role</th>
-                                        <th>Total Logins</th>
+                                        <th>User Profile</th>
+                                        <th>Role / Status</th>
+                                        <th>Logins</th>
                                         <th>Registered Date</th>
                                         <th>Last Active</th>
-                                        <th style={{ textAlign: 'right' }}>Actions</th>
+                                        <th style={{ textAlign: 'right' }}>Admin Controls &amp; Message</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -387,15 +526,15 @@ export default function UsersActivityCMS() {
                                             const initials = u.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
                                             const isSelf = currentAdmin?._id === u._id;
                                             return (
-                                                <tr key={u._id}>
+                                                <tr key={u._id} style={{ opacity: u.isSuspended ? 0.65 : 1 }}>
                                                     <td>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                                             <div style={{
-                                                                width: '38px',
-                                                                height: '38px',
+                                                                width: '40px',
+                                                                height: '40px',
                                                                 borderRadius: '50%',
                                                                 background: 'linear-gradient(135deg, #1e293b, #0f172a)',
-                                                                border: '1.5px solid var(--adm-primary)',
+                                                                border: u.isSuspended ? '2px solid #ef4444' : '2px solid var(--adm-primary)',
                                                                 overflow: 'hidden',
                                                                 display: 'flex',
                                                                 alignItems: 'center',
@@ -405,31 +544,35 @@ export default function UsersActivityCMS() {
                                                                 {u.avatar ? (
                                                                     <img src={u.avatar} alt={u.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                                 ) : (
-                                                                    <span style={{ fontSize: '13px', fontWeight: '800', color: '#38bdf8' }}>{initials}</span>
+                                                                    <span style={{ fontSize: '14px', fontWeight: '800', color: '#38bdf8' }}>{initials}</span>
                                                                 )}
                                                             </div>
                                                             <div>
-                                                                <strong style={{ fontSize: '13.5px', color: 'var(--adm-text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                                <strong style={{ fontSize: '14px', color: 'var(--adm-text-main)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                                     {u.name}
                                                                     {isSelf && <span style={{ fontSize: '10px', background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', padding: '1px 6px', borderRadius: '4px' }}>YOU</span>}
+                                                                    {u.isSuspended && <span style={{ fontSize: '10px', background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', padding: '1px 6px', borderRadius: '4px' }}>SUSPENDED</span>}
                                                                 </strong>
                                                                 <span style={{ fontSize: '12px', color: 'var(--adm-text-muted)' }}>{u.email}</span>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <span style={{
-                                                            fontSize: '11px',
-                                                            fontWeight: '700',
-                                                            textTransform: 'uppercase',
-                                                            padding: '3px 8px',
-                                                            borderRadius: '6px',
-                                                            background: u.role === 'admin' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(16, 185, 129, 0.15)',
-                                                            color: u.role === 'admin' ? '#38bdf8' : '#34d399',
-                                                            border: `1px solid ${u.role === 'admin' ? 'rgba(56, 189, 248, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`
-                                                        }}>
-                                                            {u.role === 'admin' ? '👑 Admin' : '👤 User'}
-                                                        </span>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                            <span style={{
+                                                                fontSize: '11px',
+                                                                fontWeight: '700',
+                                                                textTransform: 'uppercase',
+                                                                padding: '2px 6px',
+                                                                borderRadius: '6px',
+                                                                width: 'max-content',
+                                                                background: u.role === 'admin' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                                                                color: u.role === 'admin' ? '#38bdf8' : '#34d399',
+                                                                border: `1px solid ${u.role === 'admin' ? 'rgba(56, 189, 248, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`
+                                                            }}>
+                                                                {u.role === 'admin' ? '👑 Admin' : '👤 User'}
+                                                            </span>
+                                                        </div>
                                                     </td>
                                                     <td>
                                                         <span style={{ fontSize: '12.5px', fontWeight: '700', color: '#fff', background: 'rgba(255,255,255,0.06)', padding: '2px 8px', borderRadius: '6px' }}>
@@ -443,7 +586,41 @@ export default function UsersActivityCMS() {
                                                         {u.lastLogin ? new Date(u.lastLogin).toLocaleString() : new Date(u.createdAt).toLocaleDateString()}
                                                     </td>
                                                     <td style={{ textAlign: 'right' }}>
-                                                        <div style={{ display: 'inline-flex', gap: '6px' }}>
+                                                        <div style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
+                                                            {/* ✉️ Send Direct Message */}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleOpenMessageModal(u)}
+                                                                className="adm-btn adm-btn-sm adm-btn-primary"
+                                                                style={{ fontSize: '11px', padding: '4px 9px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                                                title="Send direct email / message to this user"
+                                                            >
+                                                                <i className="fa-solid fa-paper-plane" /> Message
+                                                            </button>
+
+                                                            {/* 🔍 View Activity History */}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleOpenHistory(u)}
+                                                                className="adm-btn adm-btn-sm adm-btn-secondary"
+                                                                style={{ fontSize: '11px', padding: '4px 8px' }}
+                                                                title="View user activity history &amp; scores"
+                                                            >
+                                                                <i className="fa-solid fa-chart-line" />
+                                                            </button>
+
+                                                            {/* 🔑 Reset Password */}
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => { setResetPwModalUser(u); setNewPasswordInput(''); }}
+                                                                className="adm-btn adm-btn-sm adm-btn-secondary"
+                                                                style={{ fontSize: '11px', padding: '4px 8px' }}
+                                                                title="Reset user's password"
+                                                            >
+                                                                <i className="fa-solid fa-key" />
+                                                            </button>
+
+                                                            {/* 👑 Role Changer */}
                                                             {u.role === 'user' ? (
                                                                 <button
                                                                     type="button"
@@ -468,13 +645,27 @@ export default function UsersActivityCMS() {
                                                                 )
                                                             )}
 
+                                                            {/* 🚫 Suspend / Activate Toggle */}
+                                                            {!isSelf && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleToggleSuspension(u._id, u.name, u.isSuspended)}
+                                                                    className={`adm-btn adm-btn-sm ${u.isSuspended ? 'adm-btn-primary' : 'adm-btn-secondary'}`}
+                                                                    style={{ fontSize: '11px', padding: '4px 8px', color: u.isSuspended ? '#090d16' : '#f87171' }}
+                                                                    title={u.isSuspended ? "Reactivate user account" : "Suspend user account"}
+                                                                >
+                                                                    <i className={`fa-solid ${u.isSuspended ? 'fa-unlock' : 'fa-ban'}`} />
+                                                                </button>
+                                                            )}
+
+                                                            {/* 🗑️ Delete User */}
                                                             {!isSelf && (
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => handleDeleteUser(u._id, u.name)}
                                                                     className="adm-btn adm-btn-sm adm-btn-danger"
                                                                     style={{ fontSize: '11px', padding: '4px 8px' }}
-                                                                    title="Delete User"
+                                                                    title="Delete User permanently"
                                                                 >
                                                                     <i className="fa-solid fa-trash" />
                                                                 </button>
@@ -487,7 +678,7 @@ export default function UsersActivityCMS() {
                                     ) : (
                                         <tr>
                                             <td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: 'var(--adm-text-muted)' }}>
-                                                No users matching "{userSearch}"
+                                                No users found.
                                             </td>
                                         </tr>
                                     )}
@@ -499,7 +690,7 @@ export default function UsersActivityCMS() {
             )}
 
             {/* ══════════════════════════════════════════════════════════════
-                 TAB 2: LIVE ACTIVITY & WORKFLOW TELEMETRY STREAM
+                 TAB 2: LIVE WORKFLOW STREAM
             ══════════════════════════════════════════════════════════════ */}
             {activeTab === 'activity' && (
                 <div>
@@ -511,7 +702,7 @@ export default function UsersActivityCMS() {
                             </div>
                             <div className="adm-stat-content">
                                 <h3 className="adm-stat-val">{activityData.totalEvents}</h3>
-                                <p className="adm-stat-label">Total Tracked Actions</p>
+                                <p className="adm-stat-label">Total Actions</p>
                             </div>
                         </div>
 
@@ -521,7 +712,7 @@ export default function UsersActivityCMS() {
                             </div>
                             <div className="adm-stat-content">
                                 <h3 className="adm-stat-val">{activityData.stats.totalLogins}</h3>
-                                <p className="adm-stat-label">User Logins</p>
+                                <p className="adm-stat-label">Logins</p>
                             </div>
                         </div>
 
@@ -541,7 +732,7 @@ export default function UsersActivityCMS() {
                             </div>
                             <div className="adm-stat-content">
                                 <h3 className="adm-stat-val">{activityData.stats.totalClicks}</h3>
-                                <p className="adm-stat-label">Button &amp; CTA Clicks</p>
+                                <p className="adm-stat-label">Button Clicks</p>
                             </div>
                         </div>
                     </div>
@@ -632,8 +823,7 @@ export default function UsersActivityCMS() {
                                                 justifyContent: 'space-between',
                                                 alignItems: 'center',
                                                 flexWrap: 'wrap',
-                                                gap: '12px',
-                                                transition: 'all 0.15s ease'
+                                                gap: '12px'
                                             }}
                                         >
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '240px' }}>
@@ -702,6 +892,267 @@ export default function UsersActivityCMS() {
                                 </div>
                             )}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ══════════════════════════════════════════════════════════════
+                 MODAL 1: SEND DIRECT MESSAGE / EMAIL TO USER
+            ══════════════════════════════════════════════════════════════ */}
+            {messageModalUser && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    backdropFilter: 'blur(6px)',
+                    zIndex: 9999,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '20px'
+                }}>
+                    <div className="adm-card" style={{ width: '100%', maxWidth: '540px', padding: '24px', position: 'relative', boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h3 style={{ margin: 0, fontSize: '17px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <i className="fa-solid fa-paper-plane" style={{ color: 'var(--adm-primary)' }} />
+                                Message to {messageModalUser.name}
+                            </h3>
+                            <button
+                                type="button"
+                                onClick={() => setMessageModalUser(null)}
+                                style={{ background: 'none', border: 'none', color: 'var(--adm-text-muted)', cursor: 'pointer', fontSize: '18px' }}
+                            >
+                                <i className="fa-solid fa-xmark" />
+                            </button>
+                        </div>
+
+                        <div style={{ background: 'rgba(255,255,255,0.04)', padding: '10px 14px', borderRadius: '8px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <span style={{ fontSize: '12px', color: 'var(--adm-text-muted)' }}>Recipient Email:</span>
+                                <div style={{ fontSize: '13.5px', fontWeight: '700', color: '#38bdf8' }}>{messageModalUser.email}</div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handleCopyEmail(messageModalUser.email)}
+                                className="adm-btn adm-btn-secondary adm-btn-sm"
+                                style={{ fontSize: '11px' }}
+                            >
+                                <i className={`fa-solid ${copiedEmail ? 'fa-check' : 'fa-copy'}`} />
+                                {copiedEmail ? 'Copied' : 'Copy Email'}
+                            </button>
+                        </div>
+
+                        <div className="adm-form-group">
+                            <label className="adm-label">Subject</label>
+                            <input
+                                type="text"
+                                className="adm-input"
+                                value={msgSubject}
+                                onChange={(e) => setMsgSubject(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="adm-form-group">
+                            <label className="adm-label">Message Body</label>
+                            <textarea
+                                className="adm-textarea"
+                                rows={5}
+                                value={msgBody}
+                                onChange={(e) => setMsgBody(e.target.value)}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '18px', flexWrap: 'wrap' }}>
+                            <a
+                                href={gmailComposeUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="adm-btn adm-btn-primary"
+                                style={{ flex: 1, justifyContent: 'center', textDecoration: 'none' }}
+                                onClick={() => setMessageModalUser(null)}
+                            >
+                                <i className="fa-solid fa-envelope-open-text" /> Send via Web Gmail
+                            </a>
+
+                            <a
+                                href={mailtoUrl}
+                                className="adm-btn adm-btn-secondary"
+                                style={{ flex: 1, justifyContent: 'center', textDecoration: 'none' }}
+                                onClick={() => setMessageModalUser(null)}
+                            >
+                                <i className="fa-solid fa-paper-plane" /> Default Email App
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ══════════════════════════════════════════════════════════════
+                 MODAL 2: RESET USER PASSWORD
+            ══════════════════════════════════════════════════════════════ */}
+            {resetPwModalUser && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    backdropFilter: 'blur(6px)',
+                    zIndex: 9999,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '20px'
+                }}>
+                    <form onSubmit={handleResetPasswordSubmit} className="adm-card" style={{ width: '100%', maxWidth: '440px', padding: '24px', position: 'relative' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h3 style={{ margin: 0, fontSize: '17px', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <i className="fa-solid fa-key" style={{ color: '#ec4899' }} />
+                                Reset Password for {resetPwModalUser.name}
+                            </h3>
+                            <button
+                                type="button"
+                                onClick={() => setResetPwModalUser(null)}
+                                style={{ background: 'none', border: 'none', color: 'var(--adm-text-muted)', cursor: 'pointer', fontSize: '18px' }}
+                            >
+                                <i className="fa-solid fa-xmark" />
+                            </button>
+                        </div>
+
+                        <p style={{ fontSize: '13px', color: 'var(--adm-text-muted)', margin: '0 0 16px' }}>
+                            Set a new login password for <strong>{resetPwModalUser.email}</strong>.
+                        </p>
+
+                        <div className="adm-form-group">
+                            <label className="adm-label">New Password (min 6 chars)</label>
+                            <input
+                                type="password"
+                                className="adm-input"
+                                placeholder="Enter new password"
+                                required
+                                value={newPasswordInput}
+                                onChange={(e) => setNewPasswordInput(e.target.value)}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '18px' }}>
+                            <button
+                                type="button"
+                                onClick={() => setResetPwModalUser(null)}
+                                className="adm-btn adm-btn-secondary"
+                                style={{ flex: 1, justifyContent: 'center' }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={resettingPw}
+                                className="adm-btn adm-btn-primary"
+                                style={{ flex: 1, justifyContent: 'center', background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', borderColor: 'transparent' }}
+                            >
+                                {resettingPw ? 'Saving...' : 'Set Password'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            {/* ══════════════════════════════════════════════════════════════
+                 MODAL 3: USER ACTIVITY & HISTORY DRAWER
+            ══════════════════════════════════════════════════════════════ */}
+            {historyModalUser && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    backdropFilter: 'blur(6px)',
+                    zIndex: 9999,
+                    display: 'flex',
+                    justifyContent: 'flex-end'
+                }}>
+                    <div style={{
+                        width: '100%',
+                        maxWidth: '520px',
+                        height: '100%',
+                        background: 'var(--adm-surface)',
+                        borderLeft: '1px solid var(--adm-border)',
+                        padding: '24px',
+                        overflowY: 'auto',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        boxShadow: '-10px 0 40px rgba(0,0,0,0.5)'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '14px', borderBottom: '1px solid var(--adm-border)' }}>
+                            <div>
+                                <h3 style={{ margin: '0 0 4px', fontSize: '18px', color: '#fff' }}>{historyModalUser.name}'s History</h3>
+                                <span style={{ fontSize: '12px', color: 'var(--adm-text-muted)' }}>{historyModalUser.email}</span>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setHistoryModalUser(null)}
+                                style={{ background: 'none', border: 'none', color: 'var(--adm-text-muted)', cursor: 'pointer', fontSize: '20px' }}
+                            >
+                                <i className="fa-solid fa-xmark" />
+                            </button>
+                        </div>
+
+                        {loadingHistory ? (
+                            <div style={{ textAlign: 'center', padding: '60px', color: 'var(--adm-text-muted)' }}>
+                                <i className="fa-solid fa-circle-notch fa-spin" style={{ fontSize: '24px', marginBottom: '10px' }} />
+                                <div>Loading history...</div>
+                            </div>
+                        ) : userHistoryData ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                                {/* User Meta Card */}
+                                <div style={{ background: 'var(--adm-surface-2)', padding: '14px', borderRadius: '10px', border: '1px solid var(--adm-border)' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '12px' }}>
+                                        <div>Total Logins: <strong>{userHistoryData.user.loginCount || 1}</strong></div>
+                                        <div>Role: <strong>{userHistoryData.user.role.toUpperCase()}</strong></div>
+                                        <div>Joined: <strong>{new Date(userHistoryData.user.createdAt).toLocaleDateString()}</strong></div>
+                                        <div>Last Active: <strong>{userHistoryData.user.lastLogin ? new Date(userHistoryData.user.lastLogin).toLocaleTimeString() : 'N/A'}</strong></div>
+                                    </div>
+                                </div>
+
+                                {/* Game Scores Recorded */}
+                                {userHistoryData.gameScores?.length > 0 && (
+                                    <div>
+                                        <h4 style={{ margin: '0 0 10px', fontSize: '13.5px', color: '#c084fc' }}>
+                                            <i className="fa-solid fa-gamepad" style={{ marginRight: '6px' }} /> Game Scores
+                                        </h4>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                            {userHistoryData.gameScores.map(score => (
+                                                <div key={score._id} style={{ background: 'rgba(168, 85, 247, 0.08)', padding: '8px 12px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                                                    <span><strong>{score.gameSlug.toUpperCase()}</strong> - Score: {score.score} pts</span>
+                                                    <span style={{ color: '#94a3b8' }}>{new Date(score.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Activity Events Feed */}
+                                <div>
+                                    <h4 style={{ margin: '0 0 10px', fontSize: '13.5px', color: '#38bdf8' }}>
+                                        <i className="fa-solid fa-timeline" style={{ marginRight: '6px' }} /> Recent Activity Events
+                                    </h4>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        {userHistoryData.activity?.length > 0 ? (
+                                            userHistoryData.activity.map(act => (
+                                                <div key={act._id} style={{ background: 'var(--adm-surface-2)', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--adm-border)', fontSize: '12px' }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
+                                                        <span style={{ fontWeight: '700', color: '#f1f5f9' }}>{act.action}</span>
+                                                        <span style={{ color: '#64748b', fontSize: '11px' }}>{new Date(act.createdAt).toLocaleString()}</span>
+                                                    </div>
+                                                    <div style={{ color: '#94a3b8' }}>{act.details || act.action}</div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div style={{ color: 'var(--adm-text-muted)', fontSize: '12px', textAlign: 'center', padding: '20px' }}>
+                                                No recorded activity events for this user.
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : null}
                     </div>
                 </div>
             )}

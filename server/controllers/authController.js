@@ -104,6 +104,10 @@ export const login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password.' });
         }
 
+        if (user.isSuspended) {
+            return res.status(403).json({ message: 'This account has been suspended by the administrator.' });
+        }
+
         const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
         const userAgent = req.headers['user-agent'] || '';
 
