@@ -142,6 +142,23 @@
   cursor: pointer; text-decoration: underline;
 }
 
-@media (max-width: 460px) {
-  .auth-modal { padding: 28px 20px 22px; }
+@media (max-width: 480px) {
+  .auth-modal__backdrop {
+    padding: 12px;
+    align-items: flex-end; /* Slide up nicely from bottom on mobile */
+  }
+  .auth-modal {
+    padding: 24px 18px 20px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 20px 20px 12px 12px;
+  }
+  .auth-modal__input {
+    font-size: 16px; /* Prevents auto-zoom in iOS Safari */
+    padding: 11px 12px;
+  }
+  .auth-modal__btn {
+    padding: 13px;
+    font-size: 1rem;
+  }
 }

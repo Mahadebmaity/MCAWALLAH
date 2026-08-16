@@ -717,7 +717,7 @@ export default function FooterSubscribersCMS() {
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             {footerForm.socials.map((soc, idx) => (
-                                <div key={idx} style={{ display: 'grid', gridTemplateColumns: '120px 180px 1fr 50px 40px', gap: '10px', alignItems: 'center', background: 'var(--adm-surface-2)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--adm-border)' }}>
+                                <div key={idx} className="adm-repeater-row">
                                     <input
                                         type="text"
                                         className="adm-input"
@@ -728,33 +728,35 @@ export default function FooterSubscribersCMS() {
                                     <input
                                         type="text"
                                         className="adm-input"
-                                        placeholder="Icon class (fa-brands fa-github)"
+                                        placeholder="Icon (fa-brands fa-github)"
                                         value={soc.icon}
                                         onChange={(e) => handleUpdateSocial(idx, 'icon', e.target.value)}
                                     />
                                     <input
                                         type="url"
                                         className="adm-input"
-                                        placeholder="URL"
+                                        placeholder="Profile URL"
                                         value={soc.href}
                                         onChange={(e) => handleUpdateSocial(idx, 'href', e.target.value)}
                                     />
-                                    <input
-                                        type="color"
-                                        value={soc.color || '#38bdf8'}
-                                        onChange={(e) => handleUpdateSocial(idx, 'color', e.target.value)}
-                                        style={{ width: '40px', height: '34px', background: 'none', border: 'none', cursor: 'pointer' }}
-                                        title="Hover Color"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => handleDeleteSocial(idx)}
-                                        className="adm-btn adm-btn-danger adm-btn-sm"
-                                        style={{ padding: '6px 8px' }}
-                                        title="Delete"
-                                    >
-                                        <i className="fa-solid fa-trash" />
-                                    </button>
+                                    <div className="adm-repeater-actions">
+                                        <input
+                                            type="color"
+                                            value={soc.color || '#38bdf8'}
+                                            onChange={(e) => handleUpdateSocial(idx, 'color', e.target.value)}
+                                            style={{ width: '38px', height: '34px', background: 'none', border: 'none', cursor: 'pointer', verticalAlign: 'middle' }}
+                                            title="Hover Color"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDeleteSocial(idx)}
+                                            className="adm-btn adm-btn-danger adm-btn-sm"
+                                            style={{ padding: '6px 10px' }}
+                                            title="Delete"
+                                        >
+                                            <i className="fa-solid fa-trash" />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -778,7 +780,7 @@ export default function FooterSubscribersCMS() {
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             {footerForm.quickLinks.map((ql, idx) => (
-                                <div key={idx} style={{ display: 'grid', gridTemplateColumns: '180px 1fr 40px', gap: '10px', alignItems: 'center', background: 'var(--adm-surface-2)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--adm-border)' }}>
+                                <div key={idx} className="adm-repeater-row">
                                     <input
                                         type="text"
                                         className="adm-input"
@@ -789,19 +791,21 @@ export default function FooterSubscribersCMS() {
                                     <input
                                         type="text"
                                         className="adm-input"
-                                        placeholder="Href Target (#home, /privacy)"
+                                        placeholder="Target (#home, /privacy)"
                                         value={ql.href}
                                         onChange={(e) => handleUpdateQuickLink(idx, 'href', e.target.value)}
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => handleDeleteQuickLink(idx)}
-                                        className="adm-btn adm-btn-danger adm-btn-sm"
-                                        style={{ padding: '6px 8px' }}
-                                        title="Delete"
-                                    >
-                                        <i className="fa-solid fa-trash" />
-                                    </button>
+                                    <div className="adm-repeater-actions">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleDeleteQuickLink(idx)}
+                                            className="adm-btn adm-btn-danger adm-btn-sm"
+                                            style={{ padding: '6px 10px' }}
+                                            title="Delete"
+                                        >
+                                            <i className="fa-solid fa-trash" />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
