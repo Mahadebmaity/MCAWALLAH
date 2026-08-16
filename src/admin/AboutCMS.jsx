@@ -4,12 +4,69 @@ import { API_BASE } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
+// Preset icon collections for rapid 1-click selection
+const HOBBY_ICON_PRESETS = [
+    { icon: 'fa-solid fa-gamepad', label: 'Gaming' },
+    { icon: 'fa-solid fa-book-open', label: 'Reading' },
+    { icon: 'fa-solid fa-music', label: 'Music' },
+    { icon: 'fa-solid fa-camera', label: 'Photography' },
+    { icon: 'fa-solid fa-code', label: 'Coding' },
+    { icon: 'fa-solid fa-mug-hot', label: 'Coffee' },
+    { icon: 'fa-solid fa-film', label: 'Movies' },
+    { icon: 'fa-solid fa-palette', label: 'Design' },
+    { icon: 'fa-solid fa-plane', label: 'Travel' },
+    { icon: 'fa-solid fa-dumbbell', label: 'Fitness' },
+    { icon: 'fa-solid fa-futbol', label: 'Sports' },
+    { icon: 'fa-solid fa-rocket', label: 'Tech' },
+    { icon: 'fa-solid fa-heart', label: 'Passion' },
+    { icon: 'fa-solid fa-leaf', label: 'Nature' },
+    { icon: 'fa-solid fa-headphones', label: 'Podcasts' },
+    { icon: 'fa-solid fa-utensils', label: 'Cooking' },
+    { icon: 'fa-solid fa-laptop-code', label: 'Open Source' },
+    { icon: 'fa-solid fa-pen-nib', label: 'Writing' },
+    { icon: 'fa-solid fa-lightbulb', label: 'Ideas' },
+    { icon: 'fa-solid fa-trophy', label: 'Gaming Pro' }
+];
+
+const RESUME_ICON_PRESETS = [
+    { icon: 'fa-solid fa-file-pdf', label: 'PDF Document' },
+    { icon: 'fa-solid fa-file-lines', label: 'CV Sheet' },
+    { icon: 'fa-solid fa-file-contract', label: 'Official Resume' },
+    { icon: 'fa-solid fa-graduation-cap', label: 'Academic CV' },
+    { icon: 'fa-solid fa-briefcase', label: 'Job Profile' },
+    { icon: 'fa-solid fa-cloud-arrow-down', label: 'Cloud Link' },
+    { icon: 'fa-solid fa-star', label: 'Featured CV' }
+];
+
+const STAT_ICON_PRESETS = [
+    { icon: 'fa-solid fa-code', label: 'Coding' },
+    { icon: 'fa-solid fa-folder-open', label: 'Projects' },
+    { icon: 'fa-solid fa-mug-hot', label: 'Coffee' },
+    { icon: 'fa-solid fa-star', label: 'Star' },
+    { icon: 'fa-solid fa-award', label: 'Awards' },
+    { icon: 'fa-solid fa-laptop-code', label: 'Tech Stack' },
+    { icon: 'fa-solid fa-briefcase', label: 'Experience' },
+    { icon: 'fa-solid fa-graduation-cap', label: 'Education' }
+];
+
+// Helper to sanitize and clean display resume title
+const formatResumeTitle = (url, title) => {
+    if (title && title.trim() && !title.startsWith('http')) {
+        return title;
+    }
+    if (!url) return 'Active Portfolio Resume';
+    const base = url.split('/').pop() || '';
+    return base.replace(/^\d+[-_]/, '').replace(/\.[^/.]+$/, '').replace(/[_]/g, ' ') || 'Primary Resume';
+};
+
 export default function AboutCMS() {
     const { authFetch } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [savedSuccess, setSavedSuccess] = useState(false);
     const [toast, setToast] = useState(null);
+    const [copiedUrl, setCopiedUrl] = useState(false);
+    const [showResumeIconPicker, setShowResumeIconPicker] = useState(false);
 
     const [about, setAbout] = useState({
         displayName: 'Mahadeb Maity',
@@ -35,13 +92,14 @@ export default function AboutCMS() {
         ],
         resumeUrl: '/resume.pdf',
         resumeLabel: 'Download Resume',
+        resumeIcon: 'fa-solid fa-file-pdf',
         resumes: [],
         isPublic: true
     });
 
     const [newParagraph, setNewParagraph] = useState('');
-    const [newStat, setNewStat] = useState({ icon: 'fa-solid fa-star', val: '', label: '' });
-    const [newHobby, setNewHobby] = useState({ icon: 'fa-solid fa-heart', label: '' });
+    const [newStat, setNewStat] = useState({ icon: 'fa-solid fa-code', val: '', label: '' });
+    const [newHobby, setNewHobby] = useState({ icon: 'fa-solid fa-gamepad', label: '' });
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [uploadingResume, setUploadingResume] = useState(false);
     const [newCustomResume, setNewCustomResume] = useState({ title: '', url: '' });
@@ -98,43 +156,25 @@ export default function AboutCMS() {
                 setToast({
                     type: 'success',
                     title: 'About Section Saved! 🌟',
-                    message: 'Your personal bio, quick stats, and hobbies are now live on your portfolio.',
-                    duration: 5000,
-                    action: (
-                        <a
-                            href="/#about"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                                color: '#38bdf8',
-                                fontSize: '12px',
-                                fontWeight: '600',
-                                textDecoration: 'underline',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '4px'
-                            }}
-                        >
-                            <i className="fa-solid fa-arrow-up-right-from-square" /> View Live Changes
-                        </a>
-                    )
+                    message: 'Your biography, avatar, resume catalog, and hobbies are now live on your portfolio.'
                 });
 
                 setTimeout(() => setSavedSuccess(false), 4000);
             } else {
-                throw new Error('Save failed');
+                throw new Error('Server returned error while saving');
             }
         } catch (err) {
             setToast({
                 type: 'error',
-                title: 'Error Saving Section',
-                message: err.message
+                title: 'Save Failed',
+                message: err.message || 'Could not save About section changes.'
             });
         } finally {
             setSaving(false);
         }
     };
 
+    // Avatar Handlers
     const handleAvatarUpload = async (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -218,7 +258,7 @@ export default function AboutCMS() {
             ...prev,
             hobbies: [...(prev.hobbies || []), { ...newHobby }]
         }));
-        setNewHobby({ icon: 'fa-solid fa-heart', label: '' });
+        setNewHobby({ icon: 'fa-solid fa-gamepad', label: '' });
     };
 
     const deleteHobby = (index) => {
@@ -249,14 +289,18 @@ export default function AboutCMS() {
                 const visibleCount = currentResumes.filter(r => r.isVisible !== false).length;
                 const shouldBeVisible = visibleCount < 3;
 
+                // Format clean title without extension
+                const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[_]/g, ' ');
+
                 const newResumeItem = {
-                    title: file.name.replace(/\.[^/.]+$/, ''),
+                    title: cleanName,
                     url: data.url,
                     fileName: file.name,
                     fileSize: file.size ? `${(file.size / 1024).toFixed(1)} KB` : 'PDF Document',
                     uploadedAt: new Date().toISOString(),
                     isVisible: shouldBeVisible,
-                    isDefault: currentResumes.length === 0
+                    isDefault: currentResumes.length === 0,
+                    icon: 'fa-solid fa-file-pdf'
                 };
 
                 setAbout(prev => {
@@ -264,6 +308,7 @@ export default function AboutCMS() {
                     return {
                         ...prev,
                         resumeUrl: prev.resumeUrl && prev.resumeUrl !== '/resume.pdf' ? prev.resumeUrl : data.url,
+                        resumeLabel: prev.resumeLabel || cleanName,
                         resumes: updatedList
                     };
                 });
@@ -271,7 +316,7 @@ export default function AboutCMS() {
                 setToast({
                     type: 'success',
                     title: 'Resume Added to Vault! 📄',
-                    message: `"${file.name}" saved to your permanent catalog${shouldBeVisible ? ' and activated on your portfolio.' : '.'}`
+                    message: `"${cleanName}" saved to your permanent catalog${shouldBeVisible ? ' and activated on your portfolio.' : '.'}`
                 });
             } else {
                 const errData = await res.json();
@@ -337,13 +382,14 @@ export default function AboutCMS() {
             return {
                 ...prev,
                 resumeUrl: selected ? selected.url : prev.resumeUrl,
+                resumeLabel: selected?.title || prev.resumeLabel,
                 resumes: list
             };
         });
         setToast({
             type: 'success',
             title: 'Primary Resume Selected ⭐',
-            message: 'Set as your primary resume for instant downloads.'
+            message: 'Set as your primary active resume for instant downloads.'
         });
     };
 
@@ -372,7 +418,8 @@ export default function AboutCMS() {
             fileName: 'Cloud / Direct Link',
             uploadedAt: new Date().toISOString(),
             isVisible: shouldBeVisible,
-            isDefault: currentResumes.length === 0
+            isDefault: currentResumes.length === 0,
+            icon: 'fa-solid fa-cloud-arrow-down'
         };
 
         setAbout(prev => {
@@ -392,9 +439,21 @@ export default function AboutCMS() {
         });
     };
 
+    const copyResumeUrl = () => {
+        if (!about.resumeUrl) return;
+        navigator.clipboard.writeText(about.resumeUrl);
+        setCopiedUrl(true);
+        setTimeout(() => setCopiedUrl(false), 3000);
+    };
+
     if (loading) {
         return <div style={{ textAlign: 'center', padding: '60px' }}>Loading About Studio...</div>;
     }
+
+    const activeResumeObj = (about.resumes || []).find(r => r.url === about.resumeUrl || r.isDefault) || {
+        title: about.resumeLabel || formatResumeTitle(about.resumeUrl),
+        url: about.resumeUrl || '/resume.pdf'
+    };
 
     return (
         <div>
@@ -423,7 +482,7 @@ export default function AboutCMS() {
                                 />
                                 <span className="adm-slider"></span>
                             </label>
-                            <span style={{ fontSize: '13px', color: 'var(--adm-text-main)' }}>
+                            <span className="adm-toggle-label">
                                 {about.isPublic ? 'Section Public' : 'Draft Mode'}
                             </span>
                         </div>
@@ -534,77 +593,128 @@ export default function AboutCMS() {
                     <div className="adm-card-header">
                         <div>
                             <h3 className="adm-card-title">
-                                <i className="fa-solid fa-file-pdf" style={{ color: '#e84545' }} />
+                                <i className="fa-solid fa-file-contract" style={{ color: '#38bdf8' }} />
                                 Resume &amp; CV Management Studio
                             </h3>
                             <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--adm-text-muted)' }}>
-                                Upload new resume files (.pdf, .docx), keep multiple versions, or link external cloud files. Visitors can preview or download your active resume.
+                                Upload new resume files (.pdf, .docx), keep multiple versions, or link external cloud files.
                             </p>
                         </div>
                     </div>
 
-                    {/* Active Resume Status Banner */}
-                    <div style={{
-                        background: 'var(--adm-surface-2)',
-                        border: '1px solid var(--adm-border)',
-                        borderRadius: '12px',
-                        padding: '16px 20px',
-                        marginBottom: '20px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: '14px'
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                            <div style={{
-                                width: '46px',
-                                height: '46px',
-                                borderRadius: '10px',
-                                background: 'rgba(232, 69, 69, 0.15)',
-                                color: '#e84545',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '22px'
-                            }}>
-                                <i className="fa-solid fa-file-pdf" />
-                            </div>
-                            <div>
-                                <span style={{ fontSize: '11px', color: '#10b981', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                    ● Active Portfolio Resume
-                                </span>
-                                <h4 style={{ margin: '2px 0 0', fontSize: '15px', fontWeight: '700', color: 'var(--adm-text-main)' }}>
-                                    {about.resumeUrl ? (about.resumeUrl.split('/').pop() || 'Active CV') : 'No resume selected'}
-                                </h4>
-                                <span style={{ fontSize: '12px', color: 'var(--adm-text-muted)', fontFamily: 'monospace' }}>
-                                    {about.resumeUrl || '/resume.pdf'}
+                    {/* ══ Upgraded Modern Showcase Active Resume Card ══ */}
+                    <div className="adm-active-resume-card">
+                        <div className="adm-active-resume-header">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    fontSize: '11px',
+                                    fontWeight: '800',
+                                    letterSpacing: '0.8px',
+                                    textTransform: 'uppercase',
+                                    color: '#10b981',
+                                    background: 'rgba(16, 185, 129, 0.15)',
+                                    padding: '4px 10px',
+                                    borderRadius: '999px',
+                                    border: '1px solid rgba(16, 185, 129, 0.3)'
+                                }}>
+                                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981', display: 'inline-block', boxShadow: '0 0 8px #10b981' }} />
+                                    Active Portfolio Resume
                                 </span>
                             </div>
+
+                            <button
+                                type="button"
+                                onClick={() => setShowResumeIconPicker(!showResumeIconPicker)}
+                                className="adm-btn adm-btn-secondary adm-btn-sm"
+                                style={{ fontSize: '11.5px', padding: '5px 10px' }}
+                            >
+                                <i className={about.resumeIcon || 'fa-solid fa-file-pdf'} style={{ color: '#38bdf8' }} />
+                                Change Icon {showResumeIconPicker ? '▲' : '▼'}
+                            </button>
                         </div>
 
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            {about.resumeUrl && (
-                                <>
-                                    <a
-                                        href={about.resumeUrl}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="adm-btn adm-btn-secondary adm-btn-sm"
-                                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                                    >
-                                        <i className="fa-solid fa-arrow-up-right-from-square" /> Preview Online
-                                    </a>
-                                    <a
-                                        href={about.resumeUrl}
-                                        download
-                                        className="adm-btn adm-btn-primary adm-btn-sm"
-                                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-                                    >
-                                        <i className="fa-solid fa-download" /> Test Download
-                                    </a>
-                                </>
-                            )}
+                        {/* Dropdown Icon Selector for Active Resume */}
+                        {showResumeIconPicker && (
+                            <div className="adm-icon-picker" style={{ marginBottom: '8px' }}>
+                                <label style={{ fontSize: '11px', color: 'var(--adm-text-muted)', fontWeight: '700', textTransform: 'uppercase' }}>
+                                    Choose Active Resume Icon:
+                                </label>
+                                <div className="adm-icon-picker__grid">
+                                    {RESUME_ICON_PRESETS.map((p, idx) => (
+                                        <button
+                                            key={idx}
+                                            type="button"
+                                            onClick={() => {
+                                                setAbout(prev => ({ ...prev, resumeIcon: p.icon }));
+                                                setShowResumeIconPicker(false);
+                                            }}
+                                            className={`adm-icon-btn ${about.resumeIcon === p.icon ? 'adm-icon-btn--active' : ''}`}
+                                        >
+                                            <i className={p.icon} />
+                                            <span>{p.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="adm-active-resume-main">
+                            <div className="adm-active-resume-icon">
+                                <i className={about.resumeIcon || 'fa-solid fa-file-pdf'} />
+                            </div>
+
+                            <div className="adm-active-resume-details">
+                                <h4 className="adm-active-resume-title">
+                                    {formatResumeTitle(about.resumeUrl, about.resumeLabel)}
+                                </h4>
+
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                    <span className="adm-active-resume-url" title={about.resumeUrl || '/resume.pdf'}>
+                                        <i className="fa-solid fa-link" style={{ fontSize: '10px' }} />
+                                        {about.resumeUrl ? (about.resumeUrl.length > 45 ? `${about.resumeUrl.substring(0, 42)}...` : about.resumeUrl) : '/resume.pdf'}
+                                    </span>
+
+                                    {about.resumeUrl && (
+                                        <button
+                                            type="button"
+                                            onClick={copyResumeUrl}
+                                            className="adm-btn adm-btn-secondary adm-btn-sm"
+                                            style={{ padding: '3px 8px', fontSize: '11px' }}
+                                            title="Copy direct file URL"
+                                        >
+                                            <i className={`fa-solid ${copiedUrl ? 'fa-check' : 'fa-copy'}`} />
+                                            {copiedUrl ? 'Copied!' : 'Copy'}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                {about.resumeUrl && (
+                                    <>
+                                        <a
+                                            href={about.resumeUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="adm-btn adm-btn-secondary adm-btn-sm"
+                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+                                        >
+                                            <i className="fa-solid fa-arrow-up-right-from-square" /> Preview
+                                        </a>
+                                        <a
+                                            href={about.resumeUrl}
+                                            download
+                                            className="adm-btn adm-btn-primary adm-btn-sm"
+                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+                                        >
+                                            <i className="fa-solid fa-download" /> Download
+                                        </a>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -686,7 +796,7 @@ export default function AboutCMS() {
                         </div>
                     </div>
 
-                    {/* Catalog of Uploaded Resumes (Vault) */}
+                    {/* Catalog of Uploaded Resumes (Vault) with Mobile Responsive Cards */}
                     {(about.resumes?.length > 0) && (
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
@@ -714,44 +824,28 @@ export default function AboutCMS() {
                                     return (
                                         <div
                                             key={idx}
-                                            style={{
-                                                display: 'grid',
-                                                gridTemplateColumns: 'minmax(200px, 1.2fr) minmax(180px, 1fr) auto',
-                                                alignItems: 'center',
-                                                background: 'var(--adm-surface-2)',
-                                                border: `1px solid ${isPrimary ? '#10b981' : (isVisible ? 'var(--adm-primary)' : 'var(--adm-border)')}`,
-                                                padding: '14px 18px',
-                                                borderRadius: '12px',
-                                                gap: '16px',
-                                                opacity: isVisible ? 1 : 0.65,
-                                                transition: 'all 0.2s ease'
-                                            }}
+                                            className={`adm-vault-card ${isPrimary ? 'adm-vault-card--primary' : (isVisible ? 'adm-vault-card--active' : '')}`}
                                         >
-                                            {/* Column 1: Editable Title & File Info */}
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <div style={{
-                                                    width: '38px',
-                                                    height: '38px',
-                                                    borderRadius: '8px',
-                                                    background: isPrimary ? 'rgba(16, 185, 129, 0.15)' : 'rgba(232, 69, 69, 0.15)',
-                                                    color: isPrimary ? '#10b981' : '#e84545',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'center',
-                                                    fontSize: '18px',
-                                                    flexShrink: 0
-                                                }}>
-                                                    <i className="fa-solid fa-file-pdf" />
+                                            {/* Row Top: Icon, Editable Title & File Info */}
+                                            <div className="adm-vault-card-row-top">
+                                                <div
+                                                    className="adm-vault-card-icon"
+                                                    style={{
+                                                        background: isPrimary ? 'rgba(16, 185, 129, 0.15)' : 'rgba(232, 69, 69, 0.15)',
+                                                        color: isPrimary ? '#10b981' : '#e84545'
+                                                    }}
+                                                >
+                                                    <i className={r.icon || 'fa-solid fa-file-pdf'} />
                                                 </div>
 
-                                                <div style={{ flex: 1 }}>
+                                                <div className="adm-vault-card-info">
                                                     <input
                                                         type="text"
                                                         className="adm-input"
                                                         style={{ padding: '6px 10px', fontSize: '13px', fontWeight: '700', marginBottom: '4px' }}
                                                         value={r.title || ''}
                                                         onChange={(e) => updateResumeTitle(idx, e.target.value)}
-                                                        placeholder="Resume Button Label (e.g. Full Stack CV)"
+                                                        placeholder="Resume Button Label"
                                                     />
                                                     <div style={{ fontSize: '11px', color: 'var(--adm-text-muted)' }}>
                                                         {r.fileName || 'Document'} • {r.fileSize || 'PDF'} • {r.uploadedAt ? new Date(r.uploadedAt).toLocaleDateString() : 'Saved'}
@@ -759,64 +853,64 @@ export default function AboutCMS() {
                                                 </div>
                                             </div>
 
-                                            {/* Column 2: Badges & Visibility Switch */}
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                                                {/* Visibility Toggle */}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => toggleResumeVisibility(idx)}
-                                                    className={`adm-btn adm-btn-sm ${isVisible ? 'adm-btn-primary' : 'adm-btn-secondary'}`}
-                                                    style={{ fontSize: '11px', padding: '6px 12px' }}
-                                                    title={isVisible ? "Click to hide from portfolio" : "Click to show as button on portfolio"}
-                                                >
-                                                    <i className={`fa-solid ${isVisible ? 'fa-eye' : 'fa-eye-slash'}`} />
-                                                    {isVisible ? 'Show on Portfolio' : 'Hidden in Vault'}
-                                                </button>
-
-                                                {isPrimary ? (
-                                                    <span style={{ fontSize: '11px', background: '#10b98122', color: '#10b981', padding: '4px 10px', borderRadius: '999px', fontWeight: '800', border: '1px solid #10b98144' }}>
-                                                        ⭐ PRIMARY
-                                                    </span>
-                                                ) : (
+                                            {/* Row Bottom: Badges, Visibility Toggle, and Action Buttons (No mobile overflow) */}
+                                            <div className="adm-vault-card-row-bottom">
+                                                <div className="adm-vault-card-badges">
                                                     <button
                                                         type="button"
-                                                        onClick={() => setAsDefaultResume(idx)}
-                                                        className="adm-btn adm-btn-sm adm-btn-secondary"
-                                                        style={{ fontSize: '11px' }}
-                                                        title="Set as primary default resume"
+                                                        onClick={() => toggleResumeVisibility(idx)}
+                                                        className={`adm-btn adm-btn-sm ${isVisible ? 'adm-btn-primary' : 'adm-btn-secondary'}`}
+                                                        style={{ fontSize: '11px', padding: '5px 10px', whiteSpace: 'nowrap' }}
+                                                        title={isVisible ? "Click to hide from portfolio" : "Click to show as button on portfolio"}
                                                     >
-                                                        Set Primary
+                                                        <i className={`fa-solid ${isVisible ? 'fa-eye' : 'fa-eye-slash'}`} />
+                                                        {isVisible ? 'Show on Portfolio' : 'Hidden in Vault'}
                                                     </button>
-                                                )}
-                                            </div>
 
-                                            {/* Column 3: Action Buttons */}
-                                            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                                                <a
-                                                    href={r.url}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="adm-btn adm-btn-sm adm-btn-secondary"
-                                                    title="Preview Resume in new tab"
-                                                >
-                                                    <i className="fa-solid fa-arrow-up-right-from-square" />
-                                                </a>
-                                                <a
-                                                    href={r.url}
-                                                    download
-                                                    className="adm-btn adm-btn-sm adm-btn-secondary"
-                                                    title="Test Download"
-                                                >
-                                                    <i className="fa-solid fa-download" />
-                                                </a>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => deleteResumeItem(idx)}
-                                                    className="adm-btn adm-btn-sm adm-btn-danger"
-                                                    title="Delete permanently from vault"
-                                                >
-                                                    <i className="fa-solid fa-trash" />
-                                                </button>
+                                                    {isPrimary ? (
+                                                        <span style={{ fontSize: '11px', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '3px 8px', borderRadius: '999px', fontWeight: '800', border: '1px solid rgba(16, 185, 129, 0.3)', whiteSpace: 'nowrap' }}>
+                                                            ★ PRIMARY
+                                                        </span>
+                                                    ) : (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setAsDefaultResume(idx)}
+                                                            className="adm-btn adm-btn-sm adm-btn-secondary"
+                                                            style={{ fontSize: '11px', padding: '5px 10px', whiteSpace: 'nowrap' }}
+                                                            title="Set as primary default resume"
+                                                        >
+                                                            Set Primary
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                <div className="adm-vault-card-actions">
+                                                    <a
+                                                        href={r.url}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="adm-btn adm-btn-sm adm-btn-secondary"
+                                                        title="Preview Resume in new tab"
+                                                    >
+                                                        <i className="fa-solid fa-arrow-up-right-from-square" />
+                                                    </a>
+                                                    <a
+                                                        href={r.url}
+                                                        download
+                                                        className="adm-btn adm-btn-sm adm-btn-secondary"
+                                                        title="Test Download"
+                                                    >
+                                                        <i className="fa-solid fa-download" />
+                                                    </a>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => deleteResumeItem(idx)}
+                                                        className="adm-btn adm-btn-sm adm-btn-danger"
+                                                        title="Delete permanently from vault"
+                                                    >
+                                                        <i className="fa-solid fa-trash" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     );
@@ -960,56 +1054,73 @@ export default function AboutCMS() {
                         ))}
                     </div>
 
-                    <div style={{
-                        display: 'flex',
-                        gap: '10px',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        background: 'var(--adm-surface-2)',
-                        padding: '12px',
-                        borderRadius: '10px'
-                    }}>
-                        <input
-                            type="text"
-                            className="adm-input"
-                            style={{ width: '160px' }}
-                            value={newStat.icon}
-                            onChange={(e) => setNewStat({ ...newStat, icon: e.target.value })}
-                            placeholder="fa-solid fa-code"
-                        />
-                        <input
-                            type="text"
-                            className="adm-input"
-                            style={{ width: '100px' }}
-                            value={newStat.val}
-                            onChange={(e) => setNewStat({ ...newStat, val: e.target.value })}
-                            placeholder="3+"
-                        />
-                        <input
-                            type="text"
-                            className="adm-input"
-                            style={{ flex: 1, minWidth: '150px' }}
-                            value={newStat.label}
-                            onChange={(e) => setNewStat({ ...newStat, label: e.target.value })}
-                            placeholder="Years Coding"
-                        />
-                        <button
-                            type="button"
-                            onClick={addQuickStat}
-                            className="adm-btn adm-btn-secondary"
-                        >
-                            <i className="fa-solid fa-plus"></i> Add Stat
-                        </button>
+                    {/* Quick Icon Selector for Stats */}
+                    <div style={{ background: 'var(--adm-surface-2)', border: '1px solid var(--adm-border)', borderRadius: '12px', padding: '14px' }}>
+                        <label style={{ fontSize: '11px', color: 'var(--adm-text-muted)', fontWeight: '700', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>
+                            Pick Stat Icon Preset:
+                        </label>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
+                            {STAT_ICON_PRESETS.map((p, idx) => (
+                                <button
+                                    key={idx}
+                                    type="button"
+                                    onClick={() => setNewStat(prev => ({ ...prev, icon: p.icon, label: prev.label || p.label }))}
+                                    className={`adm-icon-btn ${newStat.icon === p.icon ? 'adm-icon-btn--active' : ''}`}
+                                >
+                                    <i className={p.icon} />
+                                    <span>{p.label}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        <div style={{
+                            display: 'flex',
+                            gap: '10px',
+                            alignItems: 'center',
+                            flexWrap: 'wrap'
+                        }}>
+                            <input
+                                type="text"
+                                className="adm-input"
+                                style={{ width: '160px' }}
+                                value={newStat.icon}
+                                onChange={(e) => setNewStat({ ...newStat, icon: e.target.value })}
+                                placeholder="fa-solid fa-code"
+                            />
+                            <input
+                                type="text"
+                                className="adm-input"
+                                style={{ width: '100px' }}
+                                value={newStat.val}
+                                onChange={(e) => setNewStat({ ...newStat, val: e.target.value })}
+                                placeholder="3+"
+                            />
+                            <input
+                                type="text"
+                                className="adm-input"
+                                style={{ flex: 1, minWidth: '150px' }}
+                                value={newStat.label}
+                                onChange={(e) => setNewStat({ ...newStat, label: e.target.value })}
+                                placeholder="Years Coding"
+                            />
+                            <button
+                                type="button"
+                                onClick={addQuickStat}
+                                className="adm-btn adm-btn-secondary"
+                            >
+                                <i className="fa-solid fa-plus"></i> Add Stat
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                {/* ── Hobbies & Passions ── */}
+                {/* ── Hobbies & Passions with 1-Click Interactive Icon Picker ── */}
                 <div className="adm-card">
                     <div className="adm-card-header">
                         <div>
                             <h3 className="adm-card-title">
                                 <i className="fa-solid fa-heart" style={{ color: 'var(--adm-primary)' }}></i>
-                                Hobbies & Interests ({about.hobbies?.length || 0})
+                                Hobbies &amp; Interests ({about.hobbies?.length || 0})
                             </h3>
                             <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'var(--adm-text-muted)' }}>
                                 Interactive passion pills displayed at the bottom of the About section.
@@ -1017,6 +1128,7 @@ export default function AboutCMS() {
                         </div>
                     </div>
 
+                    {/* Current Hobbies Pills Display */}
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
                         {about.hobbies?.map((hobby, idx) => (
                             <div
@@ -1046,6 +1158,7 @@ export default function AboutCMS() {
                                         marginLeft: '4px',
                                         fontSize: '12px'
                                     }}
+                                    title="Remove hobby"
                                 >
                                     <i className="fa-solid fa-xmark"></i>
                                 </button>
@@ -1053,38 +1166,76 @@ export default function AboutCMS() {
                         ))}
                     </div>
 
-                    <div style={{
-                        display: 'flex',
-                        gap: '10px',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        background: 'var(--adm-surface-2)',
-                        padding: '12px',
-                        borderRadius: '10px'
-                    }}>
-                        <input
-                            type="text"
-                            className="adm-input"
-                            style={{ width: '180px' }}
-                            value={newHobby.icon}
-                            onChange={(e) => setNewHobby({ ...newHobby, icon: e.target.value })}
-                            placeholder="fa-solid fa-gamepad"
-                        />
-                        <input
-                            type="text"
-                            className="adm-input"
-                            style={{ flex: 1, minWidth: '150px' }}
-                            value={newHobby.label}
-                            onChange={(e) => setNewHobby({ ...newHobby, label: e.target.value })}
-                            placeholder="e.g. Gaming, Photography"
-                        />
-                        <button
-                            type="button"
-                            onClick={addHobby}
-                            className="adm-btn adm-btn-secondary"
-                        >
-                            <i className="fa-solid fa-plus"></i> Add Hobby
-                        </button>
+                    {/* ══ 1-Click Icon Selection Panel ══ */}
+                    <div className="adm-icon-picker">
+                        <label style={{ fontSize: '11px', color: 'var(--adm-text-muted)', fontWeight: '700', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <i className="fa-solid fa-icons" style={{ color: 'var(--adm-primary)' }} />
+                            Click to Select Topic Icon:
+                        </label>
+
+                        <div className="adm-icon-picker__grid">
+                            {HOBBY_ICON_PRESETS.map((p, idx) => (
+                                <button
+                                    key={idx}
+                                    type="button"
+                                    onClick={() => setNewHobby({ icon: p.icon, label: newHobby.label || p.label })}
+                                    className={`adm-icon-btn ${newHobby.icon === p.icon ? 'adm-icon-btn--active' : ''}`}
+                                >
+                                    <i className={p.icon} />
+                                    <span>{p.label}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Input Row with Live Icon Preview */}
+                        <div style={{
+                            display: 'flex',
+                            gap: '10px',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                            paddingTop: '10px',
+                            borderTop: '1px solid var(--adm-border)'
+                        }}>
+                            <div style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '8px',
+                                background: 'rgba(56, 189, 248, 0.15)',
+                                color: '#38bdf8',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '18px',
+                                flexShrink: 0
+                            }}>
+                                <i className={newHobby.icon || 'fa-solid fa-heart'} />
+                            </div>
+
+                            <input
+                                type="text"
+                                className="adm-input"
+                                style={{ width: '160px' }}
+                                value={newHobby.icon}
+                                onChange={(e) => setNewHobby({ ...newHobby, icon: e.target.value })}
+                                placeholder="fa-solid fa-gamepad"
+                            />
+                            <input
+                                type="text"
+                                className="adm-input"
+                                style={{ flex: 1, minWidth: '150px' }}
+                                value={newHobby.label}
+                                onChange={(e) => setNewHobby({ ...newHobby, label: e.target.value })}
+                                placeholder="e.g. Gaming, Photography"
+                            />
+                            <button
+                                type="button"
+                                onClick={addHobby}
+                                className="adm-btn adm-btn-secondary"
+                                style={{ whiteSpace: 'nowrap' }}
+                            >
+                                <i className="fa-solid fa-plus"></i> Add Hobby
+                            </button>
+                        </div>
                     </div>
                 </div>
 

@@ -277,11 +277,13 @@
 
 .adm-card-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     margin-bottom: 20px;
     border-bottom: 1px solid var(--adm-border);
     padding-bottom: 14px;
+    gap: 14px;
+    flex-wrap: wrap;
 }
 
 .adm-card-title {
@@ -291,6 +293,25 @@
     align-items: center;
     gap: 8px;
     color: var(--adm-text-main);
+}
+
+.adm-toggle-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--adm-border);
+}
+
+.adm-toggle-label {
+    font-size: 13px;
+    color: var(--adm-text-main);
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .adm-btn {
@@ -766,4 +787,235 @@ input:checked + .adm-slider:before {
         font-size: 12px;
     }
 }
+
+/* ══════════════════════════════════════
+   ICON PICKER SYSTEM
+══════════════════════════════════════ */
+.adm-icon-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--adm-surface-2);
+    border: 1px solid var(--adm-border);
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.adm-icon-picker__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-height: 160px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.adm-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--adm-border);
+    color: var(--adm-text-main);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.adm-icon-btn:hover {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+    transform: translateY(-1px);
+}
+
+.adm-icon-btn--active {
+    background: rgba(56, 189, 248, 0.22) !important;
+    border-color: #38bdf8 !important;
+    color: #38bdf8 !important;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+    font-weight: 700;
+}
+
+/* ══════════════════════════════════════
+   ACTIVE RESUME SHOWCASE CARD
+══════════════════════════════════════ */
+.adm-active-resume-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95));
+    border: 1.5px solid rgba(56, 189, 248, 0.3);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), 0 0 20px rgba(56, 189, 248, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.adm-active-resume-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #38bdf8, #10b981, #e84545);
+}
+
+.adm-active-resume-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.adm-active-resume-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.adm-active-resume-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.adm-active-resume-details {
+    flex: 1;
+    min-width: 220px;
+}
+
+.adm-active-resume-title {
+    margin: 0 0 4px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.2px;
+    word-break: break-word;
+}
+
+.adm-active-resume-url {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    color: var(--adm-text-muted);
+    font-family: monospace;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE RESUME VAULT ITEM
+══════════════════════════════════════ */
+.adm-vault-card {
+    background: var(--adm-surface-2);
+    border: 1px solid var(--adm-border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.adm-vault-card--primary {
+    border-color: rgba(16, 185, 129, 0.5) !important;
+    background: rgba(16, 185, 129, 0.05) !important;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+}
+
+.adm-vault-card--active {
+    border-color: rgba(56, 189, 248, 0.4);
+}
+
+.adm-vault-card-row-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.adm-vault-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.adm-vault-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.adm-vault-card-row-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.adm-vault-card-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.adm-vault-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+@media (max-width: 600px) {
+    .adm-vault-card {
+        padding: 14px;
+    }
+    .adm-vault-card-row-bottom {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    .adm-vault-card-badges {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .adm-vault-card-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
 

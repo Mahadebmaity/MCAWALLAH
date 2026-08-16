@@ -203,7 +203,7 @@ export default function About() {
                                                 className="about__resume-btn"
                                                 title={`Download ${resItem.title || 'Resume'}`}
                                             >
-                                                <i className="fa-solid fa-download" /> {resItem.title || about.resumeLabel || "Download Resume"}
+                                                <i className={resItem.icon || about.resumeIcon || "fa-solid fa-file-pdf"} /> {resItem.title || about.resumeLabel || "Download Resume"}
                                             </a>
                                             <a
                                                 href={resItem.url}
