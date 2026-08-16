@@ -235,7 +235,7 @@ export const updateMessageStatus = async (req, res) => {
         const message = await Message.findByIdAndUpdate(id, updateFields, { new: true });
         if (!message) return res.status(404).json({ message: 'Message not found' });
 
-        res.json({ message: 'Status updated', data: message });
+        res.json(message);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
