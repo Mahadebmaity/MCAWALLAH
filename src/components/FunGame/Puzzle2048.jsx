@@ -266,7 +266,7 @@ export default function Puzzle2048({ onGameOver, bestScore }) {
             </div>
 
             {/* 2048 Grid Canvas Card */}
-            <div className="game__canvas-wrap" ref={boardRef} style={{ width: '100%', maxWidth: '400px', aspectRatio: '1 / 1', background: '#bbada0', padding: '12px', borderRadius: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', userSelect: 'none', position: 'relative' }}>
+            <div className="game__canvas-wrap" ref={boardRef} style={{ width: '100%', minWidth: '280px', maxWidth: '420px', aspectRatio: '1 / 1', background: '#bbada0', padding: '12px', borderRadius: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', userSelect: 'none', position: 'relative', boxSizing: 'border-box', margin: '0 auto' }}>
                 {board.map((row, r) => (
                     <div key={r} style={{ display: 'flex', gap: '10px', height: '22%' }}>
                         {row.map((cell, c) => {
@@ -298,12 +298,25 @@ export default function Puzzle2048({ onGameOver, bestScore }) {
 
                 {/* Overlays */}
                 {gameStatus !== "playing" && (
-                    <div className="game__overlay" style={{ background: 'rgba(15, 23, 42, 0.88)' }}>
+                    <div className="game__overlay" style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'rgba(15, 23, 42, 0.92)',
+                        backdropFilter: 'blur(8px)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '10px',
+                        padding: '24px',
+                        textAlign: 'center',
+                        zIndex: 10
+                    }}>
                         {gameStatus === "idle" && (
                             <>
                                 <div className="game__overlay-icon">🔢</div>
                                 <h3 className="game__overlay-title">2048 Puzzle</h3>
-                                <p className="game__overlay-sub">Join numbers to reach the 2048 tile!</p>
+                                <p className="game__overlay-sub">Join numbers using arrow keys or swipe to reach the 2048 tile!</p>
                                 <button className="game__overlay-btn" onClick={initGame}>
                                     <i className="fa-solid fa-play" /> Start Game
                                 </button>
