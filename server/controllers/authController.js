@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import About from '../models/About.js';
 import ActivityLog from '../models/ActivityLog.js';
 import { generateTokens } from '../middleware/auth.js';
 import jwt from 'jsonwebtoken';
@@ -338,6 +339,11 @@ export const uploadAvatar = async (req, res) => {
 
         const user = await User.findByIdAndUpdate(req.user._id, { avatar: avatarUrl }, { new: true });
 
+        // Auto-sync avatar to About section document so it is permanently saved in portfolio
+        if (user && (user.role === 'admin' || (await User.countDocuments({ role: 'admin' })) <= 1)) {
+            await About.findOneAndUpdate({}, { avatarUrl }, { upsert: true, new: true });
+        }
+
         res.json({
             message: 'Avatar uploaded successfully',
             avatarUrl,
@@ -352,7 +358,10 @@ export const uploadAvatar = async (req, res) => {
 // @route DELETE /api/user/avatar
 export const removeAvatar = async (req, res) => {
     try {
-        await User.findByIdAndUpdate(req.user._id, { avatar: null });
+        const user = await User.findByIdAndUpdate(req.user._id, { avatar: null }, { new: true });
+        if (user && (user.role === 'admin' || (await User.countDocuments({ role: 'admin' })) <= 1)) {
+            await About.findOneAndUpdate({}, { avatarUrl: null });
+        }
         res.json({ message: 'Avatar removed successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });

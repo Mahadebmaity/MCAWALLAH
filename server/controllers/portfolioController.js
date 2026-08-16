@@ -9,13 +9,14 @@ import Analytics from '../models/Analytics.js';
 import SiteSettings from '../models/SiteSettings.js';
 import GameScore from '../models/GameScore.js';
 import Navbar from '../models/Navbar.js';
+import User from '../models/User.js';
 import { sendContactNotification } from '../services/emailService.js';
 
 // @desc Get All Public Portfolio Data in One Fast Call
 // @route GET /api/portfolio/public
 export const getPublicPortfolio = async (req, res) => {
     try {
-        const [hero, about, skills, timeline, projects, games, settings, navbar] = await Promise.all([
+        const [hero, about, skills, timeline, projects, games, settings, navbar, adminUser] = await Promise.all([
             Hero.findOne({ isPublic: true }).lean(),
             About.findOne({ isPublic: true }).lean(),
             Skill.find({ isPublic: true }).sort({ order: 1, createdAt: 1 }).lean(),
@@ -23,12 +24,18 @@ export const getPublicPortfolio = async (req, res) => {
             Project.find({ isPublic: true }).sort({ order: 1, createdAt: -1 }).lean(),
             Game.find({ isPublic: true }).sort({ order: 1, createdAt: 1 }).lean(),
             SiteSettings.findOne().lean(),
-            Navbar.findOne({ isPublic: true }).lean()
+            Navbar.findOne({ isPublic: true }).lean(),
+            User.findOne({ role: 'admin' }).select('avatar').lean()
         ]);
+
+        const resolvedAbout = about ? {
+            ...about,
+            avatarUrl: about.avatarUrl || adminUser?.avatar || null
+        } : null;
 
         res.json({
             hero: hero || null,
-            about: about || null,
+            about: resolvedAbout,
             skills: skills || [],
             timeline: timeline || [],
             projects: projects || [],
