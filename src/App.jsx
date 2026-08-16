@@ -26,6 +26,7 @@ import GamesCMS from './admin/GamesCMS';
 import DocumentsCMS from './admin/DocumentsCMS';
 import MessagesInbox from './admin/MessagesInbox';
 import SettingsCMS from './admin/SettingsCMS';
+import UsersActivityCMS from './admin/UsersActivityCMS';
 
 function PublicPortfolio() {
   return (
@@ -59,6 +60,7 @@ function App() {
         <Route element={<AdminLayout />}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardOverview />} />
+          <Route path="users-activity" element={<UsersActivityCMS />} />
           <Route path="navbar" element={<NavbarCMS />} />
           <Route path="hero" element={<HeroCMS />} />
           <Route path="about" element={<AboutCMS />} />

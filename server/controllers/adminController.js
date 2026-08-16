@@ -10,6 +10,8 @@ import SiteSettings from '../models/SiteSettings.js';
 import GameScore from '../models/GameScore.js';
 import Navbar from '../models/Navbar.js';
 import Document from '../models/Document.js';
+import User from '../models/User.js';
+import ActivityLog from '../models/ActivityLog.js';
 import path from 'path';
 import fs from 'fs';
 import cloudinary, { isCloudinaryConfigured } from '../config/cloudinary.js';
@@ -414,6 +416,152 @@ export const uploadDocument = async (req, res) => {
             fileType,
             storage: 'local'
         });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Track Public / User Action Event (Button click, game play, resume download, page view)
+// @route POST /api/portfolio/track
+export const trackActivityEvent = async (req, res) => {
+    try {
+        const { action, category, details, metadata, path: reqPath, userName, userEmail } = req.body;
+        if (!action) return res.status(400).json({ message: 'Action is required' });
+
+        const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+        const userAgent = req.headers['user-agent'] || '';
+
+        const log = await ActivityLog.create({
+            user: req.user?._id || null,
+            userName: req.user?.name || userName || 'Guest Visitor',
+            userEmail: req.user?.email || userEmail || null,
+            userRole: req.user?.role || 'guest',
+            action,
+            category: category || 'general',
+            details: details || action,
+            metadata: metadata || {},
+            path: reqPath || '/',
+            ipAddress: clientIp,
+            userAgent
+        });
+
+        res.status(201).json({ success: true, logId: log._id });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Get All Registered Users Directory with Stats
+// @route GET /api/admin/users
+export const getUsersDirectory = async (req, res) => {
+    try {
+        const [users, totalUsers, totalAdmins] = await Promise.all([
+            User.find().select('-password').sort({ createdAt: -1 }).lean(),
+            User.countDocuments(),
+            User.countDocuments({ role: 'admin' })
+        ]);
+
+        const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const newThisWeek = await User.countDocuments({ createdAt: { $gte: oneWeekAgo } });
+
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const activeToday = await User.countDocuments({ lastLogin: { $gte: oneDayAgo } });
+
+        res.json({
+            users,
+            totalUsers,
+            totalAdmins,
+            newThisWeek,
+            activeToday
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Update User Role (admin / user)
+// @route PATCH /api/admin/users/:id/role
+export const updateUserRole = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { role } = req.body;
+
+        if (!['admin', 'user', 'editor'].includes(role)) {
+            return res.status(400).json({ message: 'Invalid role specified' });
+        }
+
+        if (id === req.user._id.toString() && role !== 'admin') {
+            return res.status(400).json({ message: 'You cannot remove your own admin privileges.' });
+        }
+
+        const updated = await User.findByIdAndUpdate(id, { role }, { new: true }).select('-password');
+        if (!updated) return res.status(404).json({ message: 'User not found' });
+
+        res.json({ message: `Role updated to ${role}`, user: updated });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Delete User Account
+// @route DELETE /api/admin/users/:id
+export const deleteUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (id === req.user._id.toString()) {
+            return res.status(400).json({ message: 'You cannot delete your own admin account.' });
+        }
+
+        const deleted = await User.findByIdAndDelete(id);
+        if (!deleted) return res.status(404).json({ message: 'User not found' });
+
+        res.json({ message: `Account for ${deleted.name} deleted`, id });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Get Live Activity & Workflow Telemetry Logs
+// @route GET /api/admin/activity-logs
+export const getActivityLogs = async (req, res) => {
+    try {
+        const { category, action, limit = 100 } = req.query;
+        const filter = {};
+
+        if (category && category !== 'all') filter.category = category;
+        if (action && action !== 'all') filter.action = action;
+
+        const [logs, totalEvents, totalSignups, totalLogins, totalClicks, totalGames] = await Promise.all([
+            ActivityLog.find(filter).sort({ createdAt: -1 }).limit(Number(limit)).lean(),
+            ActivityLog.countDocuments(),
+            ActivityLog.countDocuments({ action: 'USER_SIGNUP' }),
+            ActivityLog.countDocuments({ action: 'USER_LOGIN' }),
+            ActivityLog.countDocuments({ category: 'cta' }),
+            ActivityLog.countDocuments({ category: 'game' })
+        ]);
+
+        res.json({
+            logs,
+            totalEvents,
+            stats: {
+                totalSignups,
+                totalLogins,
+                totalClicks,
+                totalGames
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Clear Activity Logs
+// @route DELETE /api/admin/activity-logs/clear
+export const clearActivityLogs = async (req, res) => {
+    try {
+        await ActivityLog.deleteMany({});
+        res.json({ message: 'Activity telemetry logs cleared successfully' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

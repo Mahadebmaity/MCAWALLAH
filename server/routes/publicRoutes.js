@@ -6,6 +6,7 @@ import {
     submitGameScore,
     getGameLeaderboard
 } from '../controllers/portfolioController.js';
+import { trackActivityEvent } from '../controllers/adminController.js';
 import rateLimit from 'express-rate-limit';
 
 const router = express.Router();
@@ -23,8 +24,9 @@ router.get('/public', getPublicPortfolio);
 // Submit contact form message
 router.post('/contact', contactLimiter, submitContact);
 
-// Record interaction analytics
+// Record interaction analytics & user activity telemetry
 router.post('/analytics', recordEvent);
+router.post('/track', trackActivityEvent);
 
 // Game Scores & Global Leaderboards
 router.post('/games/:slug/score', submitGameScore);

@@ -12,7 +12,12 @@ import {
     importBackup,
     getGameAnalytics,
     deleteGameScore,
-    uploadDocument
+    uploadDocument,
+    getUsersDirectory,
+    updateUserRole,
+    deleteUser,
+    getActivityLogs,
+    clearActivityLogs
 } from '../controllers/adminController.js';
 import { protectAdmin } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
@@ -24,6 +29,15 @@ router.use(protectAdmin);
 
 // Dashboard overview
 router.get('/overview', getAdminOverview);
+
+// Registered Users Management
+router.get('/users', getUsersDirectory);
+router.patch('/users/:id/role', updateUserRole);
+router.delete('/users/:id', deleteUser);
+
+// Live Activity & Workflow Telemetry
+router.get('/activity-logs', getActivityLogs);
+router.delete('/activity-logs/clear', clearActivityLogs);
 
 // Dynamic section CRUD
 router.get('/section/:type', getSectionData);

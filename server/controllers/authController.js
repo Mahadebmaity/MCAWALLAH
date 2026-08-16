@@ -1,4 +1,5 @@
 import User from '../models/User.js';
+import ActivityLog from '../models/ActivityLog.js';
 import { generateTokens } from '../middleware/auth.js';
 import jwt from 'jsonwebtoken';
 import cloudinary, { isCloudinaryConfigured } from '../config/cloudinary.js';
@@ -24,18 +25,41 @@ export const register = async (req, res) => {
 
         // If first user, make admin, otherwise user
         const isFirst = (await User.countDocuments()) === 0;
+        const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+        const userAgent = req.headers['user-agent'] || '';
 
         const user = await User.create({
             name: name.trim(),
             email: normalizedEmail,
             password,
             role: isFirst ? 'admin' : 'user',
+            lastLogin: new Date(),
+            loginCount: 1,
+            lastIp: clientIp,
+            device: userAgent.slice(0, 100),
             preferences: {
                 darkMode: true,
                 background: 'mesh',
                 accentColor: '#e84545'
             }
         });
+
+        // Record Activity Log
+        try {
+            await ActivityLog.create({
+                user: user._id,
+                userName: user.name,
+                userEmail: user.email,
+                userRole: user.role,
+                action: 'USER_SIGNUP',
+                category: 'auth',
+                details: `New account registered (${user.role.toUpperCase()})`,
+                ipAddress: clientIp,
+                userAgent
+            });
+        } catch (e) {
+            console.error('Activity log error:', e);
+        }
 
         const tokens = generateTokens(user._id);
 
@@ -77,6 +101,33 @@ export const login = async (req, res) => {
         const isMatch = await user.matchPassword(password);
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid email or password.' });
+        }
+
+        const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+        const userAgent = req.headers['user-agent'] || '';
+
+        // Update login stats
+        user.lastLogin = new Date();
+        user.loginCount = (user.loginCount || 0) + 1;
+        user.lastIp = clientIp;
+        user.device = userAgent.slice(0, 100);
+        await user.save();
+
+        // Record Activity Log
+        try {
+            await ActivityLog.create({
+                user: user._id,
+                userName: user.name,
+                userEmail: user.email,
+                userRole: user.role,
+                action: 'USER_LOGIN',
+                category: 'auth',
+                details: `User logged in (Session #${user.loginCount})`,
+                ipAddress: clientIp,
+                userAgent
+            });
+        } catch (e) {
+            console.error('Activity log error:', e);
         }
 
         const tokens = generateTokens(user._id);

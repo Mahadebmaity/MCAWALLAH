@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { usePortfolioData } from "../../context/DataContext";
+import { trackActivity } from "../../utils/analytics";
 import AuthModal from "../AuthModal/AuthModal";
 import "./Navbar.css";
 
@@ -164,10 +165,17 @@ export default function Navbar() {
         if (e) e.stopPropagation();
         const item = resumeItem || primaryResume;
         const targetUrl = item?.url || about.resumeUrl || "/resume.pdf";
+        const title = item?.title || "Resume";
+
+        trackActivity({
+            action: 'RESUME_DOWNLOAD',
+            category: 'document',
+            details: `Downloaded resume: "${title}"`
+        });
 
         const a = document.createElement("a");
         a.href = targetUrl;
-        a.setAttribute("download", (item?.title || "Resume").replace(/[^a-zA-Z0-9_-]/g, "_") + ".pdf");
+        a.setAttribute("download", title.replace(/[^a-zA-Z0-9_-]/g, "_") + ".pdf");
         a.target = "_blank";
         a.rel = "noreferrer";
         document.body.appendChild(a);

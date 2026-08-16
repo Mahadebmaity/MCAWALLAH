@@ -9,6 +9,7 @@ import GameLeaderboard from "./GameLeaderboard";
 import GameInstructionsModal from "./GameInstructionsModal";
 import { useAuth } from "../../context/AuthContext";
 import { API_BASE } from "../../config/api";
+import { trackActivity } from "../../utils/analytics";
 import "./FunGame.css";
 
 const GAMES = [
@@ -106,6 +107,13 @@ export default function StandaloneArcadeWindow() {
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             metrics
         };
+
+        trackActivity({
+            action: 'GAME_PLAY',
+            category: 'game',
+            details: `Played ${activeSlug.toUpperCase()} (Score: ${finalScore} pts in ${timeString})`,
+            metadata: { gameSlug: activeSlug, score: finalScore, durationSeconds, timeString }
+        });
 
         const updatedHistory = [newRun, ...sessionHistory].slice(0, 10);
         setSessionHistory(updatedHistory);

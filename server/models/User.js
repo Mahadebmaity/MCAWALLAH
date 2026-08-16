@@ -32,6 +32,22 @@ const userSchema = new mongoose.Schema({
         darkMode: { type: Boolean, default: true },
         background: { type: String, default: 'mesh' },
         accentColor: { type: String, default: '#e84545' }
+    },
+    lastLogin: {
+        type: Date,
+        default: Date.now
+    },
+    loginCount: {
+        type: Number,
+        default: 1
+    },
+    lastIp: {
+        type: String,
+        default: ''
+    },
+    device: {
+        type: String,
+        default: ''
     }
 }, {
     timestamps: true

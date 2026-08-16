@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { usePortfolioData } from "../../context/DataContext";
+import { trackActivity } from "../../utils/analytics";
 import "./Contact.css";
 
 const SOCIAL_LINKS = [
@@ -54,6 +55,12 @@ export default function Contact() {
 
         try {
             const res = await submitContactMessage(form);
+            trackActivity({
+                action: 'CONTACT_SUBMIT',
+                category: 'contact',
+                details: `Inquiry submitted: "${form.subject || 'No Subject'}" (${form.name})`,
+                metadata: { senderName: form.name, senderEmail: form.email, subject: form.subject }
+            });
             setStatus("ok");
             setFeedbackText(res.message || "Message sent! I'll reply within 24 hours.");
             setForm({ name: "", email: "", subject: "", message: "" });
