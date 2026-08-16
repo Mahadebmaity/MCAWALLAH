@@ -175,7 +175,7 @@ export default function Projects() {
                                 className="projects__card"
                                 style={{ animationDelay: `${i * 0.08}s`, "--card-color": p.color || "#e84545" }}
                             >
-                                {/* Card top */}
+                                {/* Card top banner / icon */}
                                 <div className="projects__card-top">
                                     <div className="projects__card-icon" style={{ background: `${p.color || '#e84545'}22`, border: `1px solid ${p.color || '#e84545'}44` }}>
                                         <i className={p.icon || "fa-solid fa-globe"} style={{ color: p.color || "#e84545" }} />
@@ -187,24 +187,31 @@ export default function Projects() {
                                 </div>
 
                                 {p.coverImage && (
-                                    <div style={{ height: '150px', borderRadius: '10px', overflow: 'hidden', margin: '10px 0', background: '#000' }}>
+                                    <div style={{ height: '140px', borderRadius: '10px', overflow: 'hidden', margin: '4px 0 8px', background: '#0a0f1d' }}>
                                         <img src={p.coverImage} alt={p.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                 )}
 
                                 {/* Info */}
-                                <h3 className="projects__card-title">{p.title}</h3>
-                                <p className="projects__card-desc">{p.desc}</p>
+                                <h3 className="projects__card-title" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: '38px', margin: '4px 0 6px' }}>
+                                    {p.title}
+                                </h3>
+                                <p className="projects__card-desc" style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: '52px', margin: '0 0 10px', lineHeight: '1.5' }}>
+                                    {p.desc}
+                                </p>
 
                                 {/* Tags */}
-                                <div className="projects__card-tags">
-                                    {tags.map((t, idx) => (
+                                <div className="projects__card-tags" style={{ maxHeight: '32px', overflow: 'hidden', marginBottom: '8px' }}>
+                                    {tags.slice(0, 4).map((t, idx) => (
                                         <span key={idx} className="projects__card-tag">{t.trim()}</span>
                                     ))}
+                                    {tags.length > 4 && (
+                                        <span className="projects__card-tag" style={{ opacity: 0.7 }}>+{tags.length - 4}</span>
+                                    )}
                                 </div>
 
                                 {/* Footer */}
-                                <div className="projects__card-footer">
+                                <div className="projects__card-footer" style={{ marginTop: 'auto', paddingTop: '10px', borderTop: '1px solid var(--pr-border)' }}>
                                     <div className="projects__card-stats">
                                         <span><i className="fa-solid fa-star" /> {p.stars || 0}</span>
                                         <span><i className="fa-solid fa-code-fork" /> {p.forks || 0}</span>

@@ -21,6 +21,12 @@ export const API = API_BASE;
  */
 export const getMediaUrl = (path) => {
     if (!path) return '';
+    // Normalize localhost / loopback URLs that might have been saved in DB
+    if (typeof path === 'string' && (path.includes('localhost:5000') || path.includes('127.0.0.1:5000'))) {
+        const pathPart = path.replace(/^https?:\/\/(localhost|127\.0\.0\.1):5000/, '');
+        return pathPart.startsWith('/') ? pathPart : `/${pathPart}`;
+    }
+
     if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:') || path.startsWith('blob:')) {
         return path;
     }
@@ -29,6 +35,54 @@ export const getMediaUrl = (path) => {
     if (import.meta.env?.VITE_API_URL) {
         const base = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
         return `${base}${cleanPath}`;
+    }
+
+    return cleanPath;
+};
+
+/**
+ * Resolves document URLs for preview, iframe viewing, and downloads across mobile & desktop.
+ * Gracefully handles doc objects, raw strings, undefined/null, localhost URLs, and production domains.
+ */
+export const getDocUrl = (urlOrDoc) => {
+    if (!urlOrDoc) return '#';
+    
+    // Extract url string if an object was passed
+    let url = typeof urlOrDoc === 'string' ? urlOrDoc : (urlOrDoc.fileUrl || urlOrDoc.url || urlOrDoc.secure_url || urlOrDoc.path || '');
+    
+    if (!url || typeof url !== 'string' || url === 'undefined' || url === 'null' || url.endsWith('/undefined') || url.trim() === '' || url === '#') {
+        return '#';
+    }
+
+    url = url.trim();
+
+    // If it's a data or blob URL
+    if (url.startsWith('data:') || url.startsWith('blob:')) return url;
+    
+    // Normalize localhost / loopback URLs stored in DB
+    if (url.includes('localhost:5000') || url.includes('127.0.0.1:5000')) {
+        url = url.replace(/^https?:\/\/(localhost|127\.0\.0\.1):5000/, '');
+    }
+
+    // External Cloudinary / AWS / HTTPS URLs
+    if (url.startsWith('https://') || url.startsWith('http://')) {
+        return url;
+    }
+
+    const cleanPath = url.startsWith('/') ? url : `/${url}`;
+
+    // For static /docs/ paths (like PORTFOLIO_SYSTEM_DOCUMENTATION.pdf in frontend public/docs/)
+    if (cleanPath.startsWith('/docs/')) {
+        return cleanPath;
+    }
+
+    // For /uploads/ or /api/uploads/
+    if (cleanPath.startsWith('/uploads/') || cleanPath.startsWith('/api/uploads/')) {
+        const rawApi = import.meta.env?.VITE_API_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+        // Strip trailing /api or slashes to get pure domain origin
+        const base = rawApi.replace(/\/api\/?$/, '').replace(/\/+$/, '');
+        const normPath = cleanPath.startsWith('/api/uploads/') ? cleanPath.replace(/^\/api/, '') : cleanPath;
+        return `${base}${normPath}`;
     }
 
     return cleanPath;

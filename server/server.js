@@ -43,9 +43,18 @@ app.use(cors({
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-// Serve static uploaded files
+// Serve static uploaded files and documentation under root and /api prefixes
 const uploadsPath = path.resolve('public', 'uploads');
+const docsPath = path.resolve('public', 'docs');
+if (!fs.existsSync(uploadsPath)) {
+    fs.mkdirSync(uploadsPath, { recursive: true });
+}
 app.use('/uploads', express.static(uploadsPath));
+app.use('/api/uploads', express.static(uploadsPath));
+if (fs.existsSync(docsPath)) {
+    app.use('/docs', express.static(docsPath));
+    app.use('/api/docs', express.static(docsPath));
+}
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -1,18 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { API_BASE } from '../config/api';
+import { API_BASE, getDocUrl } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
 const CATEGORIES = ['All', 'System Documentation', 'Certificates', 'Project Reports', 'Architecture', 'Notes', 'Other'];
-
-// Helper to resolve absolute document URLs for preview / download
-const getDocUrl = (url) => {
-    if (!url) return '#';
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    const base = API_BASE.replace(/\/api$/, '');
-    return `${base}${url.startsWith('/') ? '' : '/'}${url}`;
-};
 
 export default function DocumentsCMS() {
     const { authFetch } = useAuth();
@@ -24,6 +16,7 @@ export default function DocumentsCMS() {
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [previewDoc, setPreviewDoc] = useState(null);
+    const [copiedDocId, setCopiedDocId] = useState(null);
 
     const [form, setForm] = useState({
         title: '',
@@ -50,6 +43,18 @@ export default function DocumentsCMS() {
 
     useEffect(() => {
         fetchDocuments();
+    }, []);
+
+    // Listen for Escape key to close modal
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                setPreviewDoc(null);
+                setShowUploadModal(false);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
 
     const handleFileSelect = (e) => {
@@ -87,15 +92,20 @@ export default function DocumentsCMS() {
             const uploadData = await uploadRes.json();
             if (!uploadRes.ok) throw new Error(uploadData.message || 'File upload failed');
 
+            const resolvedFileUrl = uploadData.fileUrl || uploadData.url || uploadData.secure_url || '';
+            if (!resolvedFileUrl) {
+                throw new Error('Upload succeeded but server did not return a file URL.');
+            }
+
             // 2. Save Document Record
             const docPayload = {
                 title: form.title.trim(),
                 category: form.category,
                 description: form.description.trim(),
-                fileUrl: uploadData.url,
-                fileName: uploadData.fileName,
-                fileSize: uploadData.fileSize,
-                fileType: uploadData.fileType,
+                fileUrl: resolvedFileUrl,
+                fileName: uploadData.fileName || form.file.name,
+                fileSize: uploadData.fileSize || `${(form.file.size / (1024 * 1024)).toFixed(2)} MB`,
+                fileType: uploadData.fileType || (form.file.type.includes('pdf') ? 'PDF' : form.file.name.split('.').pop().toUpperCase()),
                 tags: form.tags.split(',').map(t => t.trim()).filter(Boolean)
             };
 
@@ -137,6 +147,7 @@ export default function DocumentsCMS() {
                     title: 'Document Deleted 🗑️',
                     message: `"${title}" has been removed from your vault.`
                 });
+                if (previewDoc?._id === id) setPreviewDoc(null);
                 fetchDocuments();
             } else {
                 throw new Error('Delete failed');
@@ -144,6 +155,52 @@ export default function DocumentsCMS() {
         } catch (err) {
             setToast({ type: 'error', title: 'Delete Error', message: err.message });
         }
+    };
+
+    const handleCopyUrl = (doc) => {
+        const resolvedUrl = getDocUrl(doc);
+        if (!resolvedUrl || resolvedUrl === '#') {
+            setToast({ type: 'error', title: 'No Link Available', message: 'This document does not have a valid URL.' });
+            return;
+        }
+        const fullUrl = resolvedUrl.startsWith('http') ? resolvedUrl : `${window.location.origin}${resolvedUrl}`;
+        navigator.clipboard.writeText(fullUrl).then(() => {
+            setCopiedDocId(doc._id || 'spotlight');
+            setToast({
+                type: 'success',
+                title: 'Link Copied! 📋',
+                message: 'Direct document URL copied to clipboard.'
+            });
+            setTimeout(() => setCopiedDocId(null), 2500);
+        }).catch(() => {
+            setToast({ type: 'error', title: 'Copy Failed', message: 'Could not copy URL to clipboard.' });
+        });
+    };
+
+    const isImageDoc = (doc) => {
+        if (!doc) return false;
+        const type = (doc.fileType || '').toUpperCase();
+        const url = (doc.fileUrl || doc.url || '').toLowerCase();
+        const name = (doc.fileName || doc.title || '').toLowerCase();
+        return (
+            type === 'JPEG' || type === 'JPG' || type === 'PNG' || type === 'WEBP' || type === 'GIF' || type === 'SVG' || type.includes('IMAGE') ||
+            /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(url) || /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(name)
+        );
+    };
+
+    const isPdfDoc = (doc) => {
+        if (!doc) return false;
+        const type = (doc.fileType || '').toUpperCase();
+        const url = (doc.fileUrl || doc.url || '').toLowerCase();
+        const name = (doc.fileName || doc.title || '').toLowerCase();
+        return type === 'PDF' || url.endsWith('.pdf') || name.endsWith('.pdf');
+    };
+
+    const isHtmlDoc = (doc) => {
+        if (!doc) return false;
+        const url = (doc.fileUrl || doc.url || '').toLowerCase();
+        const name = (doc.fileName || doc.title || '').toLowerCase();
+        return url.endsWith('.html') || name.endsWith('.html');
     };
 
     const filteredDocs = docs.filter(d => {
@@ -154,7 +211,7 @@ export default function DocumentsCMS() {
         return matchesCat && matchesSearch;
     });
 
-    if (loading) return <div style={{ textAlign: 'center', padding: '60px' }}>Loading Document Vault...</div>;
+    if (loading) return <div style={{ textAlign: 'center', padding: '60px', color: 'var(--adm-text-muted)' }}><i className="fa-solid fa-circle-notch fa-spin" style={{ fontSize: '24px', marginRight: '8px' }} /> Loading Document Vault...</div>;
 
     return (
         <div>
@@ -198,18 +255,25 @@ export default function DocumentsCMS() {
 
                     {/* Action buttons */}
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                        <a
-                            href="/docs/PORTFOLIO_SYSTEM_DOCUMENTATION.pdf"
-                            target="_blank"
-                            rel="noreferrer"
+                        <button
+                            type="button"
+                            onClick={() => setPreviewDoc({
+                                title: 'MCA WALLAH Portfolio - Official System Architecture & Documentation',
+                                category: 'System Documentation',
+                                description: 'Complete technical blueprint covering React 19 architecture, RESTful API endpoints, MongoDB schemas, and CMS workflows.',
+                                fileUrl: '/docs/PORTFOLIO_SYSTEM_DOCUMENTATION.pdf',
+                                fileName: 'PORTFOLIO_SYSTEM_DOCUMENTATION.pdf',
+                                fileSize: '1.60 MB',
+                                fileType: 'PDF'
+                            })}
                             className="adm-btn adm-btn-secondary"
-                            style={{ borderColor: 'rgba(56, 189, 248, 0.4)', color: '#38bdf8', textDecoration: 'none' }}
+                            style={{ borderColor: 'rgba(56, 189, 248, 0.4)', color: '#38bdf8' }}
                         >
-                            <i className="fa-solid fa-eye" /> View PDF
-                        </a>
+                            <i className="fa-solid fa-eye" /> Preview PDF
+                        </button>
 
                         <a
-                            href="/docs/PORTFOLIO_SYSTEM_DOCUMENTATION.pdf"
+                            href={getDocUrl('/docs/PORTFOLIO_SYSTEM_DOCUMENTATION.pdf')}
                             download="MCA_WALLAH_Portfolio_Documentation.pdf"
                             className="adm-btn adm-btn-primary"
                             style={{ textDecoration: 'none' }}
@@ -217,15 +281,21 @@ export default function DocumentsCMS() {
                             <i className="fa-solid fa-download" /> Download PDF (1.60 MB)
                         </a>
 
-                        <a
-                            href="/docs/PORTFOLIO_SYSTEM_DOCUMENTATION.html"
-                            target="_blank"
-                            rel="noreferrer"
+                        <button
+                            type="button"
+                            onClick={() => setPreviewDoc({
+                                title: 'MCA WALLAH Architecture Documentation (HTML)',
+                                category: 'System Documentation',
+                                description: 'Interactive web view of system architecture and API documentation.',
+                                fileUrl: '/docs/PORTFOLIO_SYSTEM_DOCUMENTATION.html',
+                                fileName: 'PORTFOLIO_SYSTEM_DOCUMENTATION.html',
+                                fileSize: '37 KB',
+                                fileType: 'HTML'
+                            })}
                             className="adm-btn adm-btn-secondary"
-                            style={{ textDecoration: 'none' }}
                         >
                             <i className="fa-solid fa-globe" /> HTML Doc
-                        </a>
+                        </button>
                     </div>
                 </div>
 
@@ -310,104 +380,294 @@ export default function DocumentsCMS() {
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                        {filteredDocs.map(doc => (
-                            <div
-                                key={doc._id}
-                                style={{
-                                    background: 'var(--adm-surface)',
-                                    border: '1px solid var(--adm-border)',
-                                    borderRadius: '12px',
-                                    padding: '16px',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'space-between',
-                                    transition: 'all 0.2s ease',
-                                    position: 'relative'
-                                }}
-                            >
-                                <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                                        <span style={{
-                                            fontSize: '10px',
-                                            fontWeight: '700',
-                                            textTransform: 'uppercase',
-                                            padding: '2px 8px',
-                                            borderRadius: '4px',
-                                            background: doc.fileType === 'PDF' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(56, 189, 248, 0.15)',
-                                            color: doc.fileType === 'PDF' ? '#ef4444' : '#38bdf8'
-                                        }}>
-                                            {doc.fileType || 'FILE'}
-                                        </span>
+                        {filteredDocs.map(doc => {
+                            const isImg = isImageDoc(doc);
+                            const isPdf = isPdfDoc(doc);
+                            const docUrl = getDocUrl(doc);
+                            const hasValidUrl = docUrl && docUrl !== '#';
 
-                                        <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)' }}>
-                                            {doc.fileSize || 'N/A'}
-                                        </span>
-                                    </div>
+                            return (
+                                <div
+                                    key={doc._id}
+                                    style={{
+                                        background: 'var(--adm-surface)',
+                                        border: '1px solid var(--adm-border)',
+                                        borderRadius: '12px',
+                                        padding: '16px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'space-between',
+                                        transition: 'all 0.2s ease',
+                                        position: 'relative'
+                                    }}
+                                >
+                                    <div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                                            <span style={{
+                                                fontSize: '10px',
+                                                fontWeight: '700',
+                                                textTransform: 'uppercase',
+                                                padding: '2px 8px',
+                                                borderRadius: '4px',
+                                                background: isPdf ? 'rgba(239, 68, 68, 0.15)' : isImg ? 'rgba(56, 189, 248, 0.15)' : 'rgba(168, 85, 247, 0.15)',
+                                                color: isPdf ? '#ef4444' : isImg ? '#38bdf8' : '#c084fc'
+                                            }}>
+                                                {doc.fileType || (isPdf ? 'PDF' : isImg ? 'IMAGE' : 'FILE')}
+                                            </span>
 
-                                    <h4 style={{ margin: '0 0 6px 0', fontSize: '14px', fontWeight: '700', color: 'var(--adm-text-main)', lineHeight: '1.3' }}>
-                                        {doc.title}
-                                    </h4>
-
-                                    <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: 'var(--adm-text-muted)', lineHeight: '1.4' }}>
-                                        {doc.description || 'No description provided.'}
-                                    </p>
-
-                                    {doc.tags && doc.tags.length > 0 && (
-                                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '14px' }}>
-                                            {doc.tags.map((t, idx) => (
-                                                <span key={idx} style={{ fontSize: '10px', background: 'rgba(255,255,255,0.05)', color: 'var(--adm-text-muted)', padding: '2px 6px', borderRadius: '4px' }}>
-                                                    #{t}
-                                                </span>
-                                            ))}
+                                            <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)' }}>
+                                                {doc.fileSize || 'N/A'}
+                                            </span>
                                         </div>
-                                    )}
-                                </div>
 
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--adm-border)', paddingTop: '12px', marginTop: '10px' }}>
-                                    <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)' }}>
-                                        {doc.category}
-                                    </span>
-
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        <a
-                                            href={getDocUrl(doc.fileUrl)}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="adm-btn adm-btn-secondary"
-                                            style={{ padding: '6px 12px', fontSize: '12px', textDecoration: 'none' }}
-                                            title="View / Open File"
+                                        <h4
+                                            onClick={() => setPreviewDoc(doc)}
+                                            style={{
+                                                margin: '0 0 6px 0',
+                                                fontSize: '14px',
+                                                fontWeight: '700',
+                                                color: 'var(--adm-text-main)',
+                                                lineHeight: '1.3',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '6px'
+                                            }}
+                                            title="Click to preview document"
                                         >
-                                            <i className="fa-solid fa-arrow-up-right-from-square" />
-                                        </a>
+                                            {doc.title}
+                                        </h4>
 
-                                        <a
-                                            href={getDocUrl(doc.fileUrl)}
-                                            download={doc.fileName || doc.title}
-                                            className="adm-btn adm-btn-primary"
-                                            style={{ padding: '6px 12px', fontSize: '12px', textDecoration: 'none' }}
-                                            title="Download Document"
-                                        >
-                                            <i className="fa-solid fa-download" />
-                                        </a>
+                                        <p style={{ margin: '0 0 12px 0', fontSize: '12px', color: 'var(--adm-text-muted)', lineHeight: '1.4' }}>
+                                            {doc.description || 'No description provided.'}
+                                        </p>
 
-                                        {!doc.isBuiltin && (
-                                            <button
-                                                type="button"
-                                                onClick={() => handleDelete(doc._id, doc.title)}
-                                                className="adm-btn adm-btn-danger"
-                                                style={{ padding: '4px 10px', fontSize: '11px' }}
-                                                title="Delete Document"
-                                            >
-                                                <i className="fa-solid fa-trash" />
-                                            </button>
+                                        {doc.tags && doc.tags.length > 0 && (
+                                            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                                                {doc.tags.map((t, idx) => (
+                                                    <span key={idx} style={{ fontSize: '10px', background: 'rgba(255,255,255,0.05)', color: 'var(--adm-text-muted)', padding: '2px 6px', borderRadius: '4px' }}>
+                                                        #{t}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         )}
                                     </div>
+
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--adm-border)', paddingTop: '12px', marginTop: '10px' }}>
+                                        <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)' }}>
+                                            {doc.category}
+                                        </span>
+
+                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                            {/* Preview in Modal Button (Circled in user screenshot) */}
+                                            <button
+                                                type="button"
+                                                onClick={() => setPreviewDoc(doc)}
+                                                className="adm-btn adm-btn-secondary"
+                                                style={{ padding: '6px 12px', fontSize: '12px', cursor: 'pointer' }}
+                                                title="Preview Document"
+                                            >
+                                                <i className="fa-solid fa-arrow-up-right-from-square" />
+                                            </button>
+
+                                            {/* Direct Download Button */}
+                                            {hasValidUrl ? (
+                                                <a
+                                                    href={docUrl}
+                                                    download={doc.fileName || doc.title}
+                                                    className="adm-btn adm-btn-primary"
+                                                    style={{ padding: '6px 12px', fontSize: '12px', textDecoration: 'none' }}
+                                                    title="Download Document"
+                                                >
+                                                    <i className="fa-solid fa-download" />
+                                                </a>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setPreviewDoc(doc)}
+                                                    className="adm-btn adm-btn-secondary"
+                                                    style={{ padding: '6px 12px', fontSize: '12px', opacity: 0.65 }}
+                                                    title="File link missing"
+                                                >
+                                                    <i className="fa-solid fa-circle-exclamation" style={{ color: '#f59e0b' }} />
+                                                </button>
+                                            )}
+
+                                            {/* Delete Button */}
+                                            {!doc.isBuiltin && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDelete(doc._id, doc.title)}
+                                                    className="adm-btn adm-btn-danger"
+                                                    style={{ padding: '4px 10px', fontSize: '11px' }}
+                                                    title="Delete Document"
+                                                >
+                                                    <i className="fa-solid fa-trash" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
+
+            {/* ══════════════════════════════════════════════════════════════
+                 DOCUMENT PREVIEW MODAL (FULL VIEWER)
+            ══════════════════════════════════════════════════════════════ */}
+            {previewDoc && (() => {
+                const resolvedUrl = getDocUrl(previewDoc);
+                const hasValidUrl = resolvedUrl && resolvedUrl !== '#';
+
+                return (
+                    <div className="adm-doc-modal-overlay" onClick={() => setPreviewDoc(null)}>
+                        <div className="adm-doc-modal-container" onClick={(e) => e.stopPropagation()}>
+                            {/* Header */}
+                            <div className="adm-doc-modal-header">
+                                <div className="adm-doc-modal-title-wrap">
+                                    <div className="adm-doc-modal-icon-badge" style={{
+                                        background: isPdfDoc(previewDoc) ? 'rgba(239, 68, 68, 0.15)' : isImageDoc(previewDoc) ? 'rgba(56, 189, 248, 0.15)' : 'rgba(168, 85, 247, 0.15)',
+                                        color: isPdfDoc(previewDoc) ? '#ef4444' : isImageDoc(previewDoc) ? '#38bdf8' : '#c084fc'
+                                    }}>
+                                        <i className={isPdfDoc(previewDoc) ? 'fa-solid fa-file-pdf' : isImageDoc(previewDoc) ? 'fa-solid fa-file-image' : isHtmlDoc(previewDoc) ? 'fa-solid fa-globe' : 'fa-solid fa-file-lines'} />
+                                    </div>
+                                    <div style={{ minWidth: 0, flex: 1 }}>
+                                        <h3 className="adm-doc-modal-title">{previewDoc.title}</h3>
+                                        <div className="adm-doc-modal-meta">
+                                            <span>{previewDoc.category}</span>
+                                            {previewDoc.fileSize && <span>• {previewDoc.fileSize}</span>}
+                                            {previewDoc.fileType && <span>• {previewDoc.fileType}</span>}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setPreviewDoc(null)}
+                                    style={{ background: 'none', border: 'none', color: 'var(--adm-text-muted)', fontSize: '20px', cursor: 'pointer', padding: '4px 8px' }}
+                                    title="Close Preview (Esc)"
+                                >
+                                    <i className="fa-solid fa-xmark" />
+                                </button>
+                            </div>
+
+                            {/* Body / Viewer */}
+                            <div className="adm-doc-modal-body">
+                                {!hasValidUrl ? (
+                                    <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--adm-text-muted)' }}>
+                                        <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: '42px', color: '#f59e0b', marginBottom: '14px' }} />
+                                        <h4 style={{ color: '#ffffff', margin: '0 0 8px 0' }}>File Link Not Available</h4>
+                                        <p style={{ maxWidth: '420px', margin: '0 auto 20px auto', fontSize: '13px', lineHeight: '1.5' }}>
+                                            This document was stored without an active file or the upload URL was missing. You can upload a new copy into your vault or delete this record.
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() => { setPreviewDoc(null); setShowUploadModal(true); }}
+                                            className="adm-btn adm-btn-primary"
+                                        >
+                                            <i className="fa-solid fa-cloud-arrow-up" /> Upload Replacement Document
+                                        </button>
+                                    </div>
+                                ) : isPdfDoc(previewDoc) ? (
+                                    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                        <iframe
+                                            src={resolvedUrl}
+                                            title={previewDoc.title}
+                                            className="adm-doc-modal-iframe"
+                                        />
+                                        <div style={{ background: 'rgba(15, 23, 42, 0.9)', padding: '8px 16px', fontSize: '11px', color: 'var(--adm-text-muted)', textAlign: 'center', borderTop: '1px solid var(--adm-border)' }}>
+                                            💡 Tip: If your mobile browser doesn't render the PDF inline, tap <strong>Open in New Tab</strong> or <strong>Download</strong> below.
+                                        </div>
+                                    </div>
+                                ) : isImageDoc(previewDoc) ? (
+                                    <div className="adm-doc-modal-img-wrap">
+                                        <img
+                                            src={resolvedUrl}
+                                            alt={previewDoc.title}
+                                            className="adm-doc-modal-img"
+                                        />
+                                    </div>
+                                ) : isHtmlDoc(previewDoc) ? (
+                                    <iframe
+                                        src={resolvedUrl}
+                                        title={previewDoc.title}
+                                        className="adm-doc-modal-iframe"
+                                        style={{ background: '#ffffff' }}
+                                    />
+                                ) : (
+                                    <div style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--adm-text-muted)' }}>
+                                        <i className="fa-solid fa-file" style={{ fontSize: '48px', color: 'var(--adm-primary)', marginBottom: '16px' }} />
+                                        <h4 style={{ color: 'var(--adm-text-main)', margin: '0 0 8px 0' }}>{previewDoc.fileName || previewDoc.title}</h4>
+                                        <p style={{ maxWidth: '400px', margin: '0 auto 20px auto', fontSize: '13px' }}>
+                                            {previewDoc.description || 'This file format is ready for direct viewing or download.'}
+                                        </p>
+                                        <a
+                                            href={resolvedUrl}
+                                            download={previewDoc.fileName || previewDoc.title}
+                                            className="adm-btn adm-btn-primary"
+                                            style={{ textDecoration: 'none', display: 'inline-flex' }}
+                                        >
+                                            <i className="fa-solid fa-download" /> Download File ({previewDoc.fileSize || 'File'})
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Footer Controls */}
+                            <div className="adm-doc-modal-footer">
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                    {hasValidUrl && (
+                                        <a
+                                            href={resolvedUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="adm-btn adm-btn-secondary"
+                                            style={{ textDecoration: 'none', fontSize: '12px' }}
+                                        >
+                                            <i className="fa-solid fa-arrow-up-right-from-square" /> Open in New Tab
+                                        </a>
+                                    )}
+
+                                    {hasValidUrl && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleCopyUrl(previewDoc)}
+                                            className="adm-btn adm-btn-secondary"
+                                            style={{ fontSize: '12px' }}
+                                        >
+                                            <i className={copiedDocId ? 'fa-solid fa-check' : 'fa-solid fa-copy'} /> {copiedDocId ? 'Copied!' : 'Copy Link'}
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                    {hasValidUrl && (
+                                        <a
+                                            href={resolvedUrl}
+                                            download={previewDoc.fileName || previewDoc.title}
+                                            className="adm-btn adm-btn-primary"
+                                            style={{ textDecoration: 'none', fontSize: '12px' }}
+                                        >
+                                            <i className="fa-solid fa-download" /> Download Document
+                                        </a>
+                                    )}
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setPreviewDoc(null)}
+                                        className="adm-btn adm-btn-secondary"
+                                        style={{ fontSize: '12px' }}
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
 
             {/* ══════════════════════════════════════════════════════════════
                  UPLOAD DOCUMENT MODAL
@@ -426,7 +686,7 @@ export default function DocumentsCMS() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     padding: '20px'
-                }}>
+                }} onClick={() => setShowUploadModal(false)}>
                     <div style={{
                         background: 'var(--adm-card-bg, #111827)',
                         border: '1px solid var(--adm-border)',
@@ -435,7 +695,7 @@ export default function DocumentsCMS() {
                         width: '100%',
                         padding: '24px',
                         boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)'
-                    }}>
+                    }} onClick={(e) => e.stopPropagation()}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: 'var(--adm-text-main)' }}>
                                 <i className="fa-solid fa-cloud-arrow-up" style={{ color: 'var(--adm-primary)', marginRight: '8px' }} />

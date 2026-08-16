@@ -97,7 +97,7 @@ export const getSectionData = async (req, res) => {
         }
 
         if (type === 'documents') {
-            let docs = await Document.find().sort({ isBuiltin: -1, createdAt: -1 });
+            let docs = await Document.find().sort({ isBuiltin: -1, createdAt: -1 }).lean();
             if (docs.length === 0) {
                 // Auto seed system documentation
                 await Document.create({
@@ -111,9 +111,21 @@ export const getSectionData = async (req, res) => {
                     isBuiltin: true,
                     tags: ['Architecture', 'API Docs', 'Mongoose', 'React 19', 'Vercel']
                 });
-                docs = await Document.find().sort({ isBuiltin: -1, createdAt: -1 });
+                docs = await Document.find().sort({ isBuiltin: -1, createdAt: -1 }).lean();
             }
-            return res.json(docs);
+            // Sanitize any corrupt / undefined URL strings in existing DB records
+            const sanitizedDocs = docs.map(doc => {
+                let resolvedUrl = doc.fileUrl || doc.url || doc.secure_url || '';
+                if (resolvedUrl === 'undefined' || resolvedUrl === 'null' || resolvedUrl.endsWith('/undefined')) {
+                    resolvedUrl = '';
+                }
+                return {
+                    ...doc,
+                    fileUrl: resolvedUrl,
+                    url: resolvedUrl
+                };
+            });
+            return res.json(sanitizedDocs);
         }
 
         const items = await Model.find().sort({ order: 1, createdAt: -1 });
@@ -390,6 +402,8 @@ export const uploadDocument = async (req, res) => {
                         }
                         resolve(res.json({
                             url: result.secure_url,
+                            fileUrl: result.secure_url,
+                            secure_url: result.secure_url,
                             fileName: req.file.originalname,
                             fileSize: fileSizeMB,
                             fileType,
@@ -402,17 +416,21 @@ export const uploadDocument = async (req, res) => {
         }
 
         // Local storage fallback
+        const uploadDir = path.resolve('public', 'uploads');
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
         const filename = `${Date.now()}-${req.file.originalname.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-        const uploadPath = path.resolve('public', 'uploads', filename);
+        const uploadPath = path.resolve(uploadDir, filename);
         
         fs.writeFileSync(uploadPath, req.file.buffer);
 
-        const protocol = req.protocol;
-        const host = req.get('host');
-        const fileUrl = `${protocol}://${host}/uploads/${filename}`;
+        const fileUrl = `/uploads/${filename}`;
 
         res.json({
             url: fileUrl,
+            fileUrl: fileUrl,
+            secure_url: fileUrl,
             fileName: req.file.originalname,
             fileSize: fileSizeMB,
             fileType,

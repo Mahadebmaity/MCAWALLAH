@@ -230,97 +230,272 @@ export default function ProjectsCMS() {
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
-                    {projects.map((project) => (
-                        <div
-                            key={project._id}
-                            style={{
-                                background: 'var(--adm-surface-2)',
-                                border: '1px solid var(--adm-border)',
-                                borderRadius: '12px',
-                                padding: '20px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'space-between',
-                                position: 'relative',
-                                overflow: 'hidden'
-                            }}
-                        >
-                            <div style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                height: '4px',
-                                background: project.color || 'var(--adm-primary)'
-                            }} />
+                    {projects.map((project) => {
+                        const getCategoryIcon = (cat) => {
+                            switch ((cat || '').toLowerCase()) {
+                                case 'react': return 'fa-brands fa-react';
+                                case 'full stack': return 'fa-solid fa-layer-group';
+                                case 'python': return 'fa-brands fa-python';
+                                case 'ui/ux': return 'fa-solid fa-palette';
+                                case 'mobile': return 'fa-solid fa-mobile-screen-button';
+                                case 'open source': return 'fa-solid fa-code-branch';
+                                default: return 'fa-solid fa-laptop-code';
+                            }
+                        };
 
-                            <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                        const projectTags = Array.isArray(project.tags) 
+                            ? project.tags 
+                            : (project.tags ? project.tags.split(',').map(t => t.trim()).filter(Boolean) : []);
+
+                        return (
+                            <div
+                                key={project._id}
+                                style={{
+                                    background: 'var(--adm-surface-2)',
+                                    border: '1px solid var(--adm-border)',
+                                    borderRadius: '14px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+                                    transition: 'all 0.2s ease'
+                                }}
+                            >
+                                {/* Top Color Accent Stripe */}
+                                <div style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    height: '3px',
+                                    background: project.color || 'var(--adm-primary)',
+                                    zIndex: 3
+                                }} />
+
+                                {/* ── Uniform 140px Top Media Banner ── */}
+                                <div style={{
+                                    height: '140px',
+                                    width: '100%',
+                                    position: 'relative',
+                                    background: '#0a0f1d',
+                                    overflow: 'hidden',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    {project.coverImage ? (
+                                        <img
+                                            src={project.coverImage}
+                                            alt={project.title}
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover'
+                                            }}
+                                        />
+                                    ) : (
+                                        <div style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            background: `radial-gradient(circle at 50% 50%, ${project.color || '#38bdf8'}20 0%, rgba(10, 15, 29, 0.95) 80%)`,
+                                            position: 'relative'
+                                        }}>
+                                            <i
+                                                className={getCategoryIcon(project.category)}
+                                                style={{
+                                                    fontSize: '44px',
+                                                    color: project.color || 'var(--adm-primary)',
+                                                    opacity: 0.85,
+                                                    filter: `drop-shadow(0 0 15px ${project.color || '#38bdf8'}40)`
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Gradient overlay on banner */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 40%, rgba(15,23,42,0.85) 100%)',
+                                        pointerEvents: 'none'
+                                    }} />
+
+                                    {/* Category Pill Overlay */}
                                     <span style={{
-                                        fontSize: '11px',
+                                        position: 'absolute',
+                                        top: '10px',
+                                        left: '12px',
+                                        fontSize: '10px',
                                         fontWeight: '700',
-                                        background: `${project.color || '#e84545'}22`,
-                                        color: project.color || '#e84545',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.5px',
+                                        background: 'rgba(15, 23, 42, 0.85)',
+                                        backdropFilter: 'blur(6px)',
+                                        border: `1px solid ${project.color || 'var(--adm-primary)'}55`,
+                                        color: project.color || '#38bdf8',
                                         padding: '3px 8px',
-                                        borderRadius: '4px'
+                                        borderRadius: '6px',
+                                        zIndex: 2
                                     }}>
                                         {project.category}
                                     </span>
 
+                                    {/* Public / Private Toggle Pill Overlay */}
                                     <button
-                                        onClick={() => toggleVisibility(project._id)}
+                                        type="button"
+                                        onClick={() => toggleVisibility(project._id, project.title)}
                                         className={`adm-status-tag ${project.isPublic ? 'adm-status-tag--public' : 'adm-status-tag--private'}`}
-                                        style={{ cursor: 'pointer', border: 'none' }}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '10px',
+                                            right: '12px',
+                                            cursor: 'pointer',
+                                            border: 'none',
+                                            zIndex: 2,
+                                            padding: '3px 9px',
+                                            fontSize: '10px'
+                                        }}
+                                        title="Toggle Visibility"
                                     >
                                         {project.isPublic ? 'Public' : 'Private'}
                                     </button>
                                 </div>
 
-                                {project.coverImage && (
-                                    <div style={{ height: '140px', borderRadius: '8px', overflow: 'hidden', marginBottom: '12px', background: '#000' }}>
-                                        <img src={project.coverImage} alt={project.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                {/* ── Card Content Body ── */}
+                                <div style={{
+                                    padding: '16px 18px 14px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    flex: 1
+                                }}>
+                                    {/* Clamped 2-line Title */}
+                                    <h4
+                                        style={{
+                                            margin: '0 0 6px',
+                                            fontSize: '15px',
+                                            fontWeight: '700',
+                                            color: 'var(--adm-text-main)',
+                                            lineHeight: '1.35',
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 2,
+                                            WebkitBoxOrient: 'vertical',
+                                            overflow: 'hidden',
+                                            minHeight: '40px'
+                                        }}
+                                        title={project.title}
+                                    >
+                                        {project.title}
+                                    </h4>
+
+                                    {/* Clamped 3-line Description */}
+                                    <p
+                                        style={{
+                                            fontSize: '12.5px',
+                                            color: 'var(--adm-text-muted)',
+                                            margin: '0 0 12px',
+                                            lineHeight: '1.45',
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 3,
+                                            WebkitBoxOrient: 'vertical',
+                                            overflow: 'hidden',
+                                            minHeight: '54px'
+                                        }}
+                                        title={project.desc}
+                                    >
+                                        {project.desc || 'No description provided.'}
+                                    </p>
+
+                                    {/* Tags Row */}
+                                    <div style={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: '5px',
+                                        marginBottom: '14px',
+                                        maxHeight: '26px',
+                                        overflow: 'hidden'
+                                    }}>
+                                        {projectTags.slice(0, 4).map((tag, i) => (
+                                            <span
+                                                key={i}
+                                                style={{
+                                                    fontSize: '10.5px',
+                                                    background: 'rgba(255, 255, 255, 0.05)',
+                                                    border: '1px solid var(--adm-border)',
+                                                    padding: '2px 7px',
+                                                    borderRadius: '4px',
+                                                    color: 'var(--adm-text-muted)',
+                                                    whiteSpace: 'nowrap'
+                                                }}
+                                            >
+                                                #{tag}
+                                            </span>
+                                        ))}
+                                        {projectTags.length > 4 && (
+                                            <span style={{ fontSize: '10px', color: 'var(--adm-text-muted)', padding: '2px 4px' }}>
+                                                +{projectTags.length - 4}
+                                            </span>
+                                        )}
                                     </div>
-                                )}
 
-                                <h4 style={{ margin: '0 0 8px', fontSize: '16px', color: 'var(--adm-text-main)' }}>{project.title}</h4>
-                                <p style={{ fontSize: '13px', color: 'var(--adm-text-muted)', margin: '0 0 12px', lineHeight: '1.4' }}>
-                                    {project.desc}
-                                </p>
+                                    {/* Footer Actions */}
+                                    <div style={{
+                                        marginTop: 'auto',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        borderTop: '1px solid var(--adm-border)',
+                                        paddingTop: '12px'
+                                    }}>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            {project.github && (
+                                                <a
+                                                    href={project.github}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ color: 'var(--adm-text-muted)', fontSize: '14px', padding: '4px 6px' }}
+                                                    title="GitHub Repository"
+                                                >
+                                                    <i className="fa-brands fa-github"></i>
+                                                </a>
+                                            )}
+                                            {project.live && (
+                                                <a
+                                                    href={project.live}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{ color: 'var(--adm-primary)', fontSize: '14px', padding: '4px 6px' }}
+                                                    title="Live Website / Demo"
+                                                >
+                                                    <i className="fa-solid fa-arrow-up-right-from-square"></i>
+                                                </a>
+                                            )}
+                                        </div>
 
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
-                                    {project.tags?.map((tag, i) => (
-                                        <span key={i} style={{ fontSize: '11px', background: 'var(--adm-surface-2)', border: '1px solid var(--adm-border)', padding: '2px 8px', borderRadius: '4px', color: 'var(--adm-text-muted)' }}>
-                                            {tag}
-                                        </span>
-                                    ))}
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <button
+                                                type="button"
+                                                onClick={() => openEditModal(project)}
+                                                className="adm-btn adm-btn-sm adm-btn-secondary"
+                                            >
+                                                <i className="fa-solid fa-pen-to-square"></i> Edit
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDelete(project._id, project.title)}
+                                                className="adm-btn adm-btn-sm adm-btn-danger"
+                                            >
+                                                <i className="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--adm-border)', paddingTop: '14px' }}>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    {project.github && (
-                                        <a href={project.github} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--adm-text-muted)', fontSize: '15px' }}>
-                                            <i className="fa-brands fa-github"></i>
-                                        </a>
-                                    )}
-                                    {project.live && (
-                                        <a href={project.live} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--adm-primary)', fontSize: '15px' }}>
-                                            <i className="fa-solid fa-arrow-up-right-from-square"></i>
-                                        </a>
-                                    )}
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <button onClick={() => openEditModal(project)} className="adm-btn adm-btn-sm adm-btn-secondary">
-                                        <i className="fa-solid fa-pen-to-square"></i> Edit
-                                    </button>
-                                    <button onClick={() => handleDelete(project._id)} className="adm-btn adm-btn-sm adm-btn-danger">
-                                        <i className="fa-solid fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
 
