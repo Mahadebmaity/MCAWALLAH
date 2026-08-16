@@ -144,10 +144,8 @@ export default function AboutCMS() {
 
         setUploadingAvatar(true);
         try {
-            const token = localStorage.getItem('accessToken');
-            const res = await fetch(`${API_BASE}/user/avatar`, {
+            const res = await authFetch(`${API_BASE}/user/avatar`, {
                 method: 'POST',
-                headers: { Authorization: `Bearer ${token}` },
                 body: formData
             });
 
@@ -240,10 +238,8 @@ export default function AboutCMS() {
 
         setUploadingResume(true);
         try {
-            const token = localStorage.getItem('accessToken');
-            const res = await fetch(`${API_BASE}/media/upload`, {
+            const res = await authFetch(`${API_BASE}/media/upload`, {
                 method: 'POST',
-                headers: { Authorization: `Bearer ${token}` },
                 body: formData
             });
 
