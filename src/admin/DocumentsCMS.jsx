@@ -6,6 +6,14 @@ import './admin.css';
 
 const CATEGORIES = ['All', 'System Documentation', 'Certificates', 'Project Reports', 'Architecture', 'Notes', 'Other'];
 
+// Helper to resolve absolute document URLs for preview / download
+const getDocUrl = (url) => {
+    if (!url) return '#';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    const base = API_BASE.replace(/\/api$/, '');
+    return `${base}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export default function DocumentsCMS() {
     const { authFetch } = useAuth();
     const [docs, setDocs] = useState([]);
@@ -362,21 +370,21 @@ export default function DocumentsCMS() {
 
                                     <div style={{ display: 'flex', gap: '8px' }}>
                                         <a
-                                            href={doc.fileUrl}
+                                            href={getDocUrl(doc.fileUrl)}
                                             target="_blank"
                                             rel="noreferrer"
                                             className="adm-btn adm-btn-secondary"
-                                            style={{ padding: '4px 10px', fontSize: '11px', textDecoration: 'none' }}
+                                            style={{ padding: '6px 12px', fontSize: '12px', textDecoration: 'none' }}
                                             title="View / Open File"
                                         >
                                             <i className="fa-solid fa-arrow-up-right-from-square" />
                                         </a>
 
                                         <a
-                                            href={doc.fileUrl}
+                                            href={getDocUrl(doc.fileUrl)}
                                             download={doc.fileName || doc.title}
                                             className="adm-btn adm-btn-primary"
-                                            style={{ padding: '4px 10px', fontSize: '11px', textDecoration: 'none' }}
+                                            style={{ padding: '6px 12px', fontSize: '12px', textDecoration: 'none' }}
                                             title="Download Document"
                                         >
                                             <i className="fa-solid fa-download" />

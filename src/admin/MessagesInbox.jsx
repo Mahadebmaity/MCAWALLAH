@@ -175,23 +175,26 @@ export default function MessagesInbox() {
                         {selectedMsg ? (
                             <>
                                 <div style={{
-                                    padding: '20px',
+                                    padding: '16px 20px',
                                     borderBottom: '1px solid var(--adm-border)',
                                     display: 'flex',
                                     justifyContent: 'space-between',
-                                    alignItems: 'center'
+                                    alignItems: 'center',
+                                    flexWrap: 'wrap',
+                                    gap: '12px'
                                 }}>
-                                    <div>
-                                        <h3 style={{ margin: '0 0 4px', fontSize: '18px', color: 'var(--adm-text-main)' }}>{selectedMsg.subject}</h3>
-                                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--adm-text-muted)' }}>
+                                    <div style={{ minWidth: '200px' }}>
+                                        <h3 style={{ margin: '0 0 4px', fontSize: '17px', color: 'var(--adm-text-main)', wordBreak: 'break-word' }}>{selectedMsg.subject}</h3>
+                                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--adm-text-muted)', wordBreak: 'break-word' }}>
                                             From: <strong style={{ color: 'var(--adm-text-main)' }}>{selectedMsg.name}</strong> &lt;{selectedMsg.email}&gt;
                                         </p>
                                     </div>
 
-                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                                         <a
                                             href={`mailto:${selectedMsg.email}?subject=Re: ${encodeURIComponent(selectedMsg.subject)}`}
                                             className="adm-btn adm-btn-primary adm-btn-sm"
+                                            style={{ whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                                         >
                                             <i className="fa-solid fa-reply"></i> Reply via Email
                                         </a>

@@ -522,6 +522,354 @@ export default function Navbar() {
 
             {/* Auth Modal */}
             {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+
+            {/* ══ User Account Settings Modal (Profile, Avatar, Prefs, Password) ══ */}
+            {activePanel && (
+                <div style={{
+                    position: 'fixed',
+                    inset: 0,
+                    zIndex: 99999,
+                    background: 'rgba(0, 0, 0, 0.75)',
+                    backdropFilter: 'blur(10px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '20px'
+                }}>
+                    <div style={{
+                        background: 'rgba(15, 23, 42, 0.95)',
+                        border: '1px solid rgba(56, 189, 248, 0.3)',
+                        borderRadius: '20px',
+                        maxWidth: '520px',
+                        width: '100%',
+                        padding: '26px',
+                        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(56, 189, 248, 0.15)',
+                        animation: 'slideUp 0.3s ease',
+                        color: '#fff'
+                    }}>
+                        {/* Modal Header */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <div style={{
+                                    width: '38px',
+                                    height: '38px',
+                                    borderRadius: '10px',
+                                    background: 'rgba(56, 189, 248, 0.15)',
+                                    color: '#38bdf8',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '18px'
+                                }}>
+                                    {activePanel === 'profile' && <i className="fa-solid fa-pen-to-square" />}
+                                    {activePanel === 'avatar' && <i className="fa-solid fa-camera" />}
+                                    {activePanel === 'prefs' && <i className="fa-solid fa-sliders" />}
+                                    {activePanel === 'password' && <i className="fa-solid fa-lock" />}
+                                </div>
+                                <div>
+                                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '800' }}>
+                                        {activePanel === 'profile' && 'Edit Profile'}
+                                        {activePanel === 'avatar' && 'Change Avatar / DP'}
+                                        {activePanel === 'prefs' && 'Account Preferences'}
+                                        {activePanel === 'password' && 'Change Password'}
+                                    </h3>
+                                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                                        Manage your personal credentials &amp; experience
+                                    </span>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={closePanel}
+                                style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '18px', cursor: 'pointer', padding: '4px' }}
+                            >
+                                <i className="fa-solid fa-xmark" />
+                            </button>
+                        </div>
+
+                        {/* Navigation Tabs */}
+                        <div style={{ display: 'flex', gap: '6px', marginBottom: '20px', background: 'rgba(255,255,255,0.04)', padding: '4px', borderRadius: '10px', flexWrap: 'wrap' }}>
+                            {[
+                                { key: 'profile', icon: 'fa-solid fa-user', label: 'Profile' },
+                                { key: 'avatar', icon: 'fa-solid fa-camera', label: 'Avatar' },
+                                { key: 'prefs', icon: 'fa-solid fa-sliders', label: 'Preferences' },
+                                { key: 'password', icon: 'fa-solid fa-lock', label: 'Password' }
+                            ].map(tab => (
+                                <button
+                                    key={tab.key}
+                                    type="button"
+                                    onClick={() => setActivePanel(tab.key)}
+                                    style={{
+                                        flex: 1,
+                                        minWidth: '90px',
+                                        padding: '7px 10px',
+                                        borderRadius: '8px',
+                                        border: 'none',
+                                        fontSize: '12px',
+                                        fontWeight: '700',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '6px',
+                                        background: activePanel === tab.key ? 'var(--adm-primary, #38bdf8)' : 'transparent',
+                                        color: activePanel === tab.key ? '#090d16' : '#94a3b8',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    <i className={tab.icon} />
+                                    <span>{tab.label}</span>
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* ── Tab 1: Edit Profile ── */}
+                        {activePanel === 'profile' && (
+                            <form onSubmit={saveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '6px', color: '#cbd5e1' }}>
+                                        Full Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="adm-input"
+                                        value={profileForm.name}
+                                        onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                                        placeholder="Your full name"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '6px', color: '#cbd5e1' }}>
+                                        Email Address
+                                    </label>
+                                    <input
+                                        type="email"
+                                        className="adm-input"
+                                        value={profileForm.email}
+                                        onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                                        placeholder="name@domain.com"
+                                        required
+                                    />
+                                </div>
+
+                                {profileMsg && (
+                                    <div style={{
+                                        padding: '10px 14px',
+                                        borderRadius: '8px',
+                                        fontSize: '13px',
+                                        background: profileMsg.ok ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                                        color: profileMsg.ok ? '#34d399' : '#f87171',
+                                        border: `1px solid ${profileMsg.ok ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
+                                    }}>
+                                        {profileMsg.text}
+                                    </div>
+                                )}
+
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '6px' }}>
+                                    <button type="button" onClick={closePanel} className="adm-btn adm-btn-secondary">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" className="adm-btn adm-btn-primary">
+                                        Save Profile
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+
+                        {/* ── Tab 2: Change Avatar ── */}
+                        {activePanel === 'avatar' && (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '18px' }}>
+                                <div style={{
+                                    width: '100px',
+                                    height: '100px',
+                                    borderRadius: '50%',
+                                    border: '3px solid #38bdf8',
+                                    overflow: 'hidden',
+                                    background: '#1e293b',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    boxShadow: '0 0 20px rgba(56, 189, 248, 0.3)'
+                                }}>
+                                    {avatarSrc ? (
+                                        <img src={avatarSrc} alt={user?.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    ) : (
+                                        <span style={{ fontSize: '28px', fontWeight: '800', color: '#38bdf8' }}>{initials}</span>
+                                    )}
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        id="navbar-avatar-upload"
+                                        style={{ display: 'none' }}
+                                        onChange={handleAvatarFile}
+                                    />
+                                    <label
+                                        htmlFor="navbar-avatar-upload"
+                                        className="adm-btn adm-btn-primary"
+                                        style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                                    >
+                                        <i className="fa-solid fa-cloud-arrow-up" /> Upload Photo
+                                    </label>
+
+                                    {avatarSrc && (
+                                        <button
+                                            type="button"
+                                            onClick={handleRemoveAvatar}
+                                            className="adm-btn adm-btn-danger"
+                                        >
+                                            <i className="fa-solid fa-trash" /> Remove
+                                        </button>
+                                    )}
+                                </div>
+
+                                {avatarStatus && (
+                                    <div style={{ fontSize: '13px', color: '#38bdf8', fontWeight: '600' }}>
+                                        {avatarStatus}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* ── Tab 3: Preferences ── */}
+                        {activePanel === 'prefs' && (
+                            <form onSubmit={savePrefs} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '8px', color: '#cbd5e1' }}>
+                                        Portfolio Accent Color
+                                    </label>
+                                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                        <input
+                                            type="color"
+                                            value={prefs.accentColor}
+                                            onChange={(e) => setPrefs({ ...prefs, accentColor: e.target.value })}
+                                            style={{ width: '44px', height: '40px', background: 'none', border: 'none', cursor: 'pointer' }}
+                                        />
+                                        <input
+                                            type="text"
+                                            className="adm-input"
+                                            value={prefs.accentColor}
+                                            onChange={(e) => setPrefs({ ...prefs, accentColor: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '8px', color: '#cbd5e1' }}>
+                                        Hero Background Style
+                                    </label>
+                                    <select
+                                        className="adm-select"
+                                        value={prefs.background}
+                                        onChange={(e) => setPrefs({ ...prefs, background: e.target.value })}
+                                    >
+                                        <option value="mesh">Mesh Gradient (Modern Glow)</option>
+                                        <option value="cyber">Cyberpunk Matrix &amp; Particles</option>
+                                        <option value="dots">Minimal Interactive Dots</option>
+                                        <option value="clean">Deep Midnight Clean</option>
+                                    </select>
+                                </div>
+
+                                {prefsMsg && (
+                                    <div style={{
+                                        padding: '10px 14px',
+                                        borderRadius: '8px',
+                                        fontSize: '13px',
+                                        background: prefsMsg.ok ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                                        color: prefsMsg.ok ? '#34d399' : '#f87171',
+                                        border: `1px solid ${prefsMsg.ok ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
+                                    }}>
+                                        {prefsMsg.text}
+                                    </div>
+                                )}
+
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '6px' }}>
+                                    <button type="button" onClick={closePanel} className="adm-btn adm-btn-secondary">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" className="adm-btn adm-btn-primary">
+                                        Save Preferences
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+
+                        {/* ── Tab 4: Change Password ── */}
+                        {activePanel === 'password' && (
+                            <form onSubmit={savePassword} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '6px', color: '#cbd5e1' }}>
+                                        Current Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        className="adm-input"
+                                        value={pwForm.current}
+                                        onChange={(e) => setPwForm({ ...pwForm, current: e.target.value })}
+                                        placeholder="••••••••"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '6px', color: '#cbd5e1' }}>
+                                        New Password (min 6 characters)
+                                    </label>
+                                    <input
+                                        type="password"
+                                        className="adm-input"
+                                        value={pwForm.next}
+                                        onChange={(e) => setPwForm({ ...pwForm, next: e.target.value })}
+                                        placeholder="••••••••"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '6px', color: '#cbd5e1' }}>
+                                        Confirm New Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        className="adm-input"
+                                        value={pwForm.confirm}
+                                        onChange={(e) => setPwForm({ ...pwForm, confirm: e.target.value })}
+                                        placeholder="••••••••"
+                                        required
+                                    />
+                                </div>
+
+                                {pwMsg && (
+                                    <div style={{
+                                        padding: '10px 14px',
+                                        borderRadius: '8px',
+                                        fontSize: '13px',
+                                        background: pwMsg.ok ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                                        color: pwMsg.ok ? '#34d399' : '#f87171',
+                                        border: `1px solid ${pwMsg.ok ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
+                                    }}>
+                                        {pwMsg.text}
+                                    </div>
+                                )}
+
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '6px' }}>
+                                    <button type="button" onClick={closePanel} className="adm-btn adm-btn-secondary">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" className="adm-btn adm-btn-primary">
+                                        Update Password
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+                    </div>
+                </div>
+            )}
         </>
     );
 }

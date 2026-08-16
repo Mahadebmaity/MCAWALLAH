@@ -10,6 +10,9 @@ import SiteSettings from '../models/SiteSettings.js';
 import GameScore from '../models/GameScore.js';
 import Navbar from '../models/Navbar.js';
 import Document from '../models/Document.js';
+import path from 'path';
+import fs from 'fs';
+import cloudinary, { isCloudinaryConfigured } from '../config/cloudinary.js';
 
 // @desc Get Full Admin Dashboard Statistics & Overview
 // @route GET /api/admin/overview
@@ -364,13 +367,52 @@ export const uploadDocument = async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ message: 'No document file uploaded' });
         }
-        const fileUrl = `/uploads/${req.file.filename}`;
+
         const fileSizeMB = (req.file.size / (1024 * 1024)).toFixed(2) + ' MB';
+        const fileType = req.file.mimetype.includes('pdf') ? 'PDF' : req.file.originalname.split('.').pop().toUpperCase();
+
+        // If Cloudinary is configured with valid credentials
+        if (isCloudinaryConfigured()) {
+            return new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: 'portfolio_documents',
+                        resource_type: 'auto'
+                    },
+                    (error, result) => {
+                        if (error) {
+                            console.error('Cloudinary document upload error:', error);
+                            return res.status(500).json({ message: 'Cloudinary upload failed', error: error.message });
+                        }
+                        resolve(res.json({
+                            url: result.secure_url,
+                            fileName: req.file.originalname,
+                            fileSize: fileSizeMB,
+                            fileType,
+                            public_id: result.public_id
+                        }));
+                    }
+                );
+                uploadStream.end(req.file.buffer);
+            });
+        }
+
+        // Local storage fallback
+        const filename = `${Date.now()}-${req.file.originalname.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+        const uploadPath = path.resolve('public', 'uploads', filename);
+        
+        fs.writeFileSync(uploadPath, req.file.buffer);
+
+        const protocol = req.protocol;
+        const host = req.get('host');
+        const fileUrl = `${protocol}://${host}/uploads/${filename}`;
+
         res.json({
             url: fileUrl,
             fileName: req.file.originalname,
             fileSize: fileSizeMB,
-            fileType: req.file.mimetype.includes('pdf') ? 'PDF' : req.file.originalname.split('.').pop().toUpperCase()
+            fileType,
+            storage: 'local'
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
