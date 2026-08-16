@@ -36,7 +36,7 @@ function addRandomTile(board) {
     return newBoard;
 }
 
-export default function Puzzle2048({ onGameOver, bestScore }) {
+export default function Puzzle2048({ onGameOver, onGameStart, bestScore }) {
     const [board, setBoard] = useState(getEmptyBoard);
     const [score, setScore] = useState(0);
     const [moves, setMoves] = useState(0);
@@ -55,6 +55,7 @@ export default function Puzzle2048({ onGameOver, bestScore }) {
         setHighestTile(4);
         setGameStatus("playing");
         startTimeRef.current = Date.now();
+        if (onGameStart) onGameStart();
     };
 
     const checkGameOver = (currentBoard) => {

@@ -217,13 +217,26 @@ export default function StandaloneArcadeWindow() {
                         gap: '8px',
                         padding: '6px 14px',
                         borderRadius: '8px',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid var(--adm-border)',
+                        background: isTimerRunning ? 'rgba(56, 189, 248, 0.12)' : 'rgba(255, 255, 255, 0.05)',
+                        border: `1px solid ${isTimerRunning ? 'rgba(56, 189, 248, 0.4)' : 'var(--adm-border)'}`,
                         fontFamily: 'var(--gm-font-m)',
-                        fontSize: '13px'
+                        fontSize: '13px',
+                        boxShadow: isTimerRunning ? '0 0 14px rgba(56, 189, 248, 0.2)' : 'none',
+                        transition: 'all 0.3s ease'
                     }}>
-                        <i className="fa-solid fa-stopwatch" style={{ color: '#38bdf8' }} />
-                        <span>Elapsed: <strong>{formatTime(gameSeconds)}</strong></span>
+                        <i
+                            className="fa-solid fa-stopwatch"
+                            style={{
+                                color: isTimerRunning ? '#38bdf8' : '#94a3b8',
+                                animation: isTimerRunning ? 'spinSlow 4s linear infinite' : 'none'
+                            }}
+                        />
+                        <span>
+                            Elapsed: <strong style={{ color: isTimerRunning ? '#38bdf8' : '#f8fafc' }}>{formatTime(gameSeconds)}</strong>
+                        </span>
+                        {isTimerRunning && (
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 6px #10b981' }} />
+                        )}
                     </div>
 
                     <button
@@ -328,24 +341,28 @@ export default function StandaloneArcadeWindow() {
                     {activeSlug === "snake" && (
                         <SnakeGame
                             onGameOver={handleGameOver}
+                            onGameStart={() => { setGameSeconds(0); setIsTimerRunning(true); }}
                             bestScore={bests.snake}
                         />
                     )}
                     {activeSlug === "2048" && (
                         <Puzzle2048
                             onGameOver={handleGameOver}
+                            onGameStart={() => { setGameSeconds(0); setIsTimerRunning(true); }}
                             bestScore={bests["2048"]}
                         />
                     )}
                     {activeSlug === "typing" && (
                         <TypingChallenge
                             onGameOver={handleGameOver}
+                            onGameStart={() => { setGameSeconds(0); setIsTimerRunning(true); }}
                             bestScore={bests.typing}
                         />
                     )}
                     {activeSlug === "tictactoe" && (
                         <TicTacToe
                             onGameOver={handleGameOver}
+                            onGameStart={() => { setGameSeconds(0); setIsTimerRunning(true); }}
                             bestScore={bests.tictactoe}
                         />
                     )}

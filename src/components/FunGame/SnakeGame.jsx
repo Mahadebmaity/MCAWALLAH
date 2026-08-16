@@ -15,7 +15,7 @@ function randomFood(snake) {
     return pos;
 }
 
-export default function SnakeGame({ onGameOver, bestScore }) {
+export default function SnakeGame({ onGameOver, onGameStart, bestScore }) {
     const canvasRef = useRef(null);
     const stateRef = useRef({
         snake: INIT_SNAKE,
@@ -131,6 +131,7 @@ export default function SnakeGame({ onGameOver, bestScore }) {
         startTimeRef.current = Date.now();
         setScore(0);
         setPhase("playing");
+        if (onGameStart) onGameStart();
         lastTime.current = performance.now();
         animRef.current = requestAnimationFrame(loop);
     };

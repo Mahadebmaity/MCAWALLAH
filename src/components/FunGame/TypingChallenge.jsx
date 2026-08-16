@@ -58,7 +58,7 @@ const KEYBOARD_ROWS = [
     ["Space"]
 ];
 
-export default function TypingChallenge({ onGameOver, bestScore }) {
+export default function TypingChallenge({ onGameOver, onGameStart, bestScore }) {
     const [categoryKey, setCategoryKey] = useState("alphabet");
     const [selectedDuration, setSelectedDuration] = useState(30); // 15, 30, 60, 120
     const [targetText, setTargetText] = useState(DRILL_CATEGORIES.alphabet.drills[0]);
@@ -127,6 +127,7 @@ export default function TypingChallenge({ onGameOver, bestScore }) {
         setAccuracy(100);
         setErrorsCount(0);
         setPhase("playing");
+        if (onGameStart) onGameStart();
         setTimeout(() => inputRef.current?.focus(), 50);
     };
 

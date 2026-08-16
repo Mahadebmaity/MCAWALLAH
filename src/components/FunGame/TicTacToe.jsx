@@ -7,7 +7,7 @@ const WINNING_COMBOS = [
     [0, 4, 8], [2, 4, 6]             // diagonals
 ];
 
-export default function TicTacToe({ onGameOver, bestScore }) {
+export default function TicTacToe({ onGameOver, onGameStart, bestScore }) {
     const [board, setBoard] = useState(Array(9).fill(null));
     const [isXNext, setIsXNext] = useState(true);
     const [gameMode, setGameMode] = useState("ai_hard"); // 'ai_hard' | 'ai_easy' | 'pvp'
@@ -126,6 +126,11 @@ export default function TicTacToe({ onGameOver, bestScore }) {
     const handleClick = useCallback((index) => {
         if (board[index] || winner || isAiThinking) return;
 
+        if (onGameStart && board.every(c => c === null)) {
+            onGameStart();
+            startTimeRef.current = Date.now();
+        }
+
         const newBoard = [...board];
         newBoard[index] = isXNext ? "X" : "O";
         setBoard(newBoard);
@@ -137,7 +142,7 @@ export default function TicTacToe({ onGameOver, bestScore }) {
         }
 
         setIsXNext(!isXNext);
-    }, [board, isXNext, winner, isAiThinking]);
+    }, [board, isXNext, winner, isAiThinking, onGameStart]);
 
     // Handle AI turn
     useEffect(() => {
