@@ -199,8 +199,25 @@
    ══════════════════════════════════════════════ */
 .game-showcase__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+@media (min-width: 860px) {
+    .game-showcase__grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .game-showcase__grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
 }
 
 /* Individual Game Card */
@@ -208,32 +225,34 @@
     position: relative;
     background: var(--gm-card);
     border: 1px solid var(--gm-border);
-    border-radius: 20px;
-    padding: 26px;
+    border-radius: 18px;
+    padding: 20px 22px;
     box-shadow: var(--gm-shadow);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 20px;
+    gap: 14px;
     cursor: pointer;
     overflow: hidden;
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     backdrop-filter: blur(12px);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .game-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-5px);
     background: var(--gm-card-hover);
-    border-color: color-mix(in srgb, var(--card-color, var(--gm-accent)) 50%, transparent);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2), 0 0 30px color-mix(in srgb, var(--card-color, var(--gm-accent)) 20%, transparent);
+    border-color: color-mix(in srgb, var(--card-color, var(--gm-accent)) 45%, transparent);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25), 0 0 24px color-mix(in srgb, var(--card-color, var(--gm-accent)) 18%, transparent);
 }
 
 /* Ambient Top Accent Glow Bar */
 .game-card__glow-bar {
     position: absolute;
     top: 0;
-    left: 20px;
-    right: 20px;
+    left: 16px;
+    right: 16px;
     height: 3px;
     border-radius: 0 0 4px 4px;
     background: linear-gradient(90deg, transparent, var(--card-color, var(--gm-accent)), transparent);
@@ -243,7 +262,7 @@
 
 .game-card:hover .game-card__glow-bar {
     opacity: 1;
-    height: 4px;
+    height: 3.5px;
 }
 
 .game-card__top {
@@ -253,45 +272,45 @@
 }
 
 .game-card__icon-box {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    background: color-mix(in srgb, var(--card-color, #e84545) 15%, transparent);
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--card-color, #e84545) 14%, transparent);
     color: var(--card-color, #e84545);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
-    border: 1px solid color-mix(in srgb, var(--card-color, #e84545) 25%, transparent);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    font-size: 19px;
+    border: 1px solid color-mix(in srgb, var(--card-color, #e84545) 24%, transparent);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .game-card:hover .game-card__icon-box {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px color-mix(in srgb, var(--card-color, #e84545) 35%, transparent);
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--card-color, #e84545) 30%, transparent);
 }
 
 .game-card__badge {
     font-family: var(--gm-font-m);
     font-size: 11px;
     font-weight: 600;
-    padding: 5px 12px;
+    padding: 4px 10px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--card-color, #e84545) 12%, transparent);
+    background: color-mix(in srgb, var(--card-color, #e84545) 10%, transparent);
     color: var(--card-color, #e84545);
-    border: 1px solid color-mix(in srgb, var(--card-color, #e84545) 25%, transparent);
-    letter-spacing: 0.3px;
+    border: 1px solid color-mix(in srgb, var(--card-color, #e84545) 22%, transparent);
+    letter-spacing: 0.2px;
 }
 
 .game-card__body {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
 }
 
 .game-card__tagline {
     font-family: var(--gm-font-m);
-    font-size: 11px;
+    font-size: 10.5px;
     color: var(--gm-text-3);
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -300,7 +319,7 @@
 
 .game-card__title {
     font-family: var(--gm-font-d);
-    font-size: 1.45rem;
+    font-size: 1.25rem;
     font-weight: 800;
     color: var(--gm-text-1);
     margin: 0;
@@ -308,8 +327,8 @@
 }
 
 .game-card__desc {
-    font-size: 13.5px;
-    line-height: 1.6;
+    font-size: 13px;
+    line-height: 1.5;
     color: var(--gm-text-2);
     margin: 0;
 }
@@ -322,12 +341,12 @@
 }
 
 .game-card__feature-pill {
-    font-size: 11px;
+    font-size: 10.5px;
     font-family: var(--gm-font-m);
     color: var(--gm-text-2);
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--gm-border);
-    padding: 4px 10px;
+    padding: 3px 8px;
     border-radius: 6px;
     display: inline-flex;
     align-items: center;
@@ -341,7 +360,7 @@
 
 .game-card__feature-pill i {
     color: var(--card-color, var(--gm-accent));
-    font-size: 10px;
+    font-size: 9.5px;
 }
 
 /* Footer Action Button */
@@ -349,7 +368,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    padding-top: 16px;
+    padding-top: 12px;
     border-top: 1px solid var(--gm-border);
 }
 
@@ -359,25 +378,25 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 10px 18px;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--card-color, #e84545) 12%, transparent);
-    border: 1px solid color-mix(in srgb, var(--card-color, #e84545) 25%, transparent);
+    padding: 8px 16px;
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--card-color, #e84545) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--card-color, #e84545) 22%, transparent);
     color: var(--card-color, #e84545);
     font-family: var(--gm-font-d);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    transition: all 0.25s ease;
+    transition: all 0.2s ease;
 }
 
 .game-card:hover .game-card__action-btn {
     background: var(--card-color, #e84545);
     color: #ffffff;
-    box-shadow: 0 4px 16px color-mix(in srgb, var(--card-color, #e84545) 40%, transparent);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--card-color, #e84545) 35%, transparent);
 }
 
 .game-card__action-btn i {
-    transition: transform 0.25s ease;
+    transition: transform 0.2s ease;
 }
 
 .game-card:hover .game-card__action-btn i {

@@ -9,11 +9,11 @@ export default function AdminLogin() {
     const [password, setPassword] = useState('Admin@123456');
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [autoFilled, setAutoFilled] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const { login } = useAuth();
     const navigate = useNavigate();
-
-    const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,9 +29,9 @@ export default function AdminLogin() {
             }
         } catch (err) {
             if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError') || err.name === 'TypeError') {
-                setError('Cannot connect to backend server. Make sure "npm run dev" or the backend server is running.');
+                setError('Cannot connect to backend server. Make sure "npm run dev" or the backend server is running on port 5000.');
             } else {
-                setError(err.message || 'Login failed. Please check credentials.');
+                setError(err.message || 'Login failed. Please check your email and password.');
             }
         } finally {
             setLoading(false);
@@ -42,6 +42,8 @@ export default function AdminLogin() {
         setEmail('mahadeb@portfolio.com');
         setPassword('Admin@123456');
         setError(null);
+        setAutoFilled(true);
+        setTimeout(() => setAutoFilled(false), 2500);
     };
 
     return (
@@ -65,11 +67,16 @@ export default function AdminLogin() {
                         fontSize: '13px',
                         marginBottom: '20px',
                         display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
+                        flexDirection: 'column',
+                        gap: '6px'
                     }}>
-                        <i className="fa-solid fa-circle-exclamation"></i>
-                        <span>{error}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <span>{error}</span>
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#fca5a5', paddingLeft: '22px' }}>
+                            Default login: <strong style={{ color: '#fff' }}>mahadeb@portfolio.com</strong> / <strong style={{ color: '#fff' }}>Admin@123456</strong>
+                        </div>
                     </div>
                 )}
 
@@ -79,10 +86,11 @@ export default function AdminLogin() {
                         <input
                             type="email"
                             required
+                            autoComplete="username"
                             className="adm-input"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="admin@portfolio.com"
+                            placeholder="mahadeb@portfolio.com"
                         />
                     </div>
 
@@ -110,6 +118,7 @@ export default function AdminLogin() {
                         <input
                             type={showPassword ? "text" : "password"}
                             required
+                            autoComplete="current-password"
                             className="adm-input"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -141,17 +150,21 @@ export default function AdminLogin() {
                             type="button"
                             onClick={handleFillDefaults}
                             style={{
-                                background: 'rgba(56, 189, 248, 0.08)',
-                                border: '1px solid rgba(56, 189, 248, 0.2)',
+                                background: autoFilled ? 'rgba(34, 197, 94, 0.15)' : 'rgba(56, 189, 248, 0.08)',
+                                border: autoFilled ? '1px solid rgba(34, 197, 94, 0.4)' : '1px solid rgba(56, 189, 248, 0.2)',
                                 borderRadius: '6px',
-                                color: '#38bdf8',
-                                fontSize: '11px',
-                                padding: '6px 12px',
-                                cursor: 'pointer'
+                                color: autoFilled ? '#4ade80' : '#38bdf8',
+                                fontSize: '11.5px',
+                                padding: '7px 14px',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px'
                             }}
                         >
-                            <i className="fa-solid fa-wand-magic-sparkles" style={{ marginRight: '5px' }}></i>
-                            Auto-fill Default Admin Credentials
+                            <i className={`fa-solid ${autoFilled ? 'fa-circle-check' : 'fa-wand-magic-sparkles'}`}></i>
+                            {autoFilled ? 'Default Credentials Applied!' : 'Auto-fill Default Admin Credentials'}
                         </button>
                     </div>
                 </form>

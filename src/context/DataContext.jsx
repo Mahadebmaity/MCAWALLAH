@@ -189,14 +189,56 @@ const DEFAULT_PORTFOLIO_DATA = {
     ],
     games: [
         {
-            id: 1,
-            title: 'Retro Snake',
-            slug: 'snake',
-            type: 'built-in',
-            componentName: 'Snake',
-            desc: 'Classic retro snake game. Eat food dots, grow longer, and avoid walls or crashing into yourself!',
-            icon: 'fa-solid fa-gamepad',
-            color: '#2e86de'
+            title: "Retro Snake",
+            slug: "snake",
+            tagline: "Classic Reflex Arcade",
+            categoryBadge: "Arcade Classic",
+            desc: "Eat glowing food dots to grow longer, avoid collisions, and test your lightning reflexes across 3 speed tiers.",
+            icon: "fa-solid fa-gamepad",
+            color: "#e84545",
+            features: ["3 Speed Modes", "Dynamic D-Pad", "Global Leaderboard"],
+            instructions: "Use arrow keys or touch D-pad to steer the snake.",
+            order: 1,
+            isPublic: true
+        },
+        {
+            title: "2048 Puzzle",
+            slug: "2048",
+            tagline: "Mathematical Strategy",
+            categoryBadge: "Puzzle & Logic",
+            desc: "Slide and merge matching number tiles on a 4x4 grid to reach the coveted 2048 tile and set record scores.",
+            icon: "fa-solid fa-shapes",
+            color: "#f59e0b",
+            features: ["4x4 Animated Grid", "Touch Swipe", "Score Multipliers"],
+            instructions: "Use arrow keys or swipe to slide and merge tiles.",
+            order: 2,
+            isPublic: true
+        },
+        {
+            title: "Typing Speed Trainer",
+            slug: "typing",
+            tagline: "Pro Touch-Typing Tutor",
+            categoryBadge: "Skill & Speed",
+            desc: "Master number rows, alphabet pangrams, and real programming syntax with live WPM telemetry & audio feedback.",
+            icon: "fa-solid fa-keyboard",
+            color: "#10b981",
+            features: ["Live WPM Telemetry", "Mechanical Sound FX", "Visual Keyboard Guide"],
+            instructions: "Type the highlighted letters, numbers, or code snippets accurately to test and improve your typing speed.",
+            order: 3,
+            isPublic: true
+        },
+        {
+            title: "Tic Tac Toe AI",
+            slug: "tictactoe",
+            tagline: "Tactical Match",
+            categoryBadge: "AI & 2-Player",
+            desc: "Challenge our unbeatable Minimax AI bot or play with a friend in local 2-Player pass-and-play mode.",
+            icon: "fa-solid fa-xmark",
+            color: "#38bdf8",
+            features: ["Unbeatable AI Bot", "2-Player Pass Mode", "Win Streak Animations"],
+            instructions: "Place 3 of your marks in a horizontal, vertical, or diagonal row to win.",
+            order: 4,
+            isPublic: true
         }
     ],
     settings: {

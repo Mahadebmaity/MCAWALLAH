@@ -60,16 +60,34 @@ export default function FunGame() {
         isPublic: true
     };
 
-    const gamesList = data?.games?.length
-        ? data.games.map(g => {
-            const fallback = DEFAULT_GAMES.find(df => df.slug === g.slug) || {};
-            return {
-                ...fallback,
-                ...g,
-                features: g.features?.length ? g.features : fallback.features || []
-            };
-        })
-        : DEFAULT_GAMES;
+    // Merge data from database with rich fallbacks so every card has badges, features, and correct colors
+    const rawGames = data?.games?.length ? data.games : DEFAULT_GAMES;
+
+    const defaultMappedGames = DEFAULT_GAMES.map(defaultGame => {
+        const found = rawGames.find(g =>
+            g.slug === defaultGame.slug ||
+            (g.slug === 'speed-typer' && defaultGame.slug === 'typing')
+        );
+        if (!found) return defaultGame;
+        return {
+            ...defaultGame,
+            ...found,
+            slug: defaultGame.slug,
+            tagline: found.tagline || defaultGame.tagline,
+            categoryBadge: found.categoryBadge || defaultGame.categoryBadge,
+            desc: found.desc || defaultGame.desc,
+            icon: found.icon || defaultGame.icon,
+            color: found.color || defaultGame.color,
+            features: (found.features && found.features.length > 0) ? found.features : defaultGame.features
+        };
+    });
+
+    // Also include any custom added games from the CMS
+    const customGames = rawGames.filter(g =>
+        !DEFAULT_GAMES.some(df => df.slug === g.slug || (g.slug === 'speed-typer' && df.slug === 'typing'))
+    );
+
+    const gamesList = [...defaultMappedGames, ...customGames];
 
     if (sectionConfig.isPublic === false) return null;
 
