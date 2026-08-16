@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import { API_BASE } from "../../config/api";
 import "./Footer.css";
 
@@ -23,6 +24,8 @@ const DEFAULT_SOCIALS = [
 ];
 
 export default function Footer() {
+    const { user } = useAuth();
+
     /* ── state ── */
     const [footerConfig, setFooterConfig] = useState(null);
     const [backVisible, setBackVisible] = useState(false);
@@ -81,7 +84,9 @@ export default function Footer() {
     /* ── real newsletter subscription to backend ── */
     const handleNewsletter = async (e) => {
         e.preventDefault();
-        if (!/\S+@\S+\.\S+/.test(newsEmail)) {
+        const targetEmail = user?.email || newsEmail;
+
+        if (!targetEmail || !/\S+@\S+\.\S+/.test(targetEmail)) {
             setNewsStatus("err");
             setNewsMessage("Please enter a valid email address.");
             return;
@@ -92,14 +97,14 @@ export default function Footer() {
             const res = await fetch(`${API_BASE}/portfolio/subscribe`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: newsEmail })
+                body: JSON.stringify({ email: targetEmail, userId: user?._id, userName: user?.name })
             });
             const data = await res.json();
 
             if (res.ok) {
                 setNewsStatus("ok");
                 setNewsMessage(data.message || "🎉 Subscribed successfully!");
-                setNewsEmail("");
+                if (!user) setNewsEmail("");
                 setTimeout(() => {
                     setNewsStatus(null);
                     setNewsMessage("");
@@ -339,18 +344,58 @@ export default function Footer() {
                                     {newsletterSubtitle}
                                 </p>
                                 <form className="footer__news-form" onSubmit={handleNewsletter} noValidate>
-                                    <div className="footer__news-input-wrap">
-                                        <i className="fa-solid fa-at footer__news-icon" />
-                                        <input
-                                            type="email"
-                                            placeholder="your@email.com"
-                                            value={newsEmail}
-                                            onChange={(e) => { setNewsEmail(e.target.value); setNewsStatus(null); setNewsMessage(""); }}
-                                            className={`footer__news-input ${newsStatus === "err" ? "footer__news-input--err" : ""}`}
-                                            aria-label="Email for newsletter"
-                                            disabled={newsStatus === "loading"}
-                                        />
-                                    </div>
+                                    {user ? (
+                                        /* ── Signed-In User: Hide Input Box, Show Active Account Pill ── */
+                                        <div style={{
+                                            background: 'rgba(56, 189, 248, 0.1)',
+                                            border: '1px solid rgba(56, 189, 248, 0.3)',
+                                            borderRadius: '10px',
+                                            padding: '8px 12px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '10px',
+                                            marginBottom: '8px'
+                                        }}>
+                                            <div style={{
+                                                width: '26px',
+                                                height: '26px',
+                                                borderRadius: '50%',
+                                                background: 'linear-gradient(135deg, var(--f-accent, #e84545), #38bdf8)',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontSize: '11px',
+                                                fontWeight: '800',
+                                                color: '#fff',
+                                                flexShrink: 0
+                                            }}>
+                                                {user.name ? user.name[0].toUpperCase() : 'U'}
+                                            </div>
+                                            <div style={{ minWidth: 0, flex: 1 }}>
+                                                <div style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                    Signed in as
+                                                </div>
+                                                <div style={{ fontSize: '12.5px', fontWeight: '700', color: '#38bdf8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                    {user.email}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        /* ── Guest / Anonymous Visitor: Show Email Input Box ── */
+                                        <div className="footer__news-input-wrap">
+                                            <i className="fa-solid fa-at footer__news-icon" />
+                                            <input
+                                                type="email"
+                                                placeholder="your@email.com"
+                                                value={newsEmail}
+                                                onChange={(e) => { setNewsEmail(e.target.value); setNewsStatus(null); setNewsMessage(""); }}
+                                                className={`footer__news-input ${newsStatus === "err" ? "footer__news-input--err" : ""}`}
+                                                aria-label="Email for newsletter"
+                                                disabled={newsStatus === "loading"}
+                                            />
+                                        </div>
+                                    )}
+
                                     {newsStatus === "err" && <p className="footer__news-err">{newsMessage || "Enter a valid email."}</p>}
                                     {newsStatus === "ok" && (
                                         <p className="footer__news-ok">
