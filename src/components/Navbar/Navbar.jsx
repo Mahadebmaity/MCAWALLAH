@@ -19,6 +19,7 @@ export default function Navbar() {
         user, logout, savePreferences,
         uploadAvatar, removeAvatar,
         updateProfile, changePassword,
+        requireAuth
     } = useAuth();
 
     const { data } = usePortfolioData();
@@ -175,24 +176,34 @@ export default function Navbar() {
     const downloadResume = (resumeItem, e) => {
         if (e) e.stopPropagation();
         const item = resumeItem || primaryResume;
-        const targetUrl = item?.url || about.resumeUrl || "/resume.pdf";
-        const title = item?.title || "Resume";
 
-        trackActivity({
-            action: 'RESUME_DOWNLOAD',
-            category: 'document',
-            details: `Downloaded resume: "${title}"`
-        });
+        const performDownload = () => {
+            const targetUrl = item?.url || about.resumeUrl || "/resume.pdf";
+            const title = item?.title || "Resume";
 
-        const a = document.createElement("a");
-        a.href = targetUrl;
-        a.setAttribute("download", title.replace(/[^a-zA-Z0-9_-]/g, "_") + ".pdf");
-        a.target = "_blank";
-        a.rel = "noreferrer";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setResumeDropdown(false);
+            trackActivity({
+                action: 'RESUME_DOWNLOAD',
+                category: 'document',
+                details: `Downloaded resume: "${title}"`
+            });
+
+            const a = document.createElement("a");
+            a.href = targetUrl;
+            a.setAttribute("download", title.replace(/[^a-zA-Z0-9_-]/g, "_") + ".pdf");
+            a.target = "_blank";
+            a.rel = "noreferrer";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setResumeDropdown(false);
+        };
+
+        if (!requireAuth(performDownload, "Please Sign In or Sign Up to download full resume & CV documents.", "register")) {
+            setResumeDropdown(false);
+            return;
+        }
+
+        performDownload();
     };
 
     /* ── logout ── */

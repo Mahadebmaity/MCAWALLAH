@@ -28,8 +28,11 @@ import MessagesInbox from './admin/MessagesInbox';
 import FooterSubscribersCMS from './admin/FooterSubscribersCMS';
 import SettingsCMS from './admin/SettingsCMS';
 import UsersActivityCMS from './admin/UsersActivityCMS';
+import AuthModal from './components/AuthModal/AuthModal';
+import { useAuth } from './context/AuthContext';
 
 function PublicPortfolio() {
+  const { authModalOpen, closeAuthModal, authModalPrompt, authModalMode } = useAuth();
   return (
     <>
       <Navbar />
@@ -39,6 +42,13 @@ function PublicPortfolio() {
       <FunGame />
       <Contact />
       <Footer />
+      {authModalOpen && (
+        <AuthModal
+          onClose={closeAuthModal}
+          prompt={authModalPrompt}
+          defaultMode={authModalMode}
+        />
+      )}
     </>
   );
 }

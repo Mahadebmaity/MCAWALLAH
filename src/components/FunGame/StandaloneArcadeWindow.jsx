@@ -7,6 +7,7 @@ import TypingChallenge from "./TypingChallenge";
 import TicTacToe from "./TicTacToe";
 import GameLeaderboard from "./GameLeaderboard";
 import GameInstructionsModal from "./GameInstructionsModal";
+import AuthModal from "../AuthModal/AuthModal";
 import { useAuth } from "../../context/AuthContext";
 import { API_BASE } from "../../config/api";
 import { trackActivity } from "../../utils/analytics";
@@ -408,6 +409,15 @@ export default function StandaloneArcadeWindow() {
                 <GameLeaderboard
                     gameSlug={activeSlug}
                     onClose={() => setShowLeaderboard(false)}
+                />
+            )}
+
+            {/* Authentication Gate Modal for Guest Visitors */}
+            {!user && (
+                <AuthModal
+                    onClose={() => navigate("/")}
+                    prompt="Please Sign In or Sign Up to access the Arcade Arena & record your high scores!"
+                    defaultMode="register"
                 />
             )}
         </div>

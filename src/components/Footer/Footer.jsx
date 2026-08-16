@@ -24,7 +24,7 @@ const DEFAULT_SOCIALS = [
 ];
 
 export default function Footer() {
-    const { user } = useAuth();
+    const { user, requireAuth } = useAuth();
 
     /* ── state ── */
     const [footerConfig, setFooterConfig] = useState(null);
@@ -32,11 +32,25 @@ export default function Footer() {
     const [newsEmail, setNewsEmail] = useState("");
     const [newsStatus, setNewsStatus] = useState(null); // "ok" | "err" | "loading"
     const [newsMessage, setNewsMessage] = useState("");
-    const [form, setForm] = useState({ name: "", email: "", message: "" });
+    const [form, setForm] = useState({
+        name: user?.name || "",
+        email: user?.email || "",
+        message: ""
+    });
     const [formErrors, setFormErrors] = useState({});
     const [formStatus, setFormStatus] = useState(null); // "ok" | "sending"
     const [visibleSections, setVisible] = useState({});
     const sectionRefs = useRef({});
+
+    useEffect(() => {
+        if (user) {
+            setForm((p) => ({
+                ...p,
+                name: p.name || user.name || "",
+                email: p.email || user.email || ""
+            }));
+        }
+    }, [user]);
 
     /* ── Fetch Dynamic Footer Data ── */
     useEffect(() => {
@@ -129,36 +143,45 @@ export default function Footer() {
     };
 
     const handleFeedback = async (e) => {
-        e.preventDefault();
-        const errs = validate();
-        if (Object.keys(errs).length) { setFormErrors(errs); return; }
-        setFormErrors({});
-        setFormStatus("sending");
+        if (e) e.preventDefault();
 
-        try {
-            const res = await fetch(`${API_BASE}/portfolio/contact`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: form.name,
-                    email: form.email,
-                    subject: "Footer Feedback Submission",
-                    message: form.message
-                })
-            });
+        const sendFeedback = async () => {
+            const errs = validate();
+            if (Object.keys(errs).length) { setFormErrors(errs); return; }
+            setFormErrors({});
+            setFormStatus("sending");
 
-            if (res.ok) {
-                setFormStatus("ok");
-                setForm({ name: "", email: "", message: "" });
-                setTimeout(() => setFormStatus(null), 4000);
-            } else {
+            try {
+                const res = await fetch(`${API_BASE}/portfolio/contact`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name: form.name,
+                        email: form.email,
+                        subject: "Footer Feedback Submission",
+                        message: form.message
+                    })
+                });
+
+                if (res.ok) {
+                    setFormStatus("ok");
+                    setForm({ name: user?.name || "", email: user?.email || "", message: "" });
+                    setTimeout(() => setFormStatus(null), 4000);
+                } else {
+                    setFormStatus(null);
+                    setFormErrors({ general: "Failed to send feedback. Please try again." });
+                }
+            } catch {
                 setFormStatus(null);
-                setFormErrors({ general: "Failed to send feedback. Please try again." });
+                setFormErrors({ general: "Network error. Please try again later." });
             }
-        } catch {
-            setFormStatus(null);
-            setFormErrors({ general: "Network error. Please try again later." });
+        };
+
+        if (!requireAuth(sendFeedback, "Please Sign In or Sign Up to submit website feedback.", "register")) {
+            return;
         }
+
+        sendFeedback();
     };
 
     const handleFormChange = (field) => (e) => {

@@ -1,6 +1,7 @@
 // src/components/FunGame/FunGame.jsx
 import { useEffect, useRef } from "react";
 import { usePortfolioData } from "../../context/DataContext";
+import { useAuth } from "../../context/AuthContext";
 import "./FunGame.css";
 
 const DEFAULT_GAMES = [
@@ -48,6 +49,7 @@ const DEFAULT_GAMES = [
 
 export default function FunGame() {
     const { data } = usePortfolioData();
+    const { requireAuth } = useAuth();
     const sectionRef = useRef(null);
 
     const sectionConfig = data?.settings?.gamesSection || {
@@ -92,6 +94,13 @@ export default function FunGame() {
     if (sectionConfig.isPublic === false) return null;
 
     const openGame = (slug = "snake") => {
+        if (!requireAuth(
+            () => window.open(`/arcade/${slug}`, "_blank"),
+            "Please Sign In or Sign Up to play Arcade Games and record your high scores!",
+            "register"
+        )) {
+            return;
+        }
         window.open(`/arcade/${slug}`, "_blank");
     };
 

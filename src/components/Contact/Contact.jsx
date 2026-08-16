@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { usePortfolioData } from "../../context/DataContext";
+import { useAuth } from "../../context/AuthContext";
 import { trackActivity } from "../../utils/analytics";
 import "./Contact.css";
 
@@ -23,13 +24,29 @@ function useInView(threshold = 0.1) {
 
 export default function Contact() {
     const { data, submitContactMessage } = usePortfolioData();
+    const { user, requireAuth } = useAuth();
     const settings = data?.settings || {};
 
     const [sectionRef, sectionIn] = useInView(0.1);
-    const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+    const [form, setForm] = useState({
+        name: user?.name || "",
+        email: user?.email || "",
+        subject: "",
+        message: ""
+    });
     const [errors, setErrors] = useState({});
     const [status, setStatus] = useState(null); // null | "sending" | "ok" | "err"
     const [feedbackText, setFeedbackText] = useState("");
+
+    useEffect(() => {
+        if (user) {
+            setForm((p) => ({
+                ...p,
+                name: p.name || user.name || "",
+                email: p.email || user.email || ""
+            }));
+        }
+    }, [user]);
 
     const validate = () => {
         const e = {};
@@ -46,34 +63,43 @@ export default function Contact() {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        const errs = validate();
-        if (Object.keys(errs).length) { setErrors(errs); return; }
-        
-        setErrors({});
-        setStatus("sending");
+        if (e) e.preventDefault();
 
-        try {
-            const res = await submitContactMessage(form);
-            trackActivity({
-                action: 'CONTACT_SUBMIT',
-                category: 'contact',
-                details: `Inquiry submitted: "${form.subject || 'No Subject'}" (${form.name})`,
-                metadata: { senderName: form.name, senderEmail: form.email, subject: form.subject }
-            });
-            setStatus("ok");
-            setFeedbackText(res.message || "Message sent! I'll reply within 24 hours.");
-            setForm({ name: "", email: "", subject: "", message: "" });
-            setTimeout(() => setStatus(null), 5000);
-        } catch (err) {
-            setStatus("err");
-            if (err.message?.includes('Failed to fetch') || err.name === 'TypeError') {
-                setFeedbackText("Cannot connect to server. Please make sure the backend server is running.");
-            } else {
-                setFeedbackText(err.message || "Failed to send message. Please try again.");
+        const send = async () => {
+            const errs = validate();
+            if (Object.keys(errs).length) { setErrors(errs); return; }
+            
+            setErrors({});
+            setStatus("sending");
+
+            try {
+                const res = await submitContactMessage(form);
+                trackActivity({
+                    action: 'CONTACT_SUBMIT',
+                    category: 'contact',
+                    details: `Inquiry submitted: "${form.subject || 'No Subject'}" (${form.name})`,
+                    metadata: { senderName: form.name, senderEmail: form.email, subject: form.subject }
+                });
+                setStatus("ok");
+                setFeedbackText(res.message || "Message sent! I'll reply within 24 hours.");
+                setForm({ name: user?.name || "", email: user?.email || "", subject: "", message: "" });
+                setTimeout(() => setStatus(null), 5000);
+            } catch (err) {
+                setStatus("err");
+                if (err.message?.includes('Failed to fetch') || err.name === 'TypeError') {
+                    setFeedbackText("Cannot connect to server. Please make sure the backend server is running.");
+                } else {
+                    setFeedbackText(err.message || "Failed to send message. Please try again.");
+                }
+                setTimeout(() => setStatus(null), 5000);
             }
-            setTimeout(() => setStatus(null), 5000);
+        };
+
+        if (!requireAuth(send, "Please Sign In or Sign Up to send direct inquiry messages.", "register")) {
+            return;
         }
+
+        send();
     };
 
     return (

@@ -210,6 +210,36 @@ export function AuthProvider({ children }) {
         return data;
     };
 
+    /* ── Global Auth Guard & Modal State ── */
+    const [authModalOpen, setAuthModalOpen] = useState(false);
+    const [authModalPrompt, setAuthModalPrompt] = useState("");
+    const [authModalMode, setAuthModalMode] = useState("login");
+    const [pendingAction, setPendingAction] = useState(null);
+
+    const openAuthModal = (prompt = "", defaultMode = "login") => {
+        setAuthModalPrompt(prompt);
+        setAuthModalMode(defaultMode);
+        setAuthModalOpen(true);
+    };
+
+    const closeAuthModal = () => {
+        setAuthModalOpen(false);
+        setAuthModalPrompt("");
+        setPendingAction(null);
+    };
+
+    const requireAuth = (callbackAction, promptMessage = "Please Sign In or Sign Up to continue.", defaultMode = "login") => {
+        if (user) {
+            if (typeof callbackAction === "function") callbackAction();
+            return true;
+        }
+        if (typeof callbackAction === "function") {
+            setPendingAction(() => callbackAction);
+        }
+        openAuthModal(promptMessage, defaultMode);
+        return false;
+    };
+
     return (
         <AuthContext.Provider value={{
             user,
@@ -224,6 +254,12 @@ export function AuthProvider({ children }) {
             removeAvatar,
             savePreferences,
             authFetch,
+            authModalOpen,
+            authModalPrompt,
+            authModalMode,
+            openAuthModal,
+            closeAuthModal,
+            requireAuth
         }}>
             {children}
         </AuthContext.Provider>

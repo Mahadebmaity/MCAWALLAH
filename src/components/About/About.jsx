@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { usePortfolioData } from "../../context/DataContext";
+import { useAuth } from "../../context/AuthContext";
 import "./About.css";
 
 const DEFAULT_SKILLS = [
@@ -93,6 +94,7 @@ function SkillBar({ skill, inView }) {
 
 export default function About() {
     const { data } = usePortfolioData();
+    const { requireAuth } = useAuth();
     const about = data?.about || {};
 
     const [heroRef, heroIn] = useInView(0.1);
@@ -109,6 +111,24 @@ export default function About() {
     const skills = data?.skills?.length ? data.skills : DEFAULT_SKILLS;
     const timeline = data?.timeline?.length ? data.timeline : DEFAULT_TIMELINE;
     const hobbies = about.hobbies?.length ? about.hobbies : DEFAULT_HOBBIES;
+
+    const handleResumeDownload = (resItem) => {
+        requireAuth(() => {
+            const a = document.createElement("a");
+            a.href = resItem.url;
+            a.download = (resItem.title || 'Resume').replace(/[^a-zA-Z0-9_-]/g, "_") + ".pdf";
+            a.target = "_blank";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }, "Please Sign In or Sign Up to download full resume & CV documents.", "register");
+    };
+
+    const handleResumePreview = (resItem) => {
+        requireAuth(() => {
+            window.open(resItem.url, "_blank");
+        }, "Please Sign In or Sign Up to preview resume documents.", "register");
+    };
 
     return (
         <section id="about" className="about">
@@ -215,25 +235,22 @@ export default function About() {
                                 <div className="about__resume-group">
                                     {visibleResumes.map((resItem, idx) => (
                                         <div key={idx} className="about__resume-item-wrap">
-                                            <a
-                                                href={resItem.url}
-                                                download
-                                                target="_blank"
-                                                rel="noreferrer"
+                                            <button
+                                                type="button"
+                                                onClick={() => handleResumeDownload(resItem)}
                                                 className="about__resume-btn"
                                                 title={`Download ${resItem.title || 'Resume'}`}
                                             >
                                                 <i className={resItem.icon || about.resumeIcon || "fa-solid fa-file-pdf"} /> {resItem.title || about.resumeLabel || "Download Resume"}
-                                            </a>
-                                            <a
-                                                href={resItem.url}
-                                                target="_blank"
-                                                rel="noreferrer"
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleResumePreview(resItem)}
                                                 className="about__resume-preview-btn"
                                                 title={`Preview ${resItem.title || 'CV'} online`}
                                             >
                                                 <i className="fa-solid fa-arrow-up-right-from-square" />
-                                            </a>
+                                            </button>
                                         </div>
                                     ))}
                                 </div>

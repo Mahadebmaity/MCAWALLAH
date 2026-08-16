@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "./AuthModal.css";
 
-export default function AuthModal({ onClose }) {
+export default function AuthModal({ onClose, prompt, defaultMode = "login" }) {
     const { login, register } = useAuth();
-    const [mode, setMode] = useState("login");
+    const [mode, setMode] = useState(defaultMode || "login");
     const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
     const [errors, setErrors] = useState({});
     const [status, setStatus] = useState(null);
@@ -71,6 +71,27 @@ export default function AuthModal({ onClose }) {
                     <span className="auth-modal__logo-name">Mahadeb</span>
                     <span className="auth-modal__logo-bracket">/&gt;</span>
                 </div>
+
+                {/* Optional Interactive Action Guard Prompt Banner */}
+                {prompt && (
+                    <div style={{
+                        background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(232, 69, 69, 0.15))',
+                        border: '1.5px solid rgba(56, 189, 248, 0.4)',
+                        borderRadius: '12px',
+                        padding: '10px 14px',
+                        marginBottom: '16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        fontSize: '12.5px',
+                        color: '#f1f5f9',
+                        lineHeight: '1.4',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+                    }}>
+                        <i className="fa-solid fa-shield-halved" style={{ color: '#38bdf8', fontSize: '18px', flexShrink: 0 }} />
+                        <span>{prompt}</span>
+                    </div>
+                )}
 
                 {/* Tabs */}
                 <div className="auth-modal__tabs">
