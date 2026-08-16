@@ -35,7 +35,8 @@ export default function StandaloneArcadeWindow() {
     const [isTimerRunning, setIsTimerRunning] = useState(false);
     const timerRef = useRef(null);
 
-    // Recent Match / Run History for current session
+    // Recent Match / Run History for current session & server sync
+    const [historyFilter, setHistoryFilter] = useState("all");
     const [sessionHistory, setSessionHistory] = useState(() => {
         try {
             return JSON.parse(localStorage.getItem("arcade_session_history") || "[]");
@@ -43,6 +44,48 @@ export default function StandaloneArcadeWindow() {
             return [];
         }
     });
+
+    // Fetch user's persistent server history across all games
+    useEffect(() => {
+        const fetchServerHistory = async () => {
+            try {
+                const query = user?._id
+                    ? `userId=${user._id}`
+                    : (user?.email ? `userEmail=${encodeURIComponent(user.email)}` : '');
+                
+                const res = await fetch(`${API_BASE}/portfolio/games/user/history${query ? `?${query}` : ''}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.history && data.history.length > 0) {
+                        const formattedRuns = data.history.map(item => ({
+                            id: item._id,
+                            gameSlug: item.gameSlug,
+                            score: item.score,
+                            durationSeconds: item.metrics?.durationSeconds || 30,
+                            timeString: formatTime(item.metrics?.durationSeconds || 30),
+                            timestamp: new Date(item.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' • ' + new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                            metrics: item.metrics || {}
+                        }));
+
+                        setSessionHistory(prev => {
+                            // Merge and deduplicate by id or unique score+time
+                            const combined = [...prev];
+                            formattedRuns.forEach(fr => {
+                                if (!combined.some(c => c.id === fr.id)) {
+                                    combined.push(fr);
+                                }
+                            });
+                            return combined.slice(0, 30);
+                        });
+                    }
+                }
+            } catch (err) {
+                console.warn("Could not fetch server history:", err);
+            }
+        };
+
+        fetchServerHistory();
+    }, [user]);
 
     const [bests, setBests] = useState(() => ({
         snake: Number(localStorage.getItem("arcade_best_snake") || 0),
@@ -371,62 +414,168 @@ export default function StandaloneArcadeWindow() {
                 {/* Session Run History & Telemetry Panel */}
                 <div style={{
                     width: '100%',
-                    maxWidth: '360px',
-                    background: 'var(--adm-surface, rgba(15,23,42,0.6))',
+                    maxWidth: '380px',
+                    background: 'var(--adm-surface, rgba(15,23,42,0.75))',
                     border: '1px solid var(--adm-border, rgba(255,255,255,0.08))',
                     borderRadius: '20px',
                     padding: 'clamp(16px, 3vw, 22px)',
                     boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '16px',
+                    gap: '14px',
                     height: 'fit-content'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <i className="fa-solid fa-clock-rotate-left" style={{ color: '#38bdf8' }} />
-                            Recent Session Runs
+                            Match History &amp; Records
                         </h3>
-                        <span style={{ fontSize: '11px', color: 'var(--gm-text-3)', fontFamily: 'var(--gm-font-m)' }}>
-                            {sessionHistory.length} recorded
+                        <span style={{ fontSize: '11px', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.12)', padding: '2px 8px', borderRadius: '6px', fontFamily: 'var(--gm-font-m)', fontWeight: '700' }}>
+                            {sessionHistory.length} total
                         </span>
                     </div>
 
-                    {sessionHistory.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '30px 10px', color: 'var(--gm-text-3)', fontSize: '13px' }}>
-                            <i className="fa-solid fa-gamepad" style={{ fontSize: '28px', opacity: 0.3, marginBottom: '8px' }} />
-                            <p style={{ margin: 0 }}>Play a match to see your live session run history and timestamps!</p>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '360px', overflowY: 'auto' }}>
-                            {sessionHistory.map((run) => (
-                                <div
-                                    key={run.id}
+                    {/* Game Filter Chips */}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        {[
+                            { id: 'all', label: 'All', icon: 'fa-solid fa-layer-group' },
+                            { id: 'snake', label: 'Snake', icon: 'fa-solid fa-staff-snake' },
+                            { id: '2048', label: '2048', icon: 'fa-solid fa-cubes' },
+                            { id: 'typing', label: 'Typing', icon: 'fa-solid fa-keyboard' },
+                            { id: 'tictactoe', label: 'TicTacToe', icon: 'fa-solid fa-xmark' }
+                        ].map((flt) => {
+                            const count = flt.id === 'all'
+                                ? sessionHistory.length
+                                : sessionHistory.filter(r => r.gameSlug === flt.id).length;
+                            const isActive = historyFilter === flt.id;
+                            return (
+                                <button
+                                    key={flt.id}
+                                    type="button"
+                                    onClick={() => setHistoryFilter(flt.id)}
                                     style={{
-                                        background: 'var(--adm-surface-2, rgba(255,255,255,0.03))',
-                                        border: '1px solid var(--adm-border, rgba(255,255,255,0.06))',
-                                        borderRadius: '10px',
-                                        padding: '10px 14px',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center'
+                                        padding: '4px 8px',
+                                        borderRadius: '6px',
+                                        fontSize: '11px',
+                                        fontWeight: '700',
+                                        border: `1px solid ${isActive ? 'var(--adm-primary, #38bdf8)' : 'rgba(255,255,255,0.08)'}`,
+                                        background: isActive ? 'rgba(56, 189, 248, 0.18)' : 'rgba(255,255,255,0.03)',
+                                        color: isActive ? '#38bdf8' : '#94a3b8',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        transition: 'all 0.2s ease'
                                     }}
                                 >
-                                    <div>
-                                        <span style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--gm-text-3)', fontWeight: '700' }}>
-                                            {run.gameSlug} • {run.timestamp}
-                                        </span>
-                                        <div style={{ fontSize: '14px', fontWeight: '800', color: 'var(--gm-text-1)' }}>
-                                            {run.score} {run.gameSlug === 'typing' ? 'WPM' : 'pts'}
-                                        </div>
-                                    </div>
-                                    <span style={{ fontSize: '11px', color: '#38bdf8', fontFamily: 'var(--gm-font-m)' }}>
-                                        ⏱️ {run.timeString || '00:30'}
-                                    </span>
+                                    <i className={flt.icon} style={{ fontSize: '10px' }} />
+                                    <span>{flt.label}</span>
+                                    {count > 0 && <span style={{ opacity: 0.7, fontSize: '10px' }}>({count})</span>}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* History List */}
+                    {(() => {
+                        const filtered = historyFilter === 'all'
+                            ? sessionHistory
+                            : sessionHistory.filter(r => r.gameSlug === historyFilter);
+
+                        if (filtered.length === 0) {
+                            return (
+                                <div style={{ textAlign: 'center', padding: '30px 10px', color: 'var(--gm-text-3)', fontSize: '13px' }}>
+                                    <i className="fa-solid fa-gamepad" style={{ fontSize: '28px', opacity: 0.3, marginBottom: '8px' }} />
+                                    <p style={{ margin: 0 }}>No matches recorded for {historyFilter === 'all' ? 'any game' : historyFilter} yet. Play a game now!</p>
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                            );
+                        }
+
+                        const gameIcons = {
+                            snake: 'fa-solid fa-staff-snake',
+                            '2048': 'fa-solid fa-cubes',
+                            typing: 'fa-solid fa-keyboard',
+                            tictactoe: 'fa-solid fa-xmark'
+                        };
+
+                        const gameColors = {
+                            snake: '#22c55e',
+                            '2048': '#f59e0b',
+                            typing: '#a855f7',
+                            tictactoe: '#38bdf8'
+                        };
+
+                        return (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '380px', overflowY: 'auto' }}>
+                                {filtered.map((run) => {
+                                    const col = gameColors[run.gameSlug] || '#38bdf8';
+                                    return (
+                                        <div
+                                            key={run.id}
+                                            style={{
+                                                background: 'var(--adm-surface-2, rgba(255,255,255,0.03))',
+                                                border: '1px solid var(--adm-border, rgba(255,255,255,0.06))',
+                                                borderRadius: '12px',
+                                                padding: '10px 14px',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                gap: '6px',
+                                                transition: 'all 0.2s ease'
+                                            }}
+                                        >
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <i className={gameIcons[run.gameSlug] || 'fa-solid fa-gamepad'} style={{ color: col, fontSize: '12px' }} />
+                                                    <span style={{ fontSize: '11px', textTransform: 'uppercase', color: col, fontWeight: '800', letterSpacing: '0.4px' }}>
+                                                        {run.gameSlug === 'snake' ? 'Retro Snake' : run.gameSlug === '2048' ? '2048 Puzzle' : run.gameSlug === 'typing' ? 'Speed Typer' : 'TicTacToe AI'}
+                                                    </span>
+                                                </div>
+                                                <span style={{ fontSize: '10.5px', color: '#94a3b8' }}>
+                                                    {run.timestamp}
+                                                </span>
+                                            </div>
+
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div style={{ fontSize: '16px', fontWeight: '900', color: '#f8fafc', fontFamily: 'var(--gm-font-d)' }}>
+                                                    {run.score} <span style={{ fontSize: '11px', color: col, fontWeight: '700' }}>{run.gameSlug === 'typing' ? 'WPM' : 'pts'}</span>
+                                                </div>
+                                                <span style={{ fontSize: '11px', color: '#38bdf8', fontFamily: 'var(--gm-font-m)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                                    <i className="fa-solid fa-stopwatch" style={{ fontSize: '10px' }} />
+                                                    {run.timeString || '00:30'}
+                                                </span>
+                                            </div>
+
+                                            {/* Extra Metric Badges */}
+                                            {run.metrics && Object.keys(run.metrics).length > 0 && (
+                                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '5px' }}>
+                                                    {run.metrics.accuracy !== undefined && (
+                                                        <span style={{ fontSize: '10px', color: '#34d399', background: 'rgba(52, 211, 153, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
+                                                            🎯 {run.metrics.accuracy}% Acc
+                                                        </span>
+                                                    )}
+                                                    {run.metrics.highestTile !== undefined && (
+                                                        <span style={{ fontSize: '10px', color: '#fbbf24', background: 'rgba(251, 191, 36, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
+                                                            🔢 Tile {run.metrics.highestTile}
+                                                        </span>
+                                                    )}
+                                                    {run.metrics.moves !== undefined && (
+                                                        <span style={{ fontSize: '10px', color: '#94a3b8', background: 'rgba(255, 255, 255, 0.05)', padding: '1px 6px', borderRadius: '4px' }}>
+                                                            🦶 {run.metrics.moves} Moves
+                                                        </span>
+                                                    )}
+                                                    {run.metrics.result && (
+                                                        <span style={{ fontSize: '10px', color: run.metrics.result === 'Victory' ? '#38bdf8' : '#fbbf24', background: 'rgba(56, 189, 248, 0.1)', padding: '1px 6px', borderRadius: '4px' }}>
+                                                            🏆 {run.metrics.result}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        );
+                    })()}
                 </div>
             </main>
 

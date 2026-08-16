@@ -264,3 +264,36 @@ export const getGameLeaderboard = async (req, res) => {
         res.status(500).json({ message: 'Failed to load leaderboard', error: error.message });
     }
 };
+
+// @desc Get Persistent Gameplay History for a specific User or Player
+// @route GET /api/portfolio/games/user/history
+export const getUserGameHistory = async (req, res) => {
+    try {
+        const { userId, userEmail, playerName } = req.query;
+        let conditions = [];
+
+        if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+            conditions.push({ userId: new mongoose.Types.ObjectId(userId) });
+        }
+        if (userEmail) {
+            conditions.push({ playerName: userEmail.split('@')[0] });
+        }
+        if (playerName && playerName.trim()) {
+            conditions.push({ playerName: playerName.trim() });
+        }
+
+        const query = conditions.length > 0 ? { $or: conditions } : {};
+        const history = await GameScore.find(query)
+            .sort({ createdAt: -1 })
+            .limit(40)
+            .lean();
+
+        res.json({
+            success: true,
+            total: history.length,
+            history
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch gameplay history', error: error.message });
+    }
+};

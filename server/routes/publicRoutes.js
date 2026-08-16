@@ -5,7 +5,8 @@ import {
     subscribeNewsletter,
     recordEvent,
     submitGameScore,
-    getGameLeaderboard
+    getGameLeaderboard,
+    getUserGameHistory
 } from '../controllers/portfolioController.js';
 import { trackActivityEvent } from '../controllers/adminController.js';
 import rateLimit from 'express-rate-limit';
@@ -30,7 +31,8 @@ router.post('/subscribe', subscribeNewsletter);
 router.post('/analytics', recordEvent);
 router.post('/track', trackActivityEvent);
 
-// Game Scores & Global Leaderboards
+// Game Scores, Global Leaderboards & User History
+router.get('/games/user/history', getUserGameHistory);
 router.post('/games/:slug/score', submitGameScore);
 router.get('/games/:slug/leaderboard', getGameLeaderboard);
 
