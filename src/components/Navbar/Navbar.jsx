@@ -34,6 +34,11 @@ export default function Navbar() {
     const showLogoPulse = navbarConfig.showLogoPulse !== false;
     const showStatusBadge = navbarConfig.showStatusBadge || false;
     const statusBadgeText = navbarConfig.statusBadgeText || "Available for work";
+    const statusBadgeStyle = navbarConfig.statusBadgeStyle || "emerald-radar";
+    const statusBadgeAnimation = navbarConfig.statusBadgeAnimation || "pulse-glow";
+    const statusBadgeIcon = navbarConfig.statusBadgeIcon || "fa-solid fa-circle";
+    const statusBadgeLinkTarget = navbarConfig.statusBadgeLinkTarget || "contact";
+    const showStatusBadgeMobile = navbarConfig.showStatusBadgeMobile || false;
     const showThemeToggle = navbarConfig.showThemeToggle !== false;
     const showResumeButton = navbarConfig.showResumeButton !== false;
     const showHireMeButton = navbarConfig.showHireMeButton || false;
@@ -303,12 +308,23 @@ export default function Navbar() {
                         {showLogoPulse && <span className="navbar__logo-dot" />}
                     </div>
 
-                    {/* Status Badge (Optional) */}
+                    {/* Status Badge (Optional with animations & effects) */}
                     {showStatusBadge && (
-                        <div className="navbar__status-pill">
-                            <span className="navbar__status-dot" />
+                        <a
+                            href={`#${statusBadgeLinkTarget}`}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                navClick(statusBadgeLinkTarget);
+                            }}
+                            className={`navbar__status-pill navbar__status-pill--${statusBadgeStyle} navbar__status-pill--anim-${statusBadgeAnimation} ${showStatusBadgeMobile ? 'navbar__status-pill--show-mobile' : ''}`}
+                            title={statusBadgeText}
+                        >
+                            <span className="navbar__status-dot-wrap">
+                                <span className="navbar__status-dot" />
+                                <span className="navbar__status-ping" />
+                            </span>
                             <span>{statusBadgeText}</span>
-                        </div>
+                        </a>
                     )}
 
                     {/* Desktop Nav Links */}

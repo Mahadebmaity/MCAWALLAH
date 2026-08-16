@@ -30,6 +30,26 @@ const navbarSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    statusBadgeStyle: {
+        type: String,
+        default: 'emerald-radar' // 'emerald-radar' | 'cyber-cyan' | 'sunset-amber' | 'amethyst-purple' | 'crimson-fire' | 'glass-minimal'
+    },
+    statusBadgeAnimation: {
+        type: String,
+        default: 'pulse-glow' // 'pulse-glow' | 'shimmer-wave' | 'neon-breathe' | 'orbit-spin' | 'gradient-flow' | 'subtle-static'
+    },
+    statusBadgeIcon: {
+        type: String,
+        default: 'fa-solid fa-circle'
+    },
+    statusBadgeLinkTarget: {
+        type: String,
+        default: 'contact'
+    },
+    showStatusBadgeMobile: {
+        type: Boolean,
+        default: false
+    },
     showThemeToggle: {
         type: Boolean,
         default: true

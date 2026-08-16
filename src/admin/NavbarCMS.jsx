@@ -20,6 +20,11 @@ export default function NavbarCMS() {
         showLogoPulse: true,
         statusBadgeText: 'Available for work',
         showStatusBadge: false,
+        statusBadgeStyle: 'emerald-radar',
+        statusBadgeAnimation: 'pulse-glow',
+        statusBadgeIcon: 'fa-solid fa-circle',
+        statusBadgeLinkTarget: 'contact',
+        showStatusBadgeMobile: false,
         showThemeToggle: true,
         showResumeButton: true,
         resumeButtonText: 'Resume',
@@ -384,9 +389,15 @@ export default function NavbarCMS() {
                         </div>
 
                         <div style={{ borderTop: '1px solid var(--adm-border)', paddingTop: '20px', marginTop: '20px' }}>
-                            <h4 style={{ margin: '0 0 12px', fontSize: '15px', fontWeight: '700', color: 'var(--adm-text-main)' }}>
-                                🟢 Navbar Live Status Pill (Optional)
-                            </h4>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
+                                <h4 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: 'var(--adm-text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <i className="fa-solid fa-bolt" style={{ color: 'var(--adm-primary)' }} />
+                                    Navbar Live Status Badge &amp; Animation Studio
+                                </h4>
+                                <span style={{ fontSize: '11px', background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', padding: '3px 8px', borderRadius: '6px', fontWeight: '700' }}>
+                                    Live Animated Pill
+                                </span>
+                            </div>
 
                             <div className="adm-form-group">
                                 <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginBottom: '12px' }}>
@@ -402,15 +413,157 @@ export default function NavbarCMS() {
                             </div>
 
                             {navbar.showStatusBadge && (
-                                <div className="adm-form-group">
-                                    <label className="adm-label">Status Badge Text</label>
-                                    <input
-                                        type="text"
-                                        className="adm-input"
-                                        value={navbar.statusBadgeText || ''}
-                                        onChange={(e) => handleChange('statusBadgeText', e.target.value)}
-                                        placeholder="Available for work / Open for hire"
-                                    />
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', background: 'var(--adm-surface-2)', padding: '16px', borderRadius: '12px', border: '1px solid var(--adm-border)' }}>
+                                    
+                                    {/* 1. Badge Text & Target */}
+                                    <div className="adm-grid-2">
+                                        <div className="adm-form-group">
+                                            <label className="adm-label">Status Badge Text</label>
+                                            <input
+                                                type="text"
+                                                className="adm-input"
+                                                value={navbar.statusBadgeText || ''}
+                                                onChange={(e) => handleChange('statusBadgeText', e.target.value)}
+                                                placeholder="Available for work / Open for hire"
+                                            />
+                                        </div>
+
+                                        <div className="adm-form-group">
+                                            <label className="adm-label">When Clicked, Scroll To Section</label>
+                                            <select
+                                                className="adm-select"
+                                                value={navbar.statusBadgeLinkTarget || 'contact'}
+                                                onChange={(e) => handleChange('statusBadgeLinkTarget', e.target.value)}
+                                            >
+                                                <option value="contact">Contact (#contact)</option>
+                                                <option value="about">About Me (#about)</option>
+                                                <option value="projects">Projects (#projects)</option>
+                                                <option value="fun-game">Fun Arcade (#fun-game)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {/* 2. Visual Style / Theme Selector */}
+                                    <div>
+                                        <label className="adm-label" style={{ marginBottom: '8px' }}>
+                                            Visual Color Theme &amp; Glow
+                                        </label>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
+                                            {[
+                                                { id: 'emerald-radar', label: 'Emerald Radar', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)' },
+                                                { id: 'cyber-cyan', label: 'Cyber Cyan', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)' },
+                                                { id: 'sunset-amber', label: 'Sunset Amber', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.15)' },
+                                                { id: 'amethyst-purple', label: 'Amethyst Violet', color: '#a855f7', bg: 'rgba(168, 85, 247, 0.15)' },
+                                                { id: 'crimson-fire', label: 'Crimson Fire', color: '#e84545', bg: 'rgba(232, 69, 69, 0.15)' },
+                                                { id: 'glass-minimal', label: 'Glass Minimal', color: '#f8fafc', bg: 'rgba(255, 255, 255, 0.08)' }
+                                            ].map((th) => (
+                                                <button
+                                                    key={th.id}
+                                                    type="button"
+                                                    onClick={() => handleChange('statusBadgeStyle', th.id)}
+                                                    style={{
+                                                        padding: '10px 8px',
+                                                        borderRadius: '8px',
+                                                        border: `1.5px solid ${(navbar.statusBadgeStyle || 'emerald-radar') === th.id ? th.color : 'var(--adm-border)'}`,
+                                                        background: (navbar.statusBadgeStyle || 'emerald-radar') === th.id ? th.bg : 'rgba(0,0,0,0.2)',
+                                                        color: th.color,
+                                                        fontSize: '12px',
+                                                        fontWeight: '700',
+                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        alignItems: 'center',
+                                                        gap: '6px',
+                                                        transition: 'all 0.2s ease'
+                                                    }}
+                                                >
+                                                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: th.color, boxShadow: `0 0 8px ${th.color}` }} />
+                                                    {th.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* 3. Animation Effect Selector */}
+                                    <div>
+                                        <label className="adm-label" style={{ marginBottom: '8px' }}>
+                                            Badge Motion &amp; Animation Effect
+                                        </label>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
+                                            {[
+                                                { id: 'pulse-glow', label: 'Live Radar Ping', icon: 'fa-solid fa-satellite-dish', desc: 'Expanding radar pulse wave' },
+                                                { id: 'shimmer-wave', label: 'Holographic Scan', icon: 'fa-solid fa-wand-magic-sparkles', desc: 'Laser beam sweep across pill' },
+                                                { id: 'neon-breathe', label: 'Neon Breathe', icon: 'fa-solid fa-sun', desc: 'Smooth glowing illumination' },
+                                                { id: 'orbit-spin', label: 'Particle Orbit', icon: 'fa-solid fa-atom', desc: 'Spinning orbit around dot' },
+                                                { id: 'gradient-flow', label: 'Aurora Flow', icon: 'fa-solid fa-water', desc: 'Flowing aurora wave' },
+                                                { id: 'subtle-static', label: 'Static Clean', icon: 'fa-solid fa-circle-dot', desc: 'Minimalist static indicator' }
+                                            ].map((anim) => (
+                                                <button
+                                                    key={anim.id}
+                                                    type="button"
+                                                    onClick={() => handleChange('statusBadgeAnimation', anim.id)}
+                                                    style={{
+                                                        padding: '10px 12px',
+                                                        borderRadius: '8px',
+                                                        border: `1.5px solid ${(navbar.statusBadgeAnimation || 'pulse-glow') === anim.id ? 'var(--adm-primary)' : 'var(--adm-border)'}`,
+                                                        background: (navbar.statusBadgeAnimation || 'pulse-glow') === anim.id ? 'rgba(56, 189, 248, 0.12)' : 'rgba(0,0,0,0.2)',
+                                                        color: (navbar.statusBadgeAnimation || 'pulse-glow') === anim.id ? '#38bdf8' : '#cbd5e1',
+                                                        fontSize: '12px',
+                                                        fontWeight: '700',
+                                                        cursor: 'pointer',
+                                                        textAlign: 'left',
+                                                        transition: 'all 0.2s ease'
+                                                    }}
+                                                >
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                                                        <i className={anim.icon} />
+                                                        <span>{anim.label}</span>
+                                                    </div>
+                                                    <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: '400' }}>
+                                                        {anim.desc}
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* 4. Mobile Switch */}
+                                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px' }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#cbd5e1', cursor: 'pointer' }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={navbar.showStatusBadgeMobile || false}
+                                                onChange={(e) => handleChange('showStatusBadgeMobile', e.target.checked)}
+                                            />
+                                            Also show status badge on mobile top navbar (off by default to keep navbar clean)
+                                        </label>
+                                    </div>
+
+                                    {/* 5. Live Interactive Preview */}
+                                    <div style={{
+                                        background: '#090d16',
+                                        padding: '16px',
+                                        borderRadius: '10px',
+                                        border: '1px dashed rgba(56, 189, 248, 0.4)',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        gap: '10px'
+                                    }}>
+                                        <span style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                                            Live Badge Preview
+                                        </span>
+                                        <div
+                                            className={`navbar__status-pill navbar__status-pill--${navbar.statusBadgeStyle || 'emerald-radar'} navbar__status-pill--anim-${navbar.statusBadgeAnimation || 'pulse-glow'}`}
+                                            style={{ pointerEvents: 'none' }}
+                                        >
+                                            <span className="navbar__status-dot-wrap">
+                                                <span className="navbar__status-dot" />
+                                                <span className="navbar__status-ping" />
+                                            </span>
+                                            <span>{navbar.statusBadgeText || 'Available for work'}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                         </div>

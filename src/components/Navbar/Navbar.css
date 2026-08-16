@@ -202,16 +202,245 @@
 }
 
 @keyframes logoPulse {
-
-  0%,
-  100% {
+  0%, 100% {
     transform: scale(1);
     opacity: 1;
   }
-
   50% {
     transform: scale(1.45);
     opacity: 0.55;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   NAVBAR LIVE STATUS PILL & ANIMATED BADGES
+   ══════════════════════════════════════════════════ */
+.navbar__status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-family: var(--font-b);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.navbar__status-pill:hover {
+  transform: translateY(-1px) scale(1.03);
+}
+
+.navbar__status-dot-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+}
+
+.navbar__status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  position: relative;
+  z-index: 2;
+}
+
+.navbar__status-ping {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  z-index: 1;
+  opacity: 0.75;
+}
+
+/* ── 1. THEME: Emerald Radar (Available / Online) ── */
+.navbar__status-pill--emerald-radar {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #10b981;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+}
+.navbar__status-pill--emerald-radar .navbar__status-dot {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+.navbar__status-pill--emerald-radar .navbar__status-ping {
+  background: #10b981;
+}
+.navbar__status-pill--emerald-radar:hover {
+  border-color: #10b981;
+  box-shadow: 0 0 22px rgba(16, 185, 129, 0.35);
+}
+
+/* ── 2. THEME: Cyber Cyan (Tech Glow) ── */
+.navbar__status-pill--cyber-cyan {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+}
+.navbar__status-pill--cyber-cyan .navbar__status-dot {
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+}
+.navbar__status-pill--cyber-cyan .navbar__status-ping {
+  background: #38bdf8;
+}
+.navbar__status-pill--cyber-cyan:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 0 22px rgba(56, 189, 248, 0.35);
+}
+
+/* ── 3. THEME: Sunset Amber (In Project / Busy) ── */
+.navbar__status-pill--sunset-amber {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+}
+.navbar__status-pill--sunset-amber .navbar__status-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+}
+.navbar__status-pill--sunset-amber .navbar__status-ping {
+  background: #f59e0b;
+}
+.navbar__status-pill--sunset-amber:hover {
+  border-color: #f59e0b;
+  box-shadow: 0 0 22px rgba(245, 158, 11, 0.35);
+}
+
+/* ── 4. THEME: Amethyst Purple (Freelance / VIP) ── */
+.navbar__status-pill--amethyst-purple {
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #c084fc;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.15);
+}
+.navbar__status-pill--amethyst-purple .navbar__status-dot {
+  background: #a855f7;
+  box-shadow: 0 0 8px #a855f7;
+}
+.navbar__status-pill--amethyst-purple .navbar__status-ping {
+  background: #a855f7;
+}
+.navbar__status-pill--amethyst-purple:hover {
+  border-color: #a855f7;
+  box-shadow: 0 0 22px rgba(168, 85, 247, 0.35);
+}
+
+/* ── 5. THEME: Crimson Fire (Exclusive / Hot) ── */
+.navbar__status-pill--crimson-fire {
+  background: rgba(232, 69, 69, 0.12);
+  border: 1px solid rgba(232, 69, 69, 0.35);
+  color: #ff6b6b;
+  box-shadow: 0 0 15px rgba(232, 69, 69, 0.15);
+}
+.navbar__status-pill--crimson-fire .navbar__status-dot {
+  background: #e84545;
+  box-shadow: 0 0 8px #e84545;
+}
+.navbar__status-pill--crimson-fire .navbar__status-ping {
+  background: #e84545;
+}
+.navbar__status-pill--crimson-fire:hover {
+  border-color: #e84545;
+  box-shadow: 0 0 22px rgba(232, 69, 69, 0.35);
+}
+
+/* ── 6. THEME: Glass Minimal ── */
+.navbar__status-pill--glass-minimal {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+  backdrop-filter: blur(8px);
+}
+.navbar__status-pill--glass-minimal .navbar__status-dot {
+  background: #38bdf8;
+}
+.navbar__status-pill--glass-minimal .navbar__status-ping {
+  background: #38bdf8;
+}
+
+/* ══════════════════════════════════════════════════
+   ANIMATION EFFECT MODIFIERS
+   ══════════════════════════════════════════════════ */
+
+/* Effect 1: Pulse Glow / Radar Ping */
+.navbar__status-pill--anim-pulse-glow .navbar__status-ping {
+  animation: badgeRadarPing 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes badgeRadarPing {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  70%, 100% { transform: scale(2.8); opacity: 0; }
+}
+
+/* Effect 2: Shimmer Wave (Holographic Scanline) */
+.navbar__status-pill--anim-shimmer-wave::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -150%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.25) 50%, transparent 100%);
+  transform: skewX(-20deg);
+  animation: badgeShimmerScan 2.5s infinite;
+  pointer-events: none;
+}
+@keyframes badgeShimmerScan {
+  0% { left: -150%; }
+  40%, 100% { left: 200%; }
+}
+
+/* Effect 3: Neon Breathe */
+.navbar__status-pill--anim-neon-breathe {
+  animation: badgeNeonBreathe 2.4s ease-in-out infinite alternate;
+}
+@keyframes badgeNeonBreathe {
+  0% { filter: brightness(0.95); opacity: 0.85; transform: scale(0.98); }
+  100% { filter: brightness(1.25); opacity: 1; transform: scale(1.02); }
+}
+
+/* Effect 4: Orbit Spin */
+.navbar__status-pill--anim-orbit-spin .navbar__status-dot-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px dashed currentColor;
+  opacity: 0.7;
+  animation: badgeOrbitSpin 4s linear infinite;
+}
+@keyframes badgeOrbitSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Effect 5: Gradient Rainbow Flow */
+.navbar__status-pill--anim-gradient-flow {
+  background-size: 200% 200% !important;
+  animation: badgeGradientFlow 4s ease infinite;
+}
+@keyframes badgeGradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Hide on mobile unless showStatusBadgeMobile is explicitly on */
+@media (max-width: 900px) {
+  .navbar__status-pill:not(.navbar__status-pill--show-mobile) {
+    display: none !important;
   }
 }
 
