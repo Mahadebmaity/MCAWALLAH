@@ -25,6 +25,7 @@ import ProjectsCMS from './admin/ProjectsCMS';
 import GamesCMS from './admin/GamesCMS';
 import DocumentsCMS from './admin/DocumentsCMS';
 import MessagesInbox from './admin/MessagesInbox';
+import FooterSubscribersCMS from './admin/FooterSubscribersCMS';
 import SettingsCMS from './admin/SettingsCMS';
 import UsersActivityCMS from './admin/UsersActivityCMS';
 
@@ -70,6 +71,7 @@ function App() {
           <Route path="games" element={<GamesCMS />} />
           <Route path="docs" element={<DocumentsCMS />} />
           <Route path="messages" element={<MessagesInbox />} />
+          <Route path="footer" element={<FooterSubscribersCMS />} />
           <Route path="settings" element={<SettingsCMS />} />
         </Route>
       </Route>

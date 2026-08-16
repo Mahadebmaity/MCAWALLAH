@@ -9,6 +9,9 @@ import Analytics from '../models/Analytics.js';
 import SiteSettings from '../models/SiteSettings.js';
 import GameScore from '../models/GameScore.js';
 import Navbar from '../models/Navbar.js';
+import Footer from '../models/Footer.js';
+import Subscriber from '../models/Subscriber.js';
+import ActivityLog from '../models/ActivityLog.js';
 import User from '../models/User.js';
 import { sendContactNotification } from '../services/emailService.js';
 
@@ -16,7 +19,7 @@ import { sendContactNotification } from '../services/emailService.js';
 // @route GET /api/portfolio/public
 export const getPublicPortfolio = async (req, res) => {
     try {
-        const [hero, about, skills, timeline, projects, games, settings, navbar, adminUser] = await Promise.all([
+        const [hero, about, skills, timeline, projects, games, settings, navbar, footer, adminUser] = await Promise.all([
             Hero.findOne({ isPublic: true }).lean(),
             About.findOne({ isPublic: true }).lean(),
             Skill.find({ isPublic: true }).sort({ order: 1, createdAt: 1 }).lean(),
@@ -25,6 +28,7 @@ export const getPublicPortfolio = async (req, res) => {
             Game.find({ isPublic: true }).sort({ order: 1, createdAt: 1 }).lean(),
             SiteSettings.findOne().lean(),
             Navbar.findOne({ isPublic: true }).lean(),
+            Footer.findOne({ isPublic: true }).lean(),
             User.findOne({ role: 'admin' }).select('avatar').lean()
         ]);
 
@@ -41,10 +45,59 @@ export const getPublicPortfolio = async (req, res) => {
             projects: projects || [],
             games: games || [],
             settings: settings || null,
-            navbar: navbar || null
+            navbar: navbar || null,
+            footer: footer || null
         });
     } catch (error) {
         res.status(500).json({ message: 'Error retrieving portfolio data', error: error.message });
+    }
+};
+
+// @desc Subscribe to Newsletter
+// @route POST /api/portfolio/subscribe
+export const subscribeNewsletter = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email || !/\S+@\S+\.\S+/.test(email)) {
+            return res.status(400).json({ message: 'Please provide a valid email address.' });
+        }
+
+        const normalizedEmail = email.trim().toLowerCase();
+        const existing = await Subscriber.findOne({ email: normalizedEmail });
+
+        if (existing) {
+            if (existing.status === 'unsubscribed') {
+                existing.status = 'active';
+                await existing.save();
+                return res.json({ message: 'Welcome back! Your newsletter subscription has been reactivated.' });
+            }
+            return res.json({ message: 'You are already subscribed to the newsletter!' });
+        }
+
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+        const device = (req.headers['user-agent'] || '').slice(0, 120);
+
+        const newSub = await Subscriber.create({
+            email: normalizedEmail,
+            ip,
+            device
+        });
+
+        // Record interaction in activity log
+        ActivityLog.create({
+            action: 'NEWSLETTER_SUBSCRIBE',
+            category: 'contact',
+            userEmail: normalizedEmail,
+            details: `Subscribed to newsletter: ${normalizedEmail}`,
+            path: '/#footer'
+        }).catch(() => {});
+
+        res.status(201).json({
+            message: '🎉 Thank you for subscribing! You will receive updates on new projects & articles.',
+            subscriber: newSub
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message || 'Subscription failed.' });
     }
 };
 

@@ -1,42 +1,57 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { API_BASE } from "../../config/api";
 import "./Footer.css";
-
-/* ── Font Awesome via CDN is loaded in index.html ──
-   Add this to your public/index.html <head>:
-   <link rel="stylesheet"
-     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-*/
 
 const CURRENT_YEAR = new Date().getFullYear();
 
-const QUICK_LINKS = [
-    { label: "Home", href: "#home" },
-    { label: "About", href: "#about" },
-    { label: "Projects", href: "#projects" },
-    { label: "Fun Game", href: "#fun-game" },
-    { label: "Contact", href: "#contact" },
-    { label: "Privacy Policy", href: "#privacy" },
+const DEFAULT_QUICK_LINKS = [
+    { label: "Home", href: "#home", isVisible: true },
+    { label: "About", href: "#about", isVisible: true },
+    { label: "Projects", href: "#projects", isVisible: true },
+    { label: "Fun Game", href: "#fun-game", isVisible: true },
+    { label: "Contact", href: "#contact", isVisible: true },
+    { label: "Privacy Policy", href: "#privacy", isVisible: true },
 ];
 
-const SOCIALS = [
-    { icon: "fa-brands fa-github", href: "https://github.com", label: "GitHub", color: "#333" },
-    { icon: "fa-brands fa-linkedin", href: "https://linkedin.com", label: "LinkedIn", color: "#0A66C2" },
-    { icon: "fa-brands fa-twitter", href: "https://twitter.com", label: "Twitter", color: "#1DA1F2" },
-    { icon: "fa-brands fa-instagram", href: "https://instagram.com", label: "Instagram", color: "#E1306C" },
-    { icon: "fa-brands fa-facebook", href: "https://facebook.com", label: "Facebook", color: "#1877F2" },
+const DEFAULT_SOCIALS = [
+    { icon: "fa-brands fa-github", href: "https://github.com", label: "GitHub", color: "#333", isVisible: true },
+    { icon: "fa-brands fa-linkedin", href: "https://linkedin.com", label: "LinkedIn", color: "#0A66C2", isVisible: true },
+    { icon: "fa-brands fa-twitter", href: "https://twitter.com", label: "Twitter", color: "#1DA1F2", isVisible: true },
+    { icon: "fa-brands fa-instagram", href: "https://instagram.com", label: "Instagram", color: "#E1306C", isVisible: true },
+    { icon: "fa-brands fa-facebook", href: "https://facebook.com", label: "Facebook", color: "#1877F2", isVisible: true },
 ];
 
 export default function Footer() {
     /* ── state ── */
+    const [footerConfig, setFooterConfig] = useState(null);
     const [backVisible, setBackVisible] = useState(false);
     const [newsEmail, setNewsEmail] = useState("");
-    const [newsStatus, setNewsStatus] = useState(null); // "ok" | "err"
+    const [newsStatus, setNewsStatus] = useState(null); // "ok" | "err" | "loading"
+    const [newsMessage, setNewsMessage] = useState("");
     const [form, setForm] = useState({ name: "", email: "", message: "" });
     const [formErrors, setFormErrors] = useState({});
     const [formStatus, setFormStatus] = useState(null); // "ok" | "sending"
     const [visibleSections, setVisible] = useState({});
     const sectionRefs = useRef({});
+
+    /* ── Fetch Dynamic Footer Data ── */
+    useEffect(() => {
+        const fetchFooterData = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/portfolio/public`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.footer) {
+                        setFooterConfig(data.footer);
+                    }
+                }
+            } catch (err) {
+                console.warn("Using default footer config:", err.message);
+            }
+        };
+        fetchFooterData();
+    }, []);
 
     /* ── back-to-top visibility ── */
     useEffect(() => {
@@ -63,13 +78,40 @@ export default function Footer() {
         if (el) el.dataset.section = key;
     };
 
-    /* ── newsletter ── */
-    const handleNewsletter = (e) => {
+    /* ── real newsletter subscription to backend ── */
+    const handleNewsletter = async (e) => {
         e.preventDefault();
-        if (!/\S+@\S+\.\S+/.test(newsEmail)) { setNewsStatus("err"); return; }
-        setNewsStatus("ok");
-        setNewsEmail("");
-        setTimeout(() => setNewsStatus(null), 4000);
+        if (!/\S+@\S+\.\S+/.test(newsEmail)) {
+            setNewsStatus("err");
+            setNewsMessage("Please enter a valid email address.");
+            return;
+        }
+
+        setNewsStatus("loading");
+        try {
+            const res = await fetch(`${API_BASE}/portfolio/subscribe`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: newsEmail })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                setNewsStatus("ok");
+                setNewsMessage(data.message || "🎉 Subscribed successfully!");
+                setNewsEmail("");
+                setTimeout(() => {
+                    setNewsStatus(null);
+                    setNewsMessage("");
+                }, 5000);
+            } else {
+                setNewsStatus("err");
+                setNewsMessage(data.message || "Subscription failed. Try again.");
+            }
+        } catch (err) {
+            setNewsStatus("err");
+            setNewsMessage("Network error. Please try again later.");
+        }
     };
 
     /* ── feedback form ── */
@@ -81,17 +123,37 @@ export default function Footer() {
         return errs;
     };
 
-    const handleFeedback = (e) => {
+    const handleFeedback = async (e) => {
         e.preventDefault();
         const errs = validate();
         if (Object.keys(errs).length) { setFormErrors(errs); return; }
         setFormErrors({});
         setFormStatus("sending");
-        setTimeout(() => {
-            setFormStatus("ok");
-            setForm({ name: "", email: "", message: "" });
-            setTimeout(() => setFormStatus(null), 4000);
-        }, 1200);
+
+        try {
+            const res = await fetch(`${API_BASE}/portfolio/contact`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: form.name,
+                    email: form.email,
+                    subject: "Footer Feedback Submission",
+                    message: form.message
+                })
+            });
+
+            if (res.ok) {
+                setFormStatus("ok");
+                setForm({ name: "", email: "", message: "" });
+                setTimeout(() => setFormStatus(null), 4000);
+            } else {
+                setFormStatus(null);
+                setFormErrors({ general: "Failed to send feedback. Please try again." });
+            }
+        } catch {
+            setFormStatus(null);
+            setFormErrors({ general: "Network error. Please try again later." });
+        }
     };
 
     const handleFormChange = (field) => (e) => {
@@ -107,11 +169,34 @@ export default function Footer() {
         }
     };
 
+    if (footerConfig?.isPublic === false) return null;
+
+    // Config values with fallbacks
+    const brandName = footerConfig?.brandName || "Mahadeb";
+    const brandPrefix = footerConfig?.brandPrefix !== undefined ? footerConfig.brandPrefix : "<";
+    const brandSuffix = footerConfig?.brandSuffix !== undefined ? footerConfig.brandSuffix : "/>";
+    const bio = footerConfig?.bio || "Building beautiful, performant web experiences that users love. Passionate about clean code, great design, and meaningful products.";
+    const contactEmail = footerConfig?.contactEmail || "you@email.com";
+    const contactPhone = footerConfig?.contactPhone || "+91 12345 67890";
+    const contactLocation = footerConfig?.contactLocation || "Haldia, West Bengal, India";
+    const newsletterTitle = footerConfig?.newsletterTitle || "NEWSLETTER";
+    const newsletterSubtitle = footerConfig?.newsletterSubtitle || "Get updates on new projects and articles. No spam, ever.";
+    const newsletterButtonText = footerConfig?.newsletterButtonText || "Subscribe";
+    const copyrightText = footerConfig?.copyrightText || "Mahadeb Maity. Built with React & Node.js";
+
+    const quickLinks = (footerConfig?.quickLinks?.length > 0 ? footerConfig.quickLinks : DEFAULT_QUICK_LINKS).filter(l => l.isVisible !== false);
+    const socials = (footerConfig?.socials?.length > 0 ? footerConfig.socials : DEFAULT_SOCIALS).filter(s => s.isVisible !== false);
+
+    const showNewsletter = footerConfig?.showNewsletter !== false;
+    const showSocials = footerConfig?.showSocials !== false;
+    const showQuickLinks = footerConfig?.showQuickLinks !== false;
+    const showContactInfo = footerConfig?.showContactInfo !== false;
+
     return (
         <>
             {/* ══════════════════════════════
-          FOOTER
-      ══════════════════════════════ */}
+                FOOTER
+            ══════════════════════════════ */}
             <footer className="footer" id="footer">
 
                 {/* ── decorative top wave ── */}
@@ -124,8 +209,8 @@ export default function Footer() {
                 <div className="footer__inner">
 
                     {/* ══════════════════════
-              ROW 1: main grid
-          ══════════════════════ */}
+                        ROW 1: main grid
+                    ══════════════════════ */}
                     <div className="footer__grid">
 
                         {/* ── 1. Branding ── */}
@@ -134,137 +219,159 @@ export default function Footer() {
                             ref={ref("brand")}
                         >
                             <div className="footer__logo">
-                                <span className="footer__logo-bracket">&lt;</span>
-                                <span className="footer__logo-name">Mahadeb</span>
-                                <span className="footer__logo-bracket">/&gt;</span>
+                                {brandPrefix && <span className="footer__logo-bracket">{brandPrefix}</span>}
+                                <span className="footer__logo-name">{brandName}</span>
+                                {brandSuffix && <span className="footer__logo-bracket">{brandSuffix}</span>}
                             </div>
                             <p className="footer__desc">
-                                Building beautiful, performant web experiences that users love.
-                                Passionate about clean code, great design, and meaningful products.
+                                {bio}
                             </p>
                             {/* Social Icons */}
-                            <div className="footer__socials">
-                                {SOCIALS.map((s) => (
-                                    <a
-                                        key={s.label}
-                                        href={s.href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="footer__social"
-                                        title={s.label}
-                                        style={{ "--social-color": s.color }}
-                                    >
-                                        <i className={s.icon} aria-hidden="true" />
-                                        <span className="sr-only">{s.label}</span>
-                                    </a>
-                                ))}
-                            </div>
+                            {showSocials && socials.length > 0 && (
+                                <div className="footer__socials">
+                                    {socials.map((s) => (
+                                        <a
+                                            key={s.label}
+                                            href={s.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="footer__social"
+                                            title={s.label}
+                                            style={{ "--social-color": s.color || "#38bdf8" }}
+                                        >
+                                            <i className={s.icon} aria-hidden="true" />
+                                            <span className="sr-only">{s.label}</span>
+                                        </a>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* ── 2. Quick Links ── */}
-                        <div
-                            className={`footer__col footer__reveal ${visibleSections.links ? "footer__reveal--in" : ""}`}
-                            ref={ref("links")}
-                            style={{ animationDelay: "0.1s" }}
-                        >
-                            <h3 className="footer__col-title">
-                                <span className="footer__col-title-line" />
-                                Quick Links
-                            </h3>
-                            <ul className="footer__links">
-                                {QUICK_LINKS.map((l) => (
-                                    <li key={l.label}>
-                                        <button className="footer__link" onClick={() => scrollTo(l.href)}>
-                                            <i className="fa-solid fa-chevron-right footer__link-arrow" />
-                                            {l.label}
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                        {showQuickLinks && (
+                            <div
+                                className={`footer__col footer__reveal ${visibleSections.links ? "footer__reveal--in" : ""}`}
+                                ref={ref("links")}
+                                style={{ animationDelay: "0.1s" }}
+                            >
+                                <h3 className="footer__col-title">
+                                    <span className="footer__col-title-line" />
+                                    Quick Links
+                                </h3>
+                                <ul className="footer__links">
+                                    {quickLinks.map((l) => (
+                                        <li key={l.label}>
+                                            <button className="footer__link" onClick={() => scrollTo(l.href)}>
+                                                <i className="fa-solid fa-chevron-right footer__link-arrow" />
+                                                {l.label}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
 
                         {/* ── 3. Contact Info ── */}
-                        <div
-                            className={`footer__col footer__reveal ${visibleSections.contact ? "footer__reveal--in" : ""}`}
-                            ref={ref("contact")}
-                            style={{ animationDelay: "0.2s" }}
-                        >
-                            <h3 className="footer__col-title">
-                                <span className="footer__col-title-line" />
-                                Get in Touch
-                            </h3>
-                            <ul className="footer__contact-list">
-                                <li className="footer__contact-item">
-                                    <span className="footer__contact-icon">
-                                        <i className="fa-solid fa-envelope" />
-                                    </span>
-                                    <div>
-                                        <p className="footer__contact-label">Email</p>
-                                        <a href="mailto:you@email.com" className="footer__contact-val">
-                                            you@email.com
-                                        </a>
-                                    </div>
-                                </li>
-                                <li className="footer__contact-item">
-                                    <span className="footer__contact-icon">
-                                        <i className="fa-solid fa-phone" />
-                                    </span>
-                                    <div>
-                                        <p className="footer__contact-label">Phone</p>
-                                        <a href="tel:+911234567890" className="footer__contact-val">
-                                            +91 12345 67890
-                                        </a>
-                                    </div>
-                                </li>
-                                <li className="footer__contact-item">
-                                    <span className="footer__contact-icon">
-                                        <i className="fa-solid fa-location-dot" />
-                                    </span>
-                                    <div>
-                                        <p className="footer__contact-label">Location</p>
-                                        <span className="footer__contact-val">Haldia, West Bengal, India</span>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
+                        {showContactInfo && (
+                            <div
+                                className={`footer__col footer__reveal ${visibleSections.contact ? "footer__reveal--in" : ""}`}
+                                ref={ref("contact")}
+                                style={{ animationDelay: "0.2s" }}
+                            >
+                                <h3 className="footer__col-title">
+                                    <span className="footer__col-title-line" />
+                                    Get in Touch
+                                </h3>
+                                <ul className="footer__contact-list">
+                                    {contactEmail && (
+                                        <li className="footer__contact-item">
+                                            <span className="footer__contact-icon">
+                                                <i className="fa-solid fa-envelope" />
+                                            </span>
+                                            <div>
+                                                <p className="footer__contact-label">Email</p>
+                                                <a href={`mailto:${contactEmail}`} className="footer__contact-val">
+                                                    {contactEmail}
+                                                </a>
+                                            </div>
+                                        </li>
+                                    )}
+                                    {contactPhone && (
+                                        <li className="footer__contact-item">
+                                            <span className="footer__contact-icon">
+                                                <i className="fa-solid fa-phone" />
+                                            </span>
+                                            <div>
+                                                <p className="footer__contact-label">Phone</p>
+                                                <a href={`tel:${contactPhone.replace(/\s+/g, '')}`} className="footer__contact-val">
+                                                    {contactPhone}
+                                                </a>
+                                            </div>
+                                        </li>
+                                    )}
+                                    {contactLocation && (
+                                        <li className="footer__contact-item">
+                                            <span className="footer__contact-icon">
+                                                <i className="fa-solid fa-location-dot" />
+                                            </span>
+                                            <div>
+                                                <p className="footer__contact-label">Location</p>
+                                                <span className="footer__contact-val">{contactLocation}</span>
+                                            </div>
+                                        </li>
+                                    )}
+                                </ul>
+                            </div>
+                        )}
 
                         {/* ── 4. Newsletter ── */}
-                        <div
-                            className={`footer__col footer__reveal ${visibleSections.news ? "footer__reveal--in" : ""}`}
-                            ref={ref("news")}
-                            style={{ animationDelay: "0.3s" }}
-                        >
-                            <h3 className="footer__col-title">
-                                <span className="footer__col-title-line" />
-                                Newsletter
-                            </h3>
-                            <p className="footer__news-desc">
-                                Get updates on new projects and articles. No spam, ever.
-                            </p>
-                            <form className="footer__news-form" onSubmit={handleNewsletter} noValidate>
-                                <div className="footer__news-input-wrap">
-                                    <i className="fa-solid fa-at footer__news-icon" />
-                                    <input
-                                        type="email"
-                                        placeholder="your@email.com"
-                                        value={newsEmail}
-                                        onChange={(e) => { setNewsEmail(e.target.value); setNewsStatus(null); }}
-                                        className={`footer__news-input ${newsStatus === "err" ? "footer__news-input--err" : ""}`}
-                                        aria-label="Email for newsletter"
-                                    />
-                                </div>
-                                {newsStatus === "err" && <p className="footer__news-err">Enter a valid email.</p>}
-                                {newsStatus === "ok" && <p className="footer__news-ok"><i className="fa-solid fa-circle-check" /> Subscribed!</p>}
-                                <button type="submit" className="footer__news-btn">
-                                    Subscribe <i className="fa-solid fa-paper-plane" />
-                                </button>
-                            </form>
-                        </div>
+                        {showNewsletter && (
+                            <div
+                                className={`footer__col footer__reveal ${visibleSections.news ? "footer__reveal--in" : ""}`}
+                                ref={ref("news")}
+                                style={{ animationDelay: "0.3s" }}
+                            >
+                                <h3 className="footer__col-title">
+                                    <span className="footer__col-title-line" />
+                                    {newsletterTitle}
+                                </h3>
+                                <p className="footer__news-desc">
+                                    {newsletterSubtitle}
+                                </p>
+                                <form className="footer__news-form" onSubmit={handleNewsletter} noValidate>
+                                    <div className="footer__news-input-wrap">
+                                        <i className="fa-solid fa-at footer__news-icon" />
+                                        <input
+                                            type="email"
+                                            placeholder="your@email.com"
+                                            value={newsEmail}
+                                            onChange={(e) => { setNewsEmail(e.target.value); setNewsStatus(null); setNewsMessage(""); }}
+                                            className={`footer__news-input ${newsStatus === "err" ? "footer__news-input--err" : ""}`}
+                                            aria-label="Email for newsletter"
+                                            disabled={newsStatus === "loading"}
+                                        />
+                                    </div>
+                                    {newsStatus === "err" && <p className="footer__news-err">{newsMessage || "Enter a valid email."}</p>}
+                                    {newsStatus === "ok" && (
+                                        <p className="footer__news-ok">
+                                            <i className="fa-solid fa-circle-check" /> {newsMessage || "Subscribed!"}
+                                        </p>
+                                    )}
+                                    <button type="submit" className="footer__news-btn" disabled={newsStatus === "loading"}>
+                                        {newsStatus === "loading" ? (
+                                            <><i className="fa-solid fa-circle-notch fa-spin" /> Subscribing...</>
+                                        ) : (
+                                            <>{newsletterButtonText} <i className="fa-solid fa-paper-plane" /></>
+                                        )}
+                                    </button>
+                                </form>
+                            </div>
+                        )}
                     </div>
 
                     {/* ══════════════════════
-              ROW 2: Feedback Form
-          ══════════════════════ */}
+                        ROW 2: Feedback Form
+                    ══════════════════════ */}
                     <div
                         className={`footer__feedback footer__reveal ${visibleSections.feedback ? "footer__reveal--in" : ""}`}
                         ref={ref("feedback")}
@@ -339,11 +446,11 @@ export default function Footer() {
                     </div>
 
                     {/* ══════════════════════
-              Bottom Bar
-          ══════════════════════ */}
+                        Bottom Bar
+                    ══════════════════════ */}
                     <div className="footer__bottom">
                         <p className="footer__copy">
-                            © {CURRENT_YEAR} <span className="footer__copy-name">MCAWALLAH</span>. All rights reserved.
+                            © {CURRENT_YEAR} <span className="footer__copy-name">{copyrightText}</span>. All rights reserved.
                         </p>
                         <div className="footer__bottom-links">
                             <button className="footer__bottom-link" onClick={() => scrollTo("#privacy")}>Privacy Policy</button>
@@ -355,7 +462,7 @@ export default function Footer() {
                             </Link>
                         </div>
                         <p className="footer__made-with">
-                            Made with <span className="footer__heart">♥</span> Mahadeb Maity
+                            Made with <span className="footer__heart">♥</span> {brandName}
                         </p>
                     </div>
                 </div>

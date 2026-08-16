@@ -2,6 +2,7 @@ import express from 'express';
 import {
     getPublicPortfolio,
     submitContact,
+    subscribeNewsletter,
     recordEvent,
     submitGameScore,
     getGameLeaderboard
@@ -21,8 +22,9 @@ const contactLimiter = rateLimit({
 // Unified public portfolio query
 router.get('/public', getPublicPortfolio);
 
-// Submit contact form message
+// Submit contact form message & Newsletter subscription
 router.post('/contact', contactLimiter, submitContact);
+router.post('/subscribe', subscribeNewsletter);
 
 // Record interaction analytics & user activity telemetry
 router.post('/analytics', recordEvent);

@@ -9,6 +9,8 @@ import Analytics from '../models/Analytics.js';
 import SiteSettings from '../models/SiteSettings.js';
 import GameScore from '../models/GameScore.js';
 import Navbar from '../models/Navbar.js';
+import Footer from '../models/Footer.js';
+import Subscriber from '../models/Subscriber.js';
 import Document from '../models/Document.js';
 import User from '../models/User.js';
 import ActivityLog from '../models/ActivityLog.js';
@@ -632,6 +634,113 @@ export const clearActivityLogs = async (req, res) => {
     try {
         await ActivityLog.deleteMany({});
         res.json({ message: 'Activity telemetry logs cleared successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Get Footer Configuration
+// @route GET /api/admin/footer
+export const getFooterConfig = async (req, res) => {
+    try {
+        let footer = await Footer.findOne();
+        if (!footer) {
+            footer = await Footer.create({
+                brandName: 'Mahadeb',
+                brandPrefix: '<',
+                brandSuffix: '/>',
+                bio: 'Building beautiful, performant web experiences that users love. Passionate about clean code, great design, and meaningful products.',
+                contactEmail: 'you@email.com',
+                contactPhone: '+91 12345 67890',
+                contactLocation: 'Haldia, West Bengal, India',
+                quickLinks: [
+                    { label: 'Home', href: '#home', isVisible: true },
+                    { label: 'About', href: '#about', isVisible: true },
+                    { label: 'Projects', href: '#projects', isVisible: true },
+                    { label: 'Fun Game', href: '#fun-game', isVisible: true },
+                    { label: 'Contact', href: '#contact', isVisible: true },
+                    { label: 'Privacy Policy', href: '#privacy', isVisible: true }
+                ],
+                socials: [
+                    { label: 'GitHub', icon: 'fa-brands fa-github', href: 'https://github.com', color: '#333', isVisible: true },
+                    { label: 'LinkedIn', icon: 'fa-brands fa-linkedin', href: 'https://linkedin.com', color: '#0A66C2', isVisible: true },
+                    { label: 'Twitter', icon: 'fa-brands fa-twitter', href: 'https://twitter.com', color: '#1DA1F2', isVisible: true },
+                    { label: 'Instagram', icon: 'fa-brands fa-instagram', href: 'https://instagram.com', color: '#E1306C', isVisible: true },
+                    { label: 'Facebook', icon: 'fa-brands fa-facebook', href: 'https://facebook.com', color: '#1877F2', isVisible: true }
+                ]
+            });
+        }
+        res.json(footer);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Update Footer Configuration
+// @route PUT /api/admin/footer
+export const updateFooterConfig = async (req, res) => {
+    try {
+        let footer = await Footer.findOne();
+        if (footer) {
+            footer = await Footer.findByIdAndUpdate(footer._id, req.body, { new: true });
+        } else {
+            footer = await Footer.create(req.body);
+        }
+        res.json({ message: 'Footer configuration updated successfully', footer });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Get All Newsletter Subscribers
+// @route GET /api/admin/subscribers
+export const getSubscribers = async (req, res) => {
+    try {
+        const { search, status } = req.query;
+        const filter = {};
+        if (status && status !== 'all') filter.status = status;
+        if (search) filter.email = { $regex: search, $options: 'i' };
+
+        const [subscribers, totalSubscribers, activeCount, unsubscribedCount] = await Promise.all([
+            Subscriber.find(filter).sort({ createdAt: -1 }).lean(),
+            Subscriber.countDocuments(),
+            Subscriber.countDocuments({ status: 'active' }),
+            Subscriber.countDocuments({ status: 'unsubscribed' })
+        ]);
+
+        res.json({
+            subscribers,
+            totalSubscribers,
+            activeCount,
+            unsubscribedCount
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Toggle Subscriber Status (Active / Unsubscribed)
+// @route PATCH /api/admin/subscribers/:id/status
+export const toggleSubscriberStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        const updated = await Subscriber.findByIdAndUpdate(id, { status }, { new: true });
+        if (!updated) return res.status(404).json({ message: 'Subscriber not found' });
+        res.json({ message: `Subscriber marked as ${status}`, subscriber: updated });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc Delete Subscriber
+// @route DELETE /api/admin/subscribers/:id
+export const deleteSubscriber = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deleted = await Subscriber.findByIdAndDelete(id);
+        if (!deleted) return res.status(404).json({ message: 'Subscriber not found' });
+        res.json({ message: 'Subscriber deleted successfully', id });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

@@ -20,7 +20,12 @@ import {
     adminResetUserPassword,
     getUserActivityDetails,
     getActivityLogs,
-    clearActivityLogs
+    clearActivityLogs,
+    getFooterConfig,
+    updateFooterConfig,
+    getSubscribers,
+    toggleSubscriberStatus,
+    deleteSubscriber
 } from '../controllers/adminController.js';
 import { protectAdmin } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
@@ -40,6 +45,15 @@ router.patch('/users/:id/status', toggleUserStatus);
 router.post('/users/:id/reset-password', adminResetUserPassword);
 router.get('/users/:id/activity', getUserActivityDetails);
 router.delete('/users/:id', deleteUser);
+
+// Newsletter Subscribers Management
+router.get('/subscribers', getSubscribers);
+router.patch('/subscribers/:id/status', toggleSubscriberStatus);
+router.delete('/subscribers/:id', deleteSubscriber);
+
+// Footer Customization CMS
+router.get('/footer', getFooterConfig);
+router.put('/footer', updateFooterConfig);
 
 // Live Activity & Workflow Telemetry
 router.get('/activity-logs', getActivityLogs);
