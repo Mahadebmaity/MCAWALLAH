@@ -132,12 +132,14 @@ export default function StandaloneArcadeWindow() {
 
         // Submit to API
         try {
-            const playerName = user?.name || localStorage.getItem('player_nickname') || 'Guest Player';
+            const playerName = user?.name || (user?.email ? user.email.split('@')[0] : (localStorage.getItem('player_nickname') || 'Player'));
             const res = await fetch(`${API_BASE}/portfolio/games/${activeSlug}/score`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     playerName,
+                    userId: user?._id,
+                    userEmail: user?.email,
                     score: finalScore,
                     metrics: { ...metrics, durationSeconds }
                 })
@@ -178,7 +180,7 @@ export default function StandaloneArcadeWindow() {
                 flexWrap: 'wrap',
                 gap: '12px'
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
                     <Link
                         to="/#fun-game"
                         className="adm-btn adm-btn-secondary adm-btn-sm"
@@ -189,6 +191,21 @@ export default function StandaloneArcadeWindow() {
                     <div style={{ fontSize: '18px', fontWeight: '800', fontFamily: 'var(--gm-font-d, sans-serif)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <i className="fa-solid fa-gamepad" style={{ color: 'var(--gm-accent, #e84545)' }} />
                         Arcade Arena Lounge
+                    </div>
+
+                    {/* Active Player Gamer Tag */}
+                    <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        background: 'rgba(56, 189, 248, 0.12)',
+                        border: '1px solid rgba(56, 189, 248, 0.3)',
+                        padding: '4px 12px',
+                        borderRadius: '999px'
+                    }}>
+                        <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 6px #10b981' }} />
+                        <span style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Player:</span>
+                        <strong style={{ fontSize: '12px', color: '#38bdf8' }}>{user?.name || (user?.email ? user.email.split('@')[0] : 'Player')}</strong>
                     </div>
                 </div>
 

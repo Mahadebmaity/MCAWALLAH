@@ -176,21 +176,38 @@ export const recordEvent = async (req, res) => {
 export const submitGameScore = async (req, res) => {
     try {
         const { slug } = req.params;
-        const { playerName, score, metrics } = req.body;
+        const { playerName, score, metrics, userId, userEmail } = req.body;
 
         if (typeof score !== 'number' || score < 0) {
             return res.status(400).json({ message: 'Valid numerical score is required.' });
         }
 
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
-        const name = (playerName && playerName.trim()) ? playerName.trim().slice(0, 30) : 'Anonymous Player';
+        let resolvedPlayerName = (playerName && playerName.trim()) ? playerName.trim().slice(0, 30) : '';
+
+        // Find user if userId or userEmail is provided
+        let userDoc = null;
+        if (userId) {
+            userDoc = await User.findById(userId).select('name email');
+        } else if (userEmail) {
+            userDoc = await User.findOne({ email: userEmail.toLowerCase() }).select('name email');
+        }
+
+        if (userDoc) {
+            resolvedPlayerName = userDoc.name || userDoc.email.split('@')[0];
+        }
+
+        if (!resolvedPlayerName || resolvedPlayerName.toLowerCase() === 'guest player' || resolvedPlayerName.toLowerCase() === 'anonymous player') {
+            resolvedPlayerName = userDoc?.name || (userEmail ? userEmail.split('@')[0] : 'Player');
+        }
 
         // 1. Create the score entry
         const entry = await GameScore.create({
             gameSlug: slug,
-            playerName: name,
+            playerName: resolvedPlayerName,
             score,
             metrics: metrics || {},
+            userId: userDoc?._id || userId || null,
             ip
         });
 
@@ -200,7 +217,7 @@ export const submitGameScore = async (req, res) => {
         // 3. Record in Analytics
         Analytics.create({
             type: 'game_play',
-            targetTitle: `${slug}: ${score} pts by ${name}`,
+            targetTitle: `${slug}: ${score} pts by ${resolvedPlayerName}`,
             path: '/#fun-game'
         }).catch(() => {});
 
@@ -228,15 +245,20 @@ export const getGameLeaderboard = async (req, res) => {
             GameScore.find({ gameSlug: slug })
                 .sort({ score: -1, createdAt: 1 })
                 .limit(10)
-                .select('playerName score metrics createdAt')
+                .populate('userId', 'name email avatarUrl')
                 .lean(),
             GameScore.countDocuments({ gameSlug: slug })
         ]);
 
+        const formattedLeaderboard = topScores.map(item => ({
+            ...item,
+            playerName: item.userId?.name || (item.playerName && !item.playerName.toLowerCase().includes('guest') ? item.playerName : (item.userId?.email ? item.userId.email.split('@')[0] : item.playerName || 'Player'))
+        }));
+
         res.json({
             gameSlug: slug,
             totalPlays,
-            leaderboard: topScores
+            leaderboard: formattedLeaderboard
         });
     } catch (error) {
         res.status(500).json({ message: 'Failed to load leaderboard', error: error.message });
