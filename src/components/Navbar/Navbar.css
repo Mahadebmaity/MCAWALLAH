@@ -163,9 +163,9 @@
    LOGO
 ══════════════════════════ */
 .navbar__logo {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 1px;
+  gap: 2px;
   font-family: var(--font-m);
   font-size: 1.12rem;
   font-weight: 700;
@@ -173,6 +173,9 @@
   cursor: pointer;
   user-select: none;
   transition: opacity var(--t);
+  white-space: nowrap;
+  flex-shrink: 0;
+  word-break: keep-all;
 }
 
 .navbar__logo:hover {
@@ -182,6 +185,8 @@
 .navbar__logo-bracket {
   color: var(--accent);
   font-size: 1.2rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .navbar__logo-name {
@@ -190,6 +195,9 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  white-space: nowrap;
+  word-break: keep-all;
+  flex-shrink: 0;
 }
 
 .navbar__logo-dot {
@@ -199,6 +207,7 @@
   background: var(--accent);
   margin-left: 4px;
   animation: logoPulse 2s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
 @keyframes logoPulse {
