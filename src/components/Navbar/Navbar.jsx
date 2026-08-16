@@ -110,7 +110,6 @@ export default function Navbar() {
         const fn = (e) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setDropdown(false);
-                closePanel();
             }
             if (resumeRef.current && !resumeRef.current.contains(e.target)) {
                 setResumeDropdown(false);
@@ -122,13 +121,25 @@ export default function Navbar() {
 
     /* ── panel open/close ── */
     const openPanel = (name) => {
+        setDropdown(false);
         if (name === "profile") setProfileForm({ name: user?.name || "", email: user?.email || "" });
+        if (name === "prefs" && user?.preferences) {
+            setPrefs({
+                darkMode: user.preferences.darkMode !== undefined ? user.preferences.darkMode : true,
+                background: user.preferences.background || "mesh",
+                accentColor: user.preferences.accentColor || "#e84545"
+            });
+        }
         setActivePanel(name);
-        setTimeout(() => setPanelOpen(true), 10);
+        setPanelOpen(true);
     };
     const closePanel = () => {
         setPanelOpen(false);
-        setTimeout(() => setActivePanel(null), 350);
+        setActivePanel(null);
+        setProfileMsg(null);
+        setPrefsMsg(null);
+        setPwMsg(null);
+        setAvatarStatus(null);
     };
 
     /* ── smooth scroll nav ── */
@@ -533,28 +544,35 @@ export default function Navbar() {
 
             {/* ══ User Account Settings Modal (Profile, Avatar, Prefs, Password) ══ */}
             {activePanel && (
-                <div style={{
-                    position: 'fixed',
-                    inset: 0,
-                    zIndex: 99999,
-                    background: 'rgba(0, 0, 0, 0.75)',
-                    backdropFilter: 'blur(10px)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '20px'
-                }}>
-                    <div style={{
-                        background: 'rgba(15, 23, 42, 0.95)',
-                        border: '1px solid rgba(56, 189, 248, 0.3)',
-                        borderRadius: '20px',
-                        maxWidth: '520px',
-                        width: '100%',
-                        padding: '26px',
-                        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(56, 189, 248, 0.15)',
-                        animation: 'slideUp 0.3s ease',
-                        color: '#fff'
-                    }}>
+                <div
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) closePanel();
+                    }}
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 99999,
+                        background: 'rgba(0, 0, 0, 0.75)',
+                        backdropFilter: 'blur(10px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '20px'
+                    }}
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            background: 'rgba(15, 23, 42, 0.95)',
+                            border: '1px solid rgba(56, 189, 248, 0.3)',
+                            borderRadius: '20px',
+                            maxWidth: '520px',
+                            width: '100%',
+                            padding: '26px',
+                            boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(56, 189, 248, 0.15)',
+                            color: '#fff'
+                        }}
+                    >
                         {/* Modal Header */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -607,7 +625,7 @@ export default function Navbar() {
                                 <button
                                     key={tab.key}
                                     type="button"
-                                    onClick={() => setActivePanel(tab.key)}
+                                    onClick={() => openPanel(tab.key)}
                                     style={{
                                         flex: 1,
                                         minWidth: '90px',
