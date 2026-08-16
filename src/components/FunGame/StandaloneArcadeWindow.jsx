@@ -93,13 +93,16 @@ export default function StandaloneArcadeWindow() {
 
         setIsTimerRunning(false);
 
+        const durationSeconds = metrics.durationSeconds || gameSeconds || 1;
+        const timeString = formatTime(durationSeconds);
+
         // Record to local session history
         const newRun = {
             id: Date.now(),
             gameSlug: activeSlug,
             score: finalScore,
-            durationSeconds: gameSeconds,
-            timeString: formatTime(gameSeconds),
+            durationSeconds,
+            timeString,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             metrics
         };
@@ -127,7 +130,7 @@ export default function StandaloneArcadeWindow() {
                 body: JSON.stringify({
                     playerName,
                     score: finalScore,
-                    metrics: { ...metrics, durationSeconds: gameSeconds }
+                    metrics: { ...metrics, durationSeconds }
                 })
             });
 

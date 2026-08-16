@@ -100,6 +100,12 @@ export default function About() {
     const [timeRef, timeIn] = useInView(0.1);
     const [hobbyRef, hobbyIn] = useInView(0.2);
 
+    const [imgError, setImgError] = useState(false);
+
+    const initials = about.displayName
+        ? about.displayName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+        : "MM";
+
     const skills = data?.skills?.length ? data.skills : DEFAULT_SKILLS;
     const timeline = data?.timeline?.length ? data.timeline : DEFAULT_TIMELINE;
     const hobbies = about.hobbies?.length ? about.hobbies : DEFAULT_HOBBIES;
@@ -132,11 +138,25 @@ export default function About() {
                     {/* Avatar */}
                     <div className="about__avatar-wrap">
                         <div className="about__avatar-ring" />
-                        <div className="about__avatar">
-                            {about.avatarUrl ? (
-                                <img src={about.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                        <div className="about__avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #1e293b, #0f172a)' }}>
+                            {about.avatarUrl && !imgError ? (
+                                <img
+                                    src={about.avatarUrl}
+                                    alt={about.displayName || "Avatar"}
+                                    onError={() => setImgError(true)}
+                                    style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
+                                />
                             ) : (
-                                <i className="fa-solid fa-user about__avatar-icon" />
+                                <span style={{
+                                    fontSize: '36px',
+                                    fontWeight: '800',
+                                    background: 'linear-gradient(135deg, #38bdf8 0%, #818cf8 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    letterSpacing: '1px'
+                                }}>
+                                    {initials}
+                                </span>
                             )}
                         </div>
                         <div className="about__avatar-badge">

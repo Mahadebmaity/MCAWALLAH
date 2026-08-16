@@ -91,15 +91,21 @@ export default function TicTacToe({ onGameOver, bestScore }) {
         return move;
     };
 
+    const startTimeRef = useRef(Date.now());
+
     const handleGameEnd = (winResult) => {
         setWinner(winResult.winner);
         setWinningLine(winResult.line);
+
+        const durationSeconds = startTimeRef.current
+            ? Math.max(1, Math.round((Date.now() - startTimeRef.current) / 1000))
+            : 2;
 
         if (winResult.winner === "X") {
             setScores(s => {
                 const newX = s.x + 1;
                 const totalPts = newX * 100;
-                if (onGameOver) onGameOver(totalPts, { mode: gameMode, result: "Victory" });
+                if (onGameOver) onGameOver(totalPts, { mode: gameMode, result: "Victory", durationSeconds });
                 return { ...s, x: newX };
             });
             setStreak(prev => prev + 1);

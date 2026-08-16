@@ -115,6 +115,8 @@ export default function SnakeGame({ onGameOver, bestScore }) {
         animRef.current = requestAnimationFrame(loop);
     }, [draw, speed]);
 
+    const startTimeRef = useRef(0);
+
     const startGame = () => {
         const initSnake = [{ x: 10, y: 10 }];
         stateRef.current = {
@@ -126,6 +128,7 @@ export default function SnakeGame({ onGameOver, bestScore }) {
             running: true,
             over: false,
         };
+        startTimeRef.current = Date.now();
         setScore(0);
         setPhase("playing");
         lastTime.current = performance.now();
@@ -139,8 +142,15 @@ export default function SnakeGame({ onGameOver, bestScore }) {
         cancelAnimationFrame(animRef.current);
         setPhase("over");
 
+        const durationSeconds = startTimeRef.current
+            ? Math.max(1, Math.round((Date.now() - startTimeRef.current) / 1000))
+            : 1;
+
         if (onGameOver) {
-            onGameOver(finalScore, { moves: stateRef.current.snake.length });
+            onGameOver(finalScore, {
+                durationSeconds,
+                moves: stateRef.current.snake.length
+            });
         }
     };
 

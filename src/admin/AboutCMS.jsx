@@ -49,6 +49,13 @@ const STAT_ICON_PRESETS = [
     { icon: 'fa-solid fa-graduation-cap', label: 'Education' }
 ];
 
+const DEFAULT_AVATAR_PRESETS = [
+    { label: 'Developer', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80' },
+    { label: 'Pro Tech', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80' },
+    { label: 'Cyberpunk', url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80' },
+    { label: 'Creative', url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&auto=format&fit=crop&q=80' }
+];
+
 // Helper to sanitize and clean display resume title
 const formatResumeTitle = (url, title) => {
     if (title && title.trim() && !title.startsWith('http')) {
@@ -67,6 +74,7 @@ export default function AboutCMS() {
     const [toast, setToast] = useState(null);
     const [copiedUrl, setCopiedUrl] = useState(false);
     const [showResumeIconPicker, setShowResumeIconPicker] = useState(false);
+    const [imgError, setImgError] = useState(false);
 
     const [about, setAbout] = useState({
         displayName: 'Mahadeb Maity',
@@ -191,11 +199,21 @@ export default function AboutCMS() {
 
             if (res.ok) {
                 const data = await res.json();
-                setAbout(prev => ({ ...prev, avatarUrl: data.avatarUrl }));
+                const newAvatarUrl = data.avatarUrl;
+                setAbout(prev => ({ ...prev, avatarUrl: newAvatarUrl }));
+                setImgError(false);
+
+                // Instantly sync & save to About section document
+                await authFetch(`${API_BASE}/admin/section/about`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...about, avatarUrl: newAvatarUrl })
+                });
+
                 setToast({
                     type: 'success',
-                    title: 'Avatar Uploaded! 📸',
-                    message: 'Your profile photo has been updated successfully.'
+                    title: 'Avatar Uploaded & Saved! 📸',
+                    message: 'Your profile photo is now updated and live on your portfolio.'
                 });
             } else {
                 throw new Error('Avatar upload failed');
@@ -208,6 +226,44 @@ export default function AboutCMS() {
             });
         } finally {
             setUploadingAvatar(false);
+        }
+    };
+
+    const handleRemoveAvatar = async () => {
+        setAbout(prev => ({ ...prev, avatarUrl: '' }));
+        setImgError(false);
+        try {
+            await authFetch(`${API_BASE}/admin/section/about`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...about, avatarUrl: '' })
+            });
+            setToast({
+                type: 'success',
+                title: 'Default Avatar Restored',
+                message: 'Custom avatar removed. Default initials avatar is active.'
+            });
+        } catch (e) {
+            console.error('Remove avatar error:', e);
+        }
+    };
+
+    const handleSelectDefaultPreset = async (presetUrl) => {
+        setAbout(prev => ({ ...prev, avatarUrl: presetUrl }));
+        setImgError(false);
+        try {
+            await authFetch(`${API_BASE}/admin/section/about`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...about, avatarUrl: presetUrl })
+            });
+            setToast({
+                type: 'success',
+                title: 'Default Avatar Applied! 🎨',
+                message: 'Selected preset avatar saved.'
+            });
+        } catch (e) {
+            console.error('Preset avatar error:', e);
         }
     };
 
@@ -490,26 +546,43 @@ export default function AboutCMS() {
 
                     <div style={{ display: 'flex', gap: '24px', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap' }}>
                         <div style={{
-                            width: '90px',
-                            height: '90px',
+                            width: '92px',
+                            height: '92px',
                             borderRadius: '50%',
-                            border: '2px solid var(--adm-primary)',
+                            border: '2.5px solid var(--adm-primary)',
                             overflow: 'hidden',
-                            background: 'var(--adm-surface-2)',
+                            background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            flexShrink: 0
+                            flexShrink: 0,
+                            boxShadow: '0 0 20px rgba(56, 189, 248, 0.25)'
                         }}>
-                            {about.avatarUrl ? (
-                                <img src={about.avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            {about.avatarUrl && !imgError ? (
+                                <img
+                                    src={about.avatarUrl}
+                                    alt={about.displayName || "Avatar"}
+                                    onError={() => setImgError(true)}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
                             ) : (
-                                <i className="fa-solid fa-user" style={{ fontSize: '32px', color: 'var(--adm-text-muted)' }}></i>
+                                <span style={{
+                                    fontSize: '28px',
+                                    fontWeight: '800',
+                                    background: 'linear-gradient(135deg, #38bdf8 0%, #818cf8 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    letterSpacing: '1px'
+                                }}>
+                                    {about.displayName
+                                        ? about.displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                                        : 'MM'}
+                                </span>
                             )}
                         </div>
-                        <div style={{ flex: 1, minWidth: '240px' }}>
+                        <div style={{ flex: 1, minWidth: '260px' }}>
                             <label className="adm-label">Profile Avatar Image</label>
-                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '10px' }}>
                                 <input
                                     type="file"
                                     accept="image/*"
@@ -519,7 +592,7 @@ export default function AboutCMS() {
                                 />
                                 <label
                                     htmlFor="avatar-upload"
-                                    className="adm-btn adm-btn-secondary"
+                                    className="adm-btn adm-btn-primary"
                                     style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                                 >
                                     <i className="fa-solid fa-cloud-arrow-up"></i>
@@ -528,16 +601,39 @@ export default function AboutCMS() {
                                 {about.avatarUrl && (
                                     <button
                                         type="button"
-                                        onClick={() => setAbout({ ...about, avatarUrl: '' })}
+                                        onClick={handleRemoveAvatar}
                                         className="adm-btn adm-btn-danger adm-btn-sm"
+                                        title="Restore Default Avatar"
                                     >
-                                        <i className="fa-solid fa-trash"></i> Remove
+                                        <i className="fa-solid fa-trash"></i> Reset Default
                                     </button>
                                 )}
                             </div>
-                            <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--adm-text-muted)' }}>
-                                Supported formats: JPG, PNG, WEBP (Max 5MB)
-                            </p>
+
+                            {/* Preset Default Avatars */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '11px', color: 'var(--adm-text-muted)', fontWeight: '600' }}>
+                                    Or Pick Preset:
+                                </span>
+                                {DEFAULT_AVATAR_PRESETS.map((p, idx) => (
+                                    <button
+                                        key={idx}
+                                        type="button"
+                                        onClick={() => handleSelectDefaultPreset(p.url)}
+                                        style={{
+                                            border: about.avatarUrl === p.url ? '1px solid var(--adm-primary)' : '1px solid var(--adm-border)',
+                                            background: about.avatarUrl === p.url ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255, 255, 255, 0.04)',
+                                            color: about.avatarUrl === p.url ? '#38bdf8' : '#cbd5e1',
+                                            padding: '3px 8px',
+                                            borderRadius: '6px',
+                                            fontSize: '11px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        {p.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
 

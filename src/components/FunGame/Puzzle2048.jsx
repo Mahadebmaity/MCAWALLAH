@@ -43,6 +43,7 @@ export default function Puzzle2048({ onGameOver, bestScore }) {
     const [gameStatus, setGameStatus] = useState("idle"); // idle | playing | over | won
     const [highestTile, setHighestTile] = useState(2);
     const boardRef = useRef(null);
+    const startTimeRef = useRef(0);
 
     const initGame = () => {
         let b = getEmptyBoard();
@@ -53,6 +54,7 @@ export default function Puzzle2048({ onGameOver, bestScore }) {
         setMoves(0);
         setHighestTile(4);
         setGameStatus("playing");
+        startTimeRef.current = Date.now();
     };
 
     const checkGameOver = (currentBoard) => {
@@ -154,12 +156,16 @@ export default function Puzzle2048({ onGameOver, bestScore }) {
             setMoves(m => m + 1);
             setHighestTile(highest);
 
+            const durationSeconds = startTimeRef.current
+                ? Math.max(1, Math.round((Date.now() - startTimeRef.current) / 1000))
+                : 1;
+
             if (highest >= 2048 && gameStatus !== "won") {
                 setGameStatus("won");
-                if (onGameOver) onGameOver(newScore, { highestTile: highest, moves: moves + 1 });
+                if (onGameOver) onGameOver(newScore, { highestTile: highest, moves: moves + 1, durationSeconds });
             } else if (checkGameOver(spawnedBoard)) {
                 setGameStatus("over");
-                if (onGameOver) onGameOver(newScore, { highestTile: highest, moves: moves + 1 });
+                if (onGameOver) onGameOver(newScore, { highestTile: highest, moves: moves + 1, durationSeconds });
             }
         }
     }, [board, gameStatus, highestTile, moves, onGameOver, score]);
