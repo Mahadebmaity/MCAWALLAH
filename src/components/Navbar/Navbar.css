@@ -1667,16 +1667,16 @@
   /* Logo */
   .navbar__logo {
     font-size: 0.95rem;
-    flex-shrink: 1;
-    min-width: 0;
+    flex-shrink: 0;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    word-break: keep-all;
   }
-  .navbar__logo-bracket { font-size: 1rem; }
+  .navbar__logo-bracket { font-size: 1rem; flex-shrink: 0; }
+  .navbar__logo-name { white-space: nowrap; word-break: keep-all; flex-shrink: 0; }
   .navbar__logo-dot {
     width: 5px;
     height: 5px;
+    flex-shrink: 0;
   }
 
   /* Hide resume text, show only icon */
