@@ -4,7 +4,7 @@ import { API_BASE, getDocUrl } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
-const CATEGORIES = ['All', 'System Documentation', 'Certificates', 'Project Reports', 'Architecture', 'Notes', 'Other'];
+const CATEGORIES = ['All', 'Implementation Plans', 'System Documentation', 'Certificates', 'Project Reports', 'Architecture', 'Notes', 'Other'];
 
 export default function DocumentsCMS() {
     const { authFetch } = useAuth();
@@ -203,6 +203,32 @@ export default function DocumentsCMS() {
         const name = (doc.fileName || doc.title || '').toLowerCase();
         return url.endsWith('.html') || name.endsWith('.html');
     };
+
+    const isMarkdownDoc = (doc) => {
+        if (!doc) return false;
+        const type = (doc.fileType || '').toUpperCase();
+        const url = (doc.fileUrl || doc.url || '').toLowerCase();
+        const name = (doc.fileName || doc.title || '').toLowerCase();
+        return type === 'MARKDOWN' || type === 'MD' || url.endsWith('.md') || name.endsWith('.md');
+    };
+
+    const [mdContent, setMdContent] = useState('');
+    const [mdLoading, setMdLoading] = useState(false);
+
+    useEffect(() => {
+        if (previewDoc && isMarkdownDoc(previewDoc)) {
+            const resolvedUrl = getDocUrl(previewDoc);
+            if (resolvedUrl && resolvedUrl !== '#') {
+                setMdLoading(true);
+                fetch(resolvedUrl)
+                    .then(res => res.text())
+                    .then(text => { setMdContent(text); setMdLoading(false); })
+                    .catch(err => { setMdContent(`Failed to load markdown content: ${err.message}`); setMdLoading(false); });
+            }
+        } else {
+            setMdContent('');
+        }
+    }, [previewDoc]);
 
     const filteredDocs = docs.filter(d => {
         const matchesCat = selectedCategory === 'All' || d.category === selectedCategory;
@@ -718,6 +744,45 @@ export default function DocumentsCMS() {
                                         className="adm-doc-modal-iframe"
                                         style={{ background: '#ffffff' }}
                                     />
+                                ) : isMarkdownDoc(previewDoc) ? (
+                                    <div style={{ width: '100%', height: '100%', overflow: 'auto', padding: '24px', background: '#090d16' }}>
+                                        {mdLoading ? (
+                                            <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
+                                                <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '28px', marginBottom: '10px' }} />
+                                                <p>Loading implementation plan...</p>
+                                            </div>
+                                        ) : (
+                                            <div style={{ maxWidth: '850px', margin: '0 auto', background: 'rgba(15, 23, 42, 0.9)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '14px', padding: '24px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: '12px' }}>
+                                                    <span style={{ color: '#38bdf8', fontWeight: '700', fontSize: '13px' }}>
+                                                        <i className="fa-brands fa-markdown" /> Markdown Feature Specification
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(mdContent);
+                                                            setToast({ type: 'success', title: 'Copied!', message: 'Markdown content copied to clipboard.' });
+                                                        }}
+                                                        className="adm-btn adm-btn-secondary"
+                                                        style={{ padding: '4px 10px', fontSize: '11px' }}
+                                                    >
+                                                        <i className="fa-solid fa-copy" /> Copy Raw Markdown
+                                                    </button>
+                                                </div>
+                                                <pre style={{
+                                                    color: '#e2e8f0',
+                                                    fontFamily: 'var(--font-mono, monospace)',
+                                                    fontSize: '13px',
+                                                    lineHeight: '1.65',
+                                                    whiteSpace: 'pre-wrap',
+                                                    wordBreak: 'break-word',
+                                                    margin: 0
+                                                }}>
+                                                    {mdContent}
+                                                </pre>
+                                            </div>
+                                        )}
+                                    </div>
                                 ) : (
                                     <div style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--adm-text-muted)' }}>
                                         <i className="fa-solid fa-file" style={{ fontSize: '48px', color: 'var(--adm-primary)', marginBottom: '16px' }} />
