@@ -27,12 +27,14 @@ import PlaygroundCMS from './admin/PlaygroundCMS';
 import GamesCMS from './admin/GamesCMS';
 import DocumentsCMS from './admin/DocumentsCMS';
 import ImplementationPlansCMS from './admin/ImplementationPlansCMS';
+import CommandPaletteCMS from './admin/CommandPaletteCMS';
 import AiAssistantCMS from './admin/AiAssistantCMS';
 import MessagesInbox from './admin/MessagesInbox';
 import FooterSubscribersCMS from './admin/FooterSubscribersCMS';
 import SettingsCMS from './admin/SettingsCMS';
 import UsersActivityCMS from './admin/UsersActivityCMS';
 import AuthModal from './components/AuthModal/AuthModal';
+import CommandPalette from './components/CommandPalette/CommandPalette';
 import { useAuth } from './context/AuthContext';
 
 function PublicPortfolio() {
@@ -47,6 +49,7 @@ function PublicPortfolio() {
       <Contact />
       <Footer />
       <AiAssistant />
+      <CommandPalette />
       {authModalOpen && (
         <AuthModal
           onClose={closeAuthModal}
@@ -87,6 +90,7 @@ function App() {
           <Route path="games" element={<GamesCMS />} />
           <Route path="docs" element={<DocumentsCMS />} />
           <Route path="plans" element={<ImplementationPlansCMS />} />
+          <Route path="command-palette" element={<CommandPaletteCMS />} />
           <Route path="ai-assistant" element={<AiAssistantCMS />} />
           <Route path="messages" element={<MessagesInbox />} />
           <Route path="footer" element={<FooterSubscribersCMS />} />
