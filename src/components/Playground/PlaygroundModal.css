@@ -1,0 +1,390 @@
+/* ══════════════════════════════════════════════════════════════
+   INTERACTIVE PROJECT LIVE PLAYGROUND & SANDBOX MODAL
+   ══════════════════════════════════════════════════════════════ */
+
+.pg-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(4, 7, 16, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    z-index: 10005;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: pgFadeIn 0.22s ease-out;
+}
+
+.pg-modal-container {
+    background: var(--adm-surface, #090d16);
+    border: 1.5px solid rgba(56, 189, 248, 0.35);
+    border-radius: 20px;
+    width: 96vw;
+    max-width: 1320px;
+    height: 94vh;
+    max-height: 96vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 30px 80px -10px rgba(0, 0, 0, 0.9), 0 0 50px rgba(56, 189, 248, 0.22);
+    overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: pgScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pg-modal-container.is-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+    z-index: 10010;
+}
+
+/* ── Top Header Toolbar ── */
+.pg-modal-header {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(24, 24, 68, 0.98) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.pg-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.pg-title-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #0284c7, #6366f1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 16px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35);
+}
+
+.pg-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.2px;
+}
+
+.pg-subtitle {
+    font-size: 11.5px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+/* ── Mode & Viewport Switchers ── */
+.pg-header-center {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pg-pill-switcher {
+    display: flex;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 3px;
+}
+
+.pg-pill-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.pg-pill-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.pg-pill-btn.active {
+    background: linear-gradient(135deg, #0284c7, #38bdf8);
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 2px 10px rgba(14, 165, 233, 0.4);
+}
+
+.pg-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pg-action-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #cbd5e1;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.pg-action-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+}
+
+.pg-action-btn.icon-only {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    justify-content: center;
+}
+
+.pg-action-btn.close:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: #ef4444;
+    color: #f87171;
+}
+
+/* ── Main Sandbox Body ── */
+.pg-modal-body {
+    flex: 1;
+    min-height: 0;
+    background: #050811;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ── Sandboxed Live Frame Viewport Container ── */
+.pg-sandbox-stage {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    overflow: auto;
+    background: radial-gradient(circle at center, #0e1626 0%, #050811 100%);
+    transition: all 0.3s ease;
+}
+
+.pg-device-frame {
+    background: #000000;
+    border: 2px solid rgba(56, 189, 248, 0.4);
+    border-radius: 14px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(56, 189, 248, 0.25);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pg-device-frame.desktop {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.pg-device-frame.tablet {
+    width: 768px;
+    max-width: 95%;
+    height: 95%;
+    border-radius: 20px;
+    border-width: 10px;
+    border-color: #1e293b;
+}
+
+.pg-device-frame.mobile {
+    width: 375px;
+    max-width: 92%;
+    height: 95%;
+    border-radius: 30px;
+    border-width: 12px;
+    border-color: #1e293b;
+}
+
+.pg-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #ffffff;
+    display: block;
+}
+
+/* ── Code & Architecture Inspector Tab ── */
+.pg-code-inspector {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #080c16;
+}
+
+.pg-code-sidebar-tabs {
+    display: flex;
+    background: rgba(15, 23, 42, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+    padding: 8px 16px;
+    gap: 8px;
+    overflow-x: auto;
+    flex-shrink: 0;
+}
+
+.pg-code-tab {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.pg-code-tab:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.pg-code-tab.active {
+    background: rgba(56, 189, 248, 0.18);
+    border-color: #38bdf8;
+    color: #38bdf8;
+    font-weight: 700;
+}
+
+.pg-code-content-area {
+    flex: 1;
+    overflow: auto;
+    padding: 16px;
+    position: relative;
+}
+
+.pg-code-block {
+    background: #050811;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    color: #e2e8f0;
+    font-family: var(--font-mono, monospace);
+    font-size: 12.5px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+}
+
+.pg-code-copy-btn {
+    position: absolute;
+    top: 26px;
+    right: 26px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.pg-code-copy-btn:hover {
+    background: rgba(56, 189, 248, 0.25);
+    color: #ffffff;
+}
+
+/* ── Keyframe Animations ── */
+@keyframes pgFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes pgScaleIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Mobile Responsive Optimizations ── */
+@media (max-width: 768px) {
+    .pg-modal-overlay {
+        padding: 4px;
+    }
+    .pg-modal-container {
+        width: 100vw;
+        height: 98dvh;
+        max-height: 99dvh;
+        border-radius: 12px;
+    }
+    .pg-modal-header {
+        padding: 8px 12px;
+    }
+    .pg-header-center {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        margin-top: 4px;
+    }
+    .pg-device-frame.tablet,
+    .pg-device-frame.mobile {
+        width: 100%;
+        height: 100%;
+        border-width: 2px;
+        border-radius: 8px;
+    }
+}

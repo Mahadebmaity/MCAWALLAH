@@ -23,6 +23,7 @@ import AboutCMS from './admin/AboutCMS';
 import SkillsCMS from './admin/SkillsCMS';
 import TimelineCMS from './admin/TimelineCMS';
 import ProjectsCMS from './admin/ProjectsCMS';
+import PlaygroundCMS from './admin/PlaygroundCMS';
 import GamesCMS from './admin/GamesCMS';
 import DocumentsCMS from './admin/DocumentsCMS';
 import AiAssistantCMS from './admin/AiAssistantCMS';
@@ -81,6 +82,7 @@ function App() {
           <Route path="skills" element={<SkillsCMS />} />
           <Route path="timeline" element={<TimelineCMS />} />
           <Route path="projects" element={<ProjectsCMS />} />
+          <Route path="playground" element={<PlaygroundCMS />} />
           <Route path="games" element={<GamesCMS />} />
           <Route path="docs" element={<DocumentsCMS />} />
           <Route path="ai-assistant" element={<AiAssistantCMS />} />

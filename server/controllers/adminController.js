@@ -102,6 +102,8 @@ export const getSectionData = async (req, res) => {
             // Check if built-in system docs exist, if not create them
             const hasSystemDoc1 = docs.some(d => d.fileName === 'PORTFOLIO_SYSTEM_DOCUMENTATION.pdf');
             const hasSystemDoc2 = docs.some(d => d.fileName === 'PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf');
+            const hasPlanDoc1 = docs.some(d => d.fileName === '01_AI_PORTFOLIO_ASSISTANT_PLAN.md');
+            const hasPlanDoc2 = docs.some(d => d.fileName === '02_INTERACTIVE_LIVE_PLAYGROUND_PLAN.md');
 
             if (!hasSystemDoc1) {
                 await Document.create({
@@ -128,6 +130,34 @@ export const getSectionData = async (req, res) => {
                     fileType: 'PDF',
                     isBuiltin: true,
                     tags: ['28-Sections', 'Enterprise Spec', 'Full-Stack Report', 'College Submission', 'GitHub']
+                });
+            }
+
+            if (!hasPlanDoc1) {
+                await Document.create({
+                    title: 'Feature Plan 01 - AI Portfolio Assistant Digital Twin Specification',
+                    category: 'Implementation Plans',
+                    description: 'Full architectural roadmap for the dual-core AI Assistant, Google Gemini 3.6 Flash engine, semantic fallback, and Admin AI CMS.',
+                    fileUrl: '/docs/implementation_plans/01_AI_PORTFOLIO_ASSISTANT_PLAN.md',
+                    fileName: '01_AI_PORTFOLIO_ASSISTANT_PLAN.md',
+                    fileSize: '12 KB',
+                    fileType: 'Markdown',
+                    isBuiltin: true,
+                    tags: ['AI Assistant', 'Feature Roadmap', 'Gemini 3.6 Flash', 'Architecture']
+                });
+            }
+
+            if (!hasPlanDoc2) {
+                await Document.create({
+                    title: 'Feature Plan 02 - Interactive Project Live Playground & Sandbox CMS',
+                    category: 'Implementation Plans',
+                    description: 'Architectural roadmap for the interactive project code sandbox, multi-device viewport toggles (Desktop/Tablet/Mobile), and Playground CMS.',
+                    fileUrl: '/docs/implementation_plans/02_INTERACTIVE_LIVE_PLAYGROUND_PLAN.md',
+                    fileName: '02_INTERACTIVE_LIVE_PLAYGROUND_PLAN.md',
+                    fileSize: '15 KB',
+                    fileType: 'Markdown',
+                    isBuiltin: true,
+                    tags: ['Playground', 'Live Demo', 'Device Frames', 'Code Inspector']
                 });
             }
 

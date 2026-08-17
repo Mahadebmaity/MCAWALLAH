@@ -12,6 +12,7 @@ import publicRoutes from './routes/publicRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import mediaRoutes from './routes/mediaRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
+import playgroundRoutes from './routes/playgroundRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -71,6 +72,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', authRoutes); // Compatibility with frontend useAuth endpoints
 app.use('/api/portfolio', publicRoutes);
 app.use('/api/portfolio/ai', aiRoutes);
+app.use('/api/portfolio/playgrounds', playgroundRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/media', mediaRoutes);

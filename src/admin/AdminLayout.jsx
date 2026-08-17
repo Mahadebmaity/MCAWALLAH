@@ -14,6 +14,7 @@ const NAV_ITEMS = [
     { to: '/admin/skills', icon: 'fa-solid fa-microchip', label: 'Skills' },
     { to: '/admin/timeline', icon: 'fa-solid fa-timeline', label: 'Experience & Edu' },
     { to: '/admin/projects', icon: 'fa-solid fa-folder-open', label: 'Projects' },
+    { to: '/admin/playground', icon: 'fa-solid fa-laptop-code', label: 'Playground CMS' },
     { to: '/admin/games', icon: 'fa-solid fa-gamepad', label: 'Games Hub' },
     { to: '/admin/docs', icon: 'fa-solid fa-file-shield', label: 'Docs & System Vault' },
     { to: '/admin/ai-assistant', icon: 'fa-solid fa-robot', label: 'AI Assistant CMS' },

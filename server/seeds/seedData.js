@@ -12,6 +12,7 @@ import Project from '../models/Project.js';
 import Game from '../models/Game.js';
 import SiteSettings from '../models/SiteSettings.js';
 import Document from '../models/Document.js';
+import Playground from '../models/Playground.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -385,6 +386,113 @@ const seedInitialData = async () => {
                 tags: ['28-Sections', 'Enterprise Spec', 'Full-Stack Report', 'College Submission', 'GitHub']
             });
             console.log('✅ Document 2 seeded: PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf');
+        }
+
+        // Seed Implementation Plans in Document collection for Admin Studio Docs & Vault
+        const hasPlanDoc1 = await Document.findOne({ fileName: '01_AI_PORTFOLIO_ASSISTANT_PLAN.md' });
+        if (!hasPlanDoc1) {
+            await Document.create({
+                title: 'Feature Plan 01 - AI Portfolio Assistant Digital Twin Specification',
+                category: 'Implementation Plans',
+                description: 'Full architectural specification for the dual-core AI Assistant, Google Gemini 3.6 Flash engine, semantic fallback, and Admin AI CMS.',
+                fileUrl: '/docs/implementation_plans/01_AI_PORTFOLIO_ASSISTANT_PLAN.md',
+                fileName: '01_AI_PORTFOLIO_ASSISTANT_PLAN.md',
+                fileSize: '12 KB',
+                fileType: 'Markdown',
+                isBuiltin: true,
+                tags: ['AI Assistant', 'Feature Roadmap', 'Gemini 3.6 Flash', 'Architecture']
+            });
+        }
+
+        const hasPlanDoc2 = await Document.findOne({ fileName: '02_INTERACTIVE_LIVE_PLAYGROUND_PLAN.md' });
+        if (!hasPlanDoc2) {
+            await Document.create({
+                title: 'Feature Plan 02 - Interactive Project Live Playground & Sandbox CMS',
+                category: 'Implementation Plans',
+                description: 'Architectural roadmap for the interactive project code sandbox, multi-device viewport toggles (Desktop/Tablet/Mobile), and Playground CMS.',
+                fileUrl: '/docs/implementation_plans/02_INTERACTIVE_LIVE_PLAYGROUND_PLAN.md',
+                fileName: '02_INTERACTIVE_LIVE_PLAYGROUND_PLAN.md',
+                fileSize: '15 KB',
+                fileType: 'Markdown',
+                isBuiltin: true,
+                tags: ['Playground', 'Live Demo', 'Device Frames', 'Code Inspector']
+            });
+        }
+
+        // 10. Seed Project Playgrounds
+        const playgroundCount = await Playground.countDocuments();
+        if (playgroundCount === 0) {
+            await Playground.create([
+                {
+                    title: 'MCA WALLAH Portfolio & Dynamic CMS',
+                    slug: 'mca-wallah-portfolio-cms',
+                    category: 'Full Stack',
+                    description: 'Modern developer portfolio with 11 custom CMS sections, Multi-Resume Vault, AI Digital Twin, and Retro Arcade Lounge.',
+                    liveUrl: 'http://localhost:5173',
+                    githubUrl: 'https://github.com/Mahadebmaity/MCAWALLAH',
+                    tags: ['React 19', 'Node.js', 'Express 4', 'MongoDB', 'Vite 8', 'BroadcastChannel'],
+                    devicePresets: { desktop: true, tablet: true, mobile: true },
+                    defaultView: 'live',
+                    codeSnippets: [
+                        {
+                            title: 'AiAssistant.jsx',
+                            language: 'javascript',
+                            code: `import { useState, useEffect } from 'react';\nimport { API_BASE } from '../../config/api';\n\nexport default function AiAssistant() {\n    const [isOpen, setIsOpen] = useState(false);\n    const [messages, setMessages] = useState([]);\n    // Multi-turn Gemini 3.6 Flash / Semantic Knowledge Graph integration\n}`
+                        },
+                        {
+                            title: 'aiController.js',
+                            language: 'javascript',
+                            code: `import { GoogleGenAI } from '@google/genai';\n\nexport const chatWithAiAssistant = async (req, res) => {\n    const { message } = req.body;\n    const knowledge = await buildPortfolioKnowledge();\n    // Dual-core execution with automatic semantic fallback\n};`
+                        }
+                    ],
+                    architectureNotes: 'Dual-core AI engine + MongoDB Atlas + Multi-Resume PDF generator with real-time BroadcastChannel sync across admin and public views.',
+                    isPublic: true,
+                    order: 0
+                },
+                {
+                    title: 'Task Manager & Kanban Workspace',
+                    slug: 'task-manager-kanban-workspace',
+                    category: 'Full Stack',
+                    description: 'Collaborative task management board featuring drag-and-drop workflow, JWT authentication, and team activity telemetry.',
+                    liveUrl: 'https://github.com/Mahadebmaity/MCAWALLAH',
+                    githubUrl: 'https://github.com/Mahadebmaity/MCAWALLAH',
+                    tags: ['React', 'Node.js', 'MongoDB', 'JWT Auth', 'REST API'],
+                    devicePresets: { desktop: true, tablet: true, mobile: true },
+                    defaultView: 'code',
+                    codeSnippets: [
+                        {
+                            title: 'KanbanBoard.jsx',
+                            language: 'javascript',
+                            code: `export default function KanbanBoard({ columns, onTaskMove }) {\n    return (\n        <div className="kanban-grid">\n            {columns.map(col => <Column key={col.id} data={col} />)}\n        </div>\n    );\n}`
+                        }
+                    ],
+                    architectureNotes: 'State management powered by React Context + Optimistic UI updates with MongoDB atomic operators.',
+                    isPublic: true,
+                    order: 1
+                },
+                {
+                    title: 'Developer Arcade Lounge (Retro Minigames)',
+                    slug: 'developer-arcade-lounge',
+                    category: 'Interactive Games',
+                    description: 'Interactive gaming hub with Retro Snake, 2048 Number Puzzle, Typing Speed Challenge, and Tic-Tac-Toe Minimax AI.',
+                    liveUrl: 'http://localhost:5173/arcade',
+                    githubUrl: 'https://github.com/Mahadebmaity/MCAWALLAH',
+                    tags: ['Canvas 2D', 'Minimax AI', 'Web Audio API', 'React 19'],
+                    devicePresets: { desktop: true, tablet: true, mobile: true },
+                    defaultView: 'live',
+                    codeSnippets: [
+                        {
+                            title: 'MinimaxAI.js',
+                            language: 'javascript',
+                            code: `function minimax(board, depth, isMaximizing) {\n    const score = evaluate(board);\n    if (score === 10 || score === -10 || !hasMoves(board)) return score;\n    // Unbeatable decision tree recursion\n}`
+                        }
+                    ],
+                    architectureNotes: 'Optimized 60 FPS HTML5 Canvas rendering + Minimax tree recursion with alpha-beta pruning.',
+                    isPublic: true,
+                    order: 2
+                }
+            ]);
+            console.log('✅ Project Playgrounds seeded: 3 default sandboxes');
         }
 
         console.log('🎉 Seeding complete!');

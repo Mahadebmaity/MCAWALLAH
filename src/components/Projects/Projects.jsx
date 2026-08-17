@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePortfolioData } from "../../context/DataContext";
+import { API_BASE } from "../../config/api";
+import PlaygroundModal from "../Playground/PlaygroundModal";
 import "./Projects.css";
 
 const DEFAULT_PROJECTS = [
@@ -109,7 +111,58 @@ export default function Projects() {
     const [headerRef, headerIn] = useInView(0.1);
     const [gridRef, gridIn] = useInView(0.05);
 
+    // Playground state
+    const [playgrounds, setPlaygrounds] = useState([]);
+    const [activePlayground, setActivePlayground] = useState(null);
+
+    useEffect(() => {
+        const fetchPlaygrounds = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/portfolio/playgrounds`);
+                if (res.ok) {
+                    const pData = await res.json();
+                    setPlaygrounds(pData);
+                }
+            } catch (err) {
+                console.warn('Could not fetch project playgrounds:', err);
+            }
+        };
+        fetchPlaygrounds();
+    }, []);
+
     const projectList = data?.projects?.length ? data.projects : DEFAULT_PROJECTS;
+
+    // Helper: open or create dynamic sandbox for project
+    const handleOpenPlayground = (project) => {
+        const match = playgrounds.find(pg => 
+            pg.title?.toLowerCase() === project.title?.toLowerCase() ||
+            (project.title && pg.title?.toLowerCase().includes(project.title.toLowerCase()))
+        );
+
+        if (match) {
+            setActivePlayground(match);
+        } else {
+            // Build sandbox on-the-fly for any project
+            setActivePlayground({
+                title: project.title,
+                category: project.category || 'Full Stack',
+                description: project.desc || 'Interactive live project preview & architecture breakdown.',
+                liveUrl: project.live || project.github || '',
+                githubUrl: project.github || '',
+                tags: project.tags || ['React', 'Full Stack'],
+                devicePresets: { desktop: true, tablet: true, mobile: true },
+                defaultView: project.live ? 'live' : 'code',
+                codeSnippets: [
+                    {
+                        title: `${project.title.replace(/\s+/g, '')}.jsx`,
+                        language: 'javascript',
+                        code: `// ${project.title} - Main Component Architecture\nimport React from 'react';\n\nexport default function ${project.title.replace(/[^a-zA-Z0-9]/g, '')}() {\n    // Engineering specification\n    return (\n        <div className="project-container">\n            <h2>${project.title}</h2>\n            <p>${project.desc || ''}</p>\n        </div>\n    );\n}`
+                    }
+                ],
+                architectureNotes: `Key Technical Stack: ${(project.tags || []).join(', ')}\n\nFeatures: ${project.desc || 'Modern architecture with production optimizations.'}`
+            });
+        }
+    };
 
     // Dynamically derive categories from project list
     const categories = ["All", ...Array.from(new Set(projectList.map(p => p.category || "React")))];
@@ -216,7 +269,32 @@ export default function Projects() {
                                         <span><i className="fa-solid fa-star" /> {p.stars || 0}</span>
                                         <span><i className="fa-solid fa-code-fork" /> {p.forks || 0}</span>
                                     </div>
-                                    <div className="projects__card-links">
+                                    <div className="projects__card-links" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        {/* Interactive Live Playground button */}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleOpenPlayground(p)}
+                                            className="projects__card-link"
+                                            style={{
+                                                background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%)',
+                                                border: '1px solid rgba(56, 189, 248, 0.45)',
+                                                color: '#38bdf8',
+                                                padding: '4px 10px',
+                                                width: 'auto',
+                                                height: '28px',
+                                                borderRadius: '6px',
+                                                fontSize: '11px',
+                                                fontWeight: '700',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '5px',
+                                                cursor: 'pointer'
+                                            }}
+                                            title="Open Interactive Live Sandbox & Architecture"
+                                        >
+                                            <i className="fa-solid fa-laptop-code" /> Sandbox
+                                        </button>
+
                                         {p.github && (
                                             <a href={p.github} target="_blank" rel="noopener noreferrer"
                                                 className="projects__card-link" title="GitHub">
@@ -247,6 +325,16 @@ export default function Projects() {
                 </div>
 
             </div>
+
+            {/* ══════════════════════════════════════════════════════════
+                 INTERACTIVE PROJECT LIVE PLAYGROUND MODAL
+            ══════════════════════════════════════════════════════════ */}
+            {activePlayground && (
+                <PlaygroundModal
+                    playground={activePlayground}
+                    onClose={() => setActivePlayground(null)}
+                />
+            )}
         </section>
     );
 }
