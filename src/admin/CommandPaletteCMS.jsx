@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import ToastNotification from './ToastNotification';
-import CommandPalette from '../components/CommandPalette/CommandPalette';
 import './admin.css';
 
 export default function CommandPaletteCMS() {
     const [toast, setToast] = useState(null);
+    const [saving, setSaving] = useState(false);
+    const [showTestModal, setShowTestModal] = useState(false);
+    const [testQuery, setTestQuery] = useState('');
+
     const [settings, setSettings] = useState({
         enabled: true,
         enableFloatingPill: true,
@@ -19,7 +22,6 @@ export default function CommandPaletteCMS() {
         ]
     });
 
-    const [saving, setSaving] = useState(false);
     const [newTitle, setNewTitle] = useState('');
     const [newUrl, setNewUrl] = useState('');
     const [newIcon, setNewIcon] = useState('fa-solid fa-bolt');
@@ -31,8 +33,8 @@ export default function CommandPaletteCMS() {
             setSaving(false);
             setToast({
                 type: 'success',
-                title: 'Command Palette Saved! ⚡',
-                message: 'All keyboard shortcut settings & custom commands are active live.'
+                title: 'Settings Saved! ⚡',
+                message: 'Command palette configuration and custom shortcuts are now active.'
             });
         }, 300);
     };
@@ -57,6 +59,7 @@ export default function CommandPaletteCMS() {
         }));
         setNewTitle('');
         setNewUrl('');
+        setToast({ type: 'success', title: 'Added', message: `Added shortcut "${newCmd.title}"` });
     };
 
     const handleRemoveCustomCommand = (id) => {
@@ -65,6 +68,19 @@ export default function CommandPaletteCMS() {
             customCommands: p.customCommands.filter(c => c.id !== id)
         }));
     };
+
+    const previewCommands = [
+        { id: 'p-1', title: 'Home / Hero Header', group: 'Navigation', icon: 'fa-solid fa-house', desc: 'Jump to top intro' },
+        { id: 'p-2', title: 'Skills & Tech Stack', group: 'Navigation', icon: 'fa-solid fa-microchip', desc: 'React 19, Node.js, MongoDB' },
+        { id: 'p-3', title: 'Featured Projects Showcase', group: 'Projects', icon: 'fa-solid fa-folder-open', desc: 'Explore live apps' },
+        { id: 'p-4', title: 'Download Verified Resume (PDF)', group: 'Resume', icon: 'fa-solid fa-file-arrow-down', desc: 'Full stack resume' },
+        { id: 'p-5', title: 'Play Retro Cyber Snake', group: 'Arcade', icon: 'fa-solid fa-worm', desc: 'Classic arcade minigame' },
+        ...settings.customCommands.map(c => ({ id: c.id, title: c.title, group: c.group, icon: c.icon, desc: c.url }))
+    ].filter(c => {
+        const q = testQuery.toLowerCase().trim();
+        if (!q) return true;
+        return c.title.toLowerCase().includes(q) || c.group.toLowerCase().includes(q) || (c.desc && c.desc.toLowerCase().includes(q));
+    });
 
     return (
         <div className="adm-page-container">
@@ -110,14 +126,24 @@ export default function CommandPaletteCMS() {
                         </p>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={handleSaveSettings}
-                        className="adm-btn adm-btn-primary"
-                        disabled={saving}
-                    >
-                        <i className="fa-solid fa-floppy-disk" /> {saving ? 'Saving...' : 'Save Settings'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                        <button
+                            type="button"
+                            onClick={() => setShowTestModal(true)}
+                            className="adm-doc-btn-tab"
+                        >
+                            <i className="fa-solid fa-play" /> Test Palette Modal
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleSaveSettings}
+                            className="adm-btn adm-btn-primary"
+                            disabled={saving}
+                        >
+                            <i className="fa-solid fa-floppy-disk" /> {saving ? 'Saving...' : 'Save Settings'}
+                        </button>
+                    </div>
                 </div>
 
                 {/* KPI Metrics */}
@@ -242,7 +268,7 @@ export default function CommandPaletteCMS() {
                             className="adm-btn adm-btn-primary"
                             style={{ padding: '6px 14px', fontSize: '12px' }}
                         >
-                            <i className="fa-solid fa-plus" /> Add Command
+                            <i className="fa-solid fa-plus" /> Add
                         </button>
                     </div>
 
@@ -283,8 +309,65 @@ export default function CommandPaletteCMS() {
                 </div>
             </div>
 
-            {/* Test Launcher helper */}
-            <CommandPalette />
+            {/* ══════════════════════════════════════════════════════════
+                 INTERACTIVE SANDBOX TESTER MODAL
+            ══════════════════════════════════════════════════════════ */}
+            {showTestModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(4, 8, 18, 0.85)',
+                    backdropFilter: 'blur(12px)',
+                    zIndex: 10010,
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    justifyContent: 'center',
+                    padding: '80px 16px 20px'
+                }} onClick={() => setShowTestModal(false)}>
+                    <div style={{
+                        background: '#090e1a',
+                        border: '1.5px solid rgba(56, 189, 248, 0.35)',
+                        borderRadius: '18px',
+                        width: '100%',
+                        maxWidth: '620px',
+                        maxHeight: '80vh',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'hidden',
+                        boxShadow: '0 25px 70px rgba(0, 0, 0, 0.85)'
+                    }} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', gap: '12px', background: '#0f172a' }}>
+                            <i className="fa-solid fa-magnifying-glass" style={{ color: '#38bdf8' }} />
+                            <input
+                                type="text"
+                                style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', outline: 'none', fontSize: '15px' }}
+                                placeholder="Type to filter commands in simulator..."
+                                value={testQuery}
+                                onChange={(e) => setTestQuery(e.target.value)}
+                                autoFocus
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowTestModal(false)}
+                                style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: '#94a3b8', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}
+                            >
+                                ESC
+                            </button>
+                        </div>
+                        <div style={{ padding: '10px', overflowY: 'auto', maxHeight: '400px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            {previewCommands.map(cmd => (
+                                <div key={cmd.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <i className={cmd.icon} style={{ color: '#38bdf8' }} />
+                                        <span style={{ color: '#f1f5f9', fontSize: '13px', fontWeight: '600' }}>{cmd.title}</span>
+                                    </div>
+                                    <span style={{ fontSize: '10.5px', color: '#64748b', background: 'rgba(255,255,255,0.05)', padding: '2px 7px', borderRadius: '999px' }}>{cmd.group}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
