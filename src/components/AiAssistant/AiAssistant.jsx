@@ -29,6 +29,63 @@ export default function AiAssistant() {
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
 
+    // ── Draggable State & Handlers ──
+    const [position, setPosition] = useState({ x: null, y: null });
+    const isDraggingRef = useRef(false);
+    const dragDataRef = useRef({ startX: 0, startY: 0, initX: 0, initY: 0, moved: false });
+    const launcherRef = useRef(null);
+
+    const handlePointerDown = (e) => {
+        if (e.button !== 0 && e.pointerType === 'mouse') return; // Left click only
+        const rect = launcherRef.current?.getBoundingClientRect();
+        if (!rect) return;
+
+        isDraggingRef.current = true;
+        dragDataRef.current = {
+            startX: e.clientX,
+            startY: e.clientY,
+            initX: position.x !== null ? position.x : rect.left,
+            initY: position.y !== null ? position.y : rect.top,
+            moved: false
+        };
+
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerup', handlePointerUp);
+    };
+
+    const handlePointerMove = (e) => {
+        if (!isDraggingRef.current) return;
+        const dx = e.clientX - dragDataRef.current.startX;
+        const dy = e.clientY - dragDataRef.current.startY;
+
+        if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+            dragDataRef.current.moved = true;
+        }
+
+        const orbWidth = 190;
+        const orbHeight = 70;
+        const nextX = Math.max(10, Math.min(window.innerWidth - orbWidth, dragDataRef.current.initX + dx));
+        const nextY = Math.max(10, Math.min(window.innerHeight - orbHeight, dragDataRef.current.initY + dy));
+
+        setPosition({ x: nextX, y: nextY });
+    };
+
+    const handlePointerUp = () => {
+        isDraggingRef.current = false;
+        window.removeEventListener('pointermove', handlePointerMove);
+        window.removeEventListener('pointerup', handlePointerUp);
+    };
+
+    const handleLauncherClick = (e) => {
+        if (dragDataRef.current.moved) {
+            e.preventDefault();
+            e.stopPropagation();
+            dragDataRef.current.moved = false;
+            return;
+        }
+        setIsOpen(!isOpen);
+    };
+
     // Fetch dynamic AI Configuration from API
     useEffect(() => {
         const fetchConfig = async () => {
@@ -242,13 +299,30 @@ export default function AiAssistant() {
                  FLOATING LAUNCHER ORB / BADGE
             ══════════════════════════════════════════════════════════ */}
             <div
+                ref={launcherRef}
                 className="ai-assistant-launcher"
-                onClick={() => setIsOpen(!isOpen)}
-                title="Chat with Mahadeb's AI Assistant"
+                onPointerDown={handlePointerDown}
+                onClick={handleLauncherClick}
+                style={{
+                    position: 'fixed',
+                    ...(position.x !== null ? {
+                        left: `${position.x}px`,
+                        top: `${position.y}px`,
+                        right: 'auto',
+                        bottom: 'auto'
+                    } : {
+                        right: '28px',
+                        bottom: '28px'
+                    }),
+                    zIndex: 9996,
+                    cursor: isDraggingRef.current ? 'grabbing' : 'grab',
+                    touchAction: 'none'
+                }}
+                title="Chat with Mahadeb's AI Assistant (Drag to move)"
             >
-                <div className="ai-launcher-badge-pill">
+                <div className="ai-launcher-badge-pill" style={{ cursor: 'inherit' }}>
                     <span className="ai-online-dot" />
-                    <span>Ask AI Twin</span>
+                    <span>{aiConfig.launcherText || "Ask AI Twin"}</span>
                     {unreadCount > 0 && (
                         <span style={{
                             background: '#ef4444',
@@ -263,9 +337,9 @@ export default function AiAssistant() {
                     )}
                 </div>
 
-                <div className="ai-assistant-launcher-orb">
+                <div className="ai-assistant-launcher-orb" style={{ cursor: 'inherit' }}>
                     <div className="ai-launcher-pulse-ring" />
-                    <i className={isOpen ? "fa-solid fa-xmark" : "fa-solid fa-wand-magic-sparkles"} />
+                    <i className={isOpen ? "fa-solid fa-xmark" : `fa-solid ${aiConfig.avatarIcon || "fa-robot"}`} />
                 </div>
             </div>
 
