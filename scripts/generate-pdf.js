@@ -7,34 +7,44 @@ const __dirname = path.dirname(__filename);
 
 async function generatePDF() {
     const edgePath = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
-    const htmlPath = path.join(__dirname, '..', 'PORTFOLIO_SYSTEM_DOCUMENTATION.html');
-    const outputPath = path.join(__dirname, '..', 'PORTFOLIO_SYSTEM_DOCUMENTATION.pdf');
+    const docs = [
+        {
+            html: path.join(__dirname, '..', 'PORTFOLIO_SYSTEM_DOCUMENTATION.html'),
+            pdf: path.join(__dirname, '..', 'PORTFOLIO_SYSTEM_DOCUMENTATION.pdf')
+        },
+        {
+            html: path.join(__dirname, '..', 'PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.html'),
+            pdf: path.join(__dirname, '..', 'PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf')
+        }
+    ];
 
-    console.log("🚀 Launching Edge browser to compile PDF...");
+    console.log("🚀 Launching Edge browser to compile documentation PDFs...");
     const browser = await puppeteer.launch({
         executablePath: edgePath,
         headless: 'new',
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
-    const page = await browser.newPage();
-    await page.goto(`file://${htmlPath}`, { waitUntil: 'networkidle0' });
-
-    console.log("📄 Generating publication-grade PDF...");
-    await page.pdf({
-        path: outputPath,
-        format: 'A4',
-        printBackground: true,
-        margin: {
-            top: '18mm',
-            bottom: '18mm',
-            left: '16mm',
-            right: '16mm'
-        }
-    });
+    for (const doc of docs) {
+        console.log(`📄 Generating PDF for: ${path.basename(doc.html)}...`);
+        const page = await browser.newPage();
+        await page.goto(`file://${doc.html}`, { waitUntil: 'networkidle0' });
+        await page.pdf({
+            path: doc.pdf,
+            format: 'A4',
+            printBackground: true,
+            margin: {
+                top: '16mm',
+                bottom: '16mm',
+                left: '16mm',
+                right: '16mm'
+            }
+        });
+        await page.close();
+        console.log(`🎉 PDF Successfully Generated at: ${doc.pdf}`);
+    }
 
     await browser.close();
-    console.log(`🎉 PDF Successfully Generated at: ${outputPath}`);
 }
 
 generatePDF().catch(err => {

@@ -98,8 +98,12 @@ export const getSectionData = async (req, res) => {
 
         if (type === 'documents') {
             let docs = await Document.find().sort({ isBuiltin: -1, createdAt: -1 }).lean();
-            if (docs.length === 0) {
-                // Auto seed system documentation
+            
+            // Check if built-in system docs exist, if not create them
+            const hasSystemDoc1 = docs.some(d => d.fileName === 'PORTFOLIO_SYSTEM_DOCUMENTATION.pdf');
+            const hasSystemDoc2 = docs.some(d => d.fileName === 'PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf');
+
+            if (!hasSystemDoc1) {
                 await Document.create({
                     title: 'MCA WALLAH Portfolio - Official System Architecture & Documentation',
                     category: 'System Documentation',
@@ -111,8 +115,24 @@ export const getSectionData = async (req, res) => {
                     isBuiltin: true,
                     tags: ['Architecture', 'API Docs', 'Mongoose', 'React 19', 'Vercel']
                 });
-                docs = await Document.find().sort({ isBuiltin: -1, createdAt: -1 }).lean();
             }
+
+            if (!hasSystemDoc2) {
+                await Document.create({
+                    title: 'MCA WALLAH Portfolio - 28-Section Comprehensive Enterprise Technical Documentation',
+                    category: 'System Documentation',
+                    description: 'Complete 28-section industry-standard software project specification & technical report with Mermaid diagrams, API contracts, security matrices, and setup guides.',
+                    fileUrl: '/docs/PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf',
+                    fileName: 'PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf',
+                    fileSize: '1.65 MB',
+                    fileType: 'PDF',
+                    isBuiltin: true,
+                    tags: ['28-Sections', 'Enterprise Spec', 'Full-Stack Report', 'College Submission', 'GitHub']
+                });
+            }
+
+            docs = await Document.find().sort({ isBuiltin: -1, createdAt: -1 }).lean();
+            
             // Sanitize any corrupt / undefined URL strings in existing DB records
             const sanitizedDocs = docs.map(doc => {
                 let resolvedUrl = doc.fileUrl || doc.url || doc.secure_url || '';

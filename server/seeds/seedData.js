@@ -11,6 +11,7 @@ import Timeline from '../models/Timeline.js';
 import Project from '../models/Project.js';
 import Game from '../models/Game.js';
 import SiteSettings from '../models/SiteSettings.js';
+import Document from '../models/Document.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -351,6 +352,39 @@ const seedInitialData = async () => {
                 ]
             });
             console.log('✅ Site settings seeded');
+        }
+
+        // 9. Seed System Documents
+        const hasDoc1 = await Document.findOne({ fileName: 'PORTFOLIO_SYSTEM_DOCUMENTATION.pdf' });
+        if (!hasDoc1) {
+            await Document.create({
+                title: 'MCA WALLAH Portfolio - Official System Architecture & Documentation',
+                category: 'System Documentation',
+                description: 'Comprehensive technical blueprint covering React 19 architecture, RESTful API endpoints, MongoDB schemas, and CMS workflows.',
+                fileUrl: '/docs/PORTFOLIO_SYSTEM_DOCUMENTATION.pdf',
+                fileName: 'PORTFOLIO_SYSTEM_DOCUMENTATION.pdf',
+                fileSize: '1.60 MB',
+                fileType: 'PDF',
+                isBuiltin: true,
+                tags: ['Architecture', 'API Docs', 'Mongoose', 'React 19', 'Vercel']
+            });
+            console.log('✅ Document 1 seeded: PORTFOLIO_SYSTEM_DOCUMENTATION.pdf');
+        }
+
+        const hasDoc2 = await Document.findOne({ fileName: 'PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf' });
+        if (!hasDoc2) {
+            await Document.create({
+                title: 'MCA WALLAH Portfolio - 28-Section Comprehensive Enterprise Technical Documentation',
+                category: 'System Documentation',
+                description: 'Complete 28-section industry-standard software project specification & technical report with Mermaid diagrams, API contracts, security matrices, and setup guides.',
+                fileUrl: '/docs/PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf',
+                fileName: 'PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf',
+                fileSize: '1.65 MB',
+                fileType: 'PDF',
+                isBuiltin: true,
+                tags: ['28-Sections', 'Enterprise Spec', 'Full-Stack Report', 'College Submission', 'GitHub']
+            });
+            console.log('✅ Document 2 seeded: PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf');
         }
 
         console.log('🎉 Seeding complete!');
