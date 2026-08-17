@@ -235,7 +235,7 @@ export default function ImplementationPlansCMS() {
             {/* ══════════════════════════════════════════════════════════
                  MAIN SPLIT VIEW: PLANS SIDEBAR + FULL SPEC READER
             ══════════════════════════════════════════════════════════ */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 380px) 1fr', gap: '20px', alignItems: 'start' }}>
+            <div className="adm-plans-split-grid">
                 {/* ── Left Plans List ── */}
                 <div className="adm-card" style={{ margin: 0, padding: '18px' }}>
                     {/* Status filter pills */}

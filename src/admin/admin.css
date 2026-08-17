@@ -692,6 +692,34 @@ input:checked + .adm-slider:before {
 }
 
 /* ══════════════════════════════════════
+   RESPONSIVE CMS SPLIT & 2-COLUMN GRIDS
+══════════════════════════════════════ */
+.adm-plans-split-grid {
+    display: grid;
+    grid-template-columns: minmax(320px, 380px) 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.adm-two-col-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 960px) {
+    .adm-plans-split-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .adm-two-col-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ══════════════════════════════════════
    INTERACTIVE TOAST POPUP NOTIFICATION
 ══════════════════════════════════════ */
 .adm-toast-container {

@@ -142,7 +142,7 @@ export default function CommandPaletteCMS() {
             {/* ══════════════════════════════════════════════════════════
                  SETTINGS & CATEGORY TOGGLES
             ══════════════════════════════════════════════════════════ */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div className="adm-two-col-grid">
                 {/* Category Toggles Card */}
                 <div className="adm-card" style={{ margin: 0 }}>
                     <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#ffffff', margin: '0 0 16px 0' }}>
