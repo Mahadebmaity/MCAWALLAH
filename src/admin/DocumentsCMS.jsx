@@ -17,6 +17,7 @@ export default function DocumentsCMS() {
     const [uploading, setUploading] = useState(false);
     const [previewDoc, setPreviewDoc] = useState(null);
     const [copiedDocId, setCopiedDocId] = useState(null);
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
     const [form, setForm] = useState({
         title: '',
@@ -218,43 +219,132 @@ export default function DocumentsCMS() {
             <ToastNotification toast={toast} onClose={() => setToast(null)} />
 
             {/* ══════════════════════════════════════════════════════════════
-                 SPOTLIGHT: OFFICIAL SYSTEM ARCHITECTURE DOCUMENTATION
+                 SPOTLIGHT: OFFICIAL SYSTEM ARCHITECTURE & 28-SECTION DOCUMENTATION
             ══════════════════════════════════════════════════════════════ */}
-            <div className="adm-card" style={{
-                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.95) 100%)',
-                border: '1.5px solid rgba(56, 189, 248, 0.35)',
-                boxShadow: '0 12px 35px rgba(0, 0, 0, 0.35)',
-                marginBottom: '28px'
-            }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px', marginBottom: '28px' }}>
+                {/* 28-Section Enterprise Doc */}
+                <div className="adm-card" style={{
+                    background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(24, 24, 72, 0.96) 100%)',
+                    border: '1.5px solid rgba(56, 189, 248, 0.4)',
+                    boxShadow: '0 12px 35px rgba(0, 0, 0, 0.45)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    margin: 0
+                }}>
                     <div>
-                        <span style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            background: 'rgba(56, 189, 248, 0.15)',
-                            border: '1px solid rgba(56, 189, 248, 0.35)',
-                            color: '#38bdf8',
-                            fontSize: '11px',
-                            fontWeight: '700',
-                            textTransform: 'uppercase',
-                            letterSpacing: '1px',
-                            padding: '4px 12px',
-                            borderRadius: '999px',
-                            marginBottom: '10px'
-                        }}>
-                            <i className="fa-solid fa-file-shield" /> Official System Architecture Doc
-                        </span>
-                        <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#ffffff', margin: '4px 0 8px 0' }}>
-                            MCA WALLAH Portfolio &amp; CMS Engine Documentation
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                            <span style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                background: 'rgba(56, 189, 248, 0.18)',
+                                border: '1px solid rgba(56, 189, 248, 0.4)',
+                                color: '#38bdf8',
+                                fontSize: '11px',
+                                fontWeight: '700',
+                                textTransform: 'uppercase',
+                                letterSpacing: '1px',
+                                padding: '4px 12px',
+                                borderRadius: '999px'
+                            }}>
+                                <i className="fa-solid fa-graduation-cap" /> 28-Section Specification
+                            </span>
+                            <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600' }}>1.65 MB • PDF</span>
+                        </div>
+                        <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#ffffff', margin: '4px 0 8px 0', lineHeight: '1.3' }}>
+                            MCA WALLAH 28-Section Enterprise Documentation
                         </h2>
-                        <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0, maxWidth: '650px', lineHeight: '1.5' }}>
-                            Complete technical specifications covering React 19 client architecture, RESTful endpoints, Mongoose data models, Minimax AI arcade, and production deployment guide.
+                        <p style={{ fontSize: '12.5px', color: '#94a3b8', margin: '0 0 14px 0', lineHeight: '1.5' }}>
+                            Complete 28-section software engineering specification with Mermaid architecture diagrams, database ER schemas, API matrices, security breakdown &amp; submission report.
                         </p>
                     </div>
 
-                    {/* Action buttons */}
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: 'auto', paddingTop: '10px' }}>
+                        <button
+                            type="button"
+                            onClick={() => setPreviewDoc({
+                                title: 'MCA WALLAH Portfolio - 28-Section Comprehensive Enterprise Technical Documentation',
+                                category: 'System Documentation',
+                                description: 'Complete 28-section industry-standard software project specification & technical report with Mermaid diagrams, API contracts, security matrices, and setup guides.',
+                                fileUrl: '/docs/PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf',
+                                fileName: 'PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf',
+                                fileSize: '1.65 MB',
+                                fileType: 'PDF'
+                            })}
+                            className="adm-doc-btn-tab"
+                            style={{ flex: '1 1 120px' }}
+                        >
+                            <i className="fa-solid fa-eye" /> Preview PDF
+                        </button>
+
+                        <a
+                            href={getDocUrl('/docs/PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf')}
+                            download="MCA_WALLAH_28_Section_Documentation.pdf"
+                            className="adm-doc-btn-download"
+                            style={{ flex: '1 1 120px' }}
+                        >
+                            <i className="fa-solid fa-download" /> Download PDF
+                        </a>
+
+                        <button
+                            type="button"
+                            onClick={() => setPreviewDoc({
+                                title: 'MCA WALLAH 28-Section Documentation (HTML View)',
+                                category: 'System Documentation',
+                                description: 'Interactive web view of the complete 28-section technical specification.',
+                                fileUrl: '/docs/PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.html',
+                                fileName: 'PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.html',
+                                fileSize: '42 KB',
+                                fileType: 'HTML'
+                            })}
+                            className="adm-doc-btn-copy"
+                            style={{ flex: '1 1 100px' }}
+                        >
+                            <i className="fa-solid fa-globe" /> HTML Doc
+                        </button>
+                    </div>
+                </div>
+
+                {/* Original System Architecture Doc */}
+                <div className="adm-card" style={{
+                    background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 27, 75, 0.96) 100%)',
+                    border: '1.5px solid rgba(99, 102, 241, 0.4)',
+                    boxShadow: '0 12px 35px rgba(0, 0, 0, 0.45)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    margin: 0
+                }}>
+                    <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                            <span style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                background: 'rgba(99, 102, 241, 0.18)',
+                                border: '1px solid rgba(99, 102, 241, 0.4)',
+                                color: '#a5b4fc',
+                                fontSize: '11px',
+                                fontWeight: '700',
+                                textTransform: 'uppercase',
+                                letterSpacing: '1px',
+                                padding: '4px 12px',
+                                borderRadius: '999px'
+                            }}>
+                                <i className="fa-solid fa-file-shield" /> System Architecture Blueprint
+                            </span>
+                            <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600' }}>1.60 MB • PDF</span>
+                        </div>
+                        <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#ffffff', margin: '4px 0 8px 0', lineHeight: '1.3' }}>
+                            Official Architecture &amp; System Documentation
+                        </h2>
+                        <p style={{ fontSize: '12.5px', color: '#94a3b8', margin: '0 0 14px 0', lineHeight: '1.5' }}>
+                            Core architectural whitepaper covering React 19 client components, REST endpoints, Mongoose schema models, and production deployment guide.
+                        </p>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: 'auto', paddingTop: '10px' }}>
                         <button
                             type="button"
                             onClick={() => setPreviewDoc({
@@ -266,8 +356,8 @@ export default function DocumentsCMS() {
                                 fileSize: '1.60 MB',
                                 fileType: 'PDF'
                             })}
-                            className="adm-btn adm-btn-secondary"
-                            style={{ borderColor: 'rgba(56, 189, 248, 0.4)', color: '#38bdf8' }}
+                            className="adm-doc-btn-tab"
+                            style={{ flex: '1 1 120px' }}
                         >
                             <i className="fa-solid fa-eye" /> Preview PDF
                         </button>
@@ -275,10 +365,10 @@ export default function DocumentsCMS() {
                         <a
                             href={getDocUrl('/docs/PORTFOLIO_SYSTEM_DOCUMENTATION.pdf')}
                             download="MCA_WALLAH_Portfolio_Documentation.pdf"
-                            className="adm-btn adm-btn-primary"
-                            style={{ textDecoration: 'none' }}
+                            className="adm-doc-btn-download"
+                            style={{ flex: '1 1 120px' }}
                         >
-                            <i className="fa-solid fa-download" /> Download PDF (1.60 MB)
+                            <i className="fa-solid fa-download" /> Download PDF
                         </a>
 
                         <button
@@ -292,19 +382,12 @@ export default function DocumentsCMS() {
                                 fileSize: '37 KB',
                                 fileType: 'HTML'
                             })}
-                            className="adm-btn adm-btn-secondary"
+                            className="adm-doc-btn-copy"
+                            style={{ flex: '1 1 100px' }}
                         >
                             <i className="fa-solid fa-globe" /> HTML Doc
                         </button>
                     </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
-                    {['React 19', 'Express 4', 'MongoDB', 'Minimax AI', 'Permanent Resume Vault', 'Vercel Ready'].map(tag => (
-                        <span key={tag} style={{ fontSize: '11px', background: 'rgba(255, 255, 255, 0.08)', color: '#cbd5e1', padding: '3px 9px', borderRadius: '6px' }}>
-                            #{tag}
-                        </span>
-                    ))}
                 </div>
             </div>
 
@@ -522,13 +605,16 @@ export default function DocumentsCMS() {
                 const hasValidUrl = resolvedUrl && resolvedUrl !== '#';
 
                 return (
-                    <div className="adm-doc-modal-overlay" onClick={() => setPreviewDoc(null)}>
-                        <div className="adm-doc-modal-container" onClick={(e) => e.stopPropagation()}>
+                    <div className="adm-doc-modal-overlay" onClick={() => { setPreviewDoc(null); setIsFullscreen(false); }}>
+                        <div
+                            className={`adm-doc-modal-container ${isFullscreen ? 'is-fullscreen' : ''}`}
+                            onClick={(e) => e.stopPropagation()}
+                        >
                             {/* Header */}
                             <div className="adm-doc-modal-header">
                                 <div className="adm-doc-modal-title-wrap">
                                     <div className="adm-doc-modal-icon-badge" style={{
-                                        background: isPdfDoc(previewDoc) ? 'rgba(239, 68, 68, 0.15)' : isImageDoc(previewDoc) ? 'rgba(56, 189, 248, 0.15)' : 'rgba(168, 85, 247, 0.15)',
+                                        background: isPdfDoc(previewDoc) ? 'rgba(239, 68, 68, 0.18)' : isImageDoc(previewDoc) ? 'rgba(56, 189, 248, 0.18)' : 'rgba(168, 85, 247, 0.18)',
                                         color: isPdfDoc(previewDoc) ? '#ef4444' : isImageDoc(previewDoc) ? '#38bdf8' : '#c084fc'
                                     }}>
                                         <i className={isPdfDoc(previewDoc) ? 'fa-solid fa-file-pdf' : isImageDoc(previewDoc) ? 'fa-solid fa-file-image' : isHtmlDoc(previewDoc) ? 'fa-solid fa-globe' : 'fa-solid fa-file-lines'} />
@@ -536,21 +622,35 @@ export default function DocumentsCMS() {
                                     <div style={{ minWidth: 0, flex: 1 }}>
                                         <h3 className="adm-doc-modal-title">{previewDoc.title}</h3>
                                         <div className="adm-doc-modal-meta">
-                                            <span>{previewDoc.category}</span>
+                                            <span style={{ color: '#38bdf8', fontWeight: '600' }}>{previewDoc.category}</span>
                                             {previewDoc.fileSize && <span>• {previewDoc.fileSize}</span>}
                                             {previewDoc.fileType && <span>• {previewDoc.fileType}</span>}
                                         </div>
                                     </div>
                                 </div>
 
-                                <button
-                                    type="button"
-                                    onClick={() => setPreviewDoc(null)}
-                                    style={{ background: 'none', border: 'none', color: 'var(--adm-text-muted)', fontSize: '20px', cursor: 'pointer', padding: '4px 8px' }}
-                                    title="Close Preview (Esc)"
-                                >
-                                    <i className="fa-solid fa-xmark" />
-                                </button>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    {/* Toggle Fullscreen / Maximize */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsFullscreen(!isFullscreen)}
+                                        className="adm-doc-btn-icon"
+                                        title={isFullscreen ? "Exit Fullscreen" : "Maximize / Fullscreen"}
+                                    >
+                                        <i className={isFullscreen ? "fa-solid fa-compress" : "fa-solid fa-expand"} />
+                                    </button>
+
+                                    {/* Close Button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => { setPreviewDoc(null); setIsFullscreen(false); }}
+                                        className="adm-doc-btn-icon"
+                                        title="Close Preview (Esc)"
+                                        style={{ color: '#f87171' }}
+                                    >
+                                        <i className="fa-solid fa-xmark" />
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Body / Viewer */}
@@ -565,20 +665,42 @@ export default function DocumentsCMS() {
                                         <button
                                             type="button"
                                             onClick={() => { setPreviewDoc(null); setShowUploadModal(true); }}
-                                            className="adm-btn adm-btn-primary"
+                                            className="adm-doc-btn-download"
                                         >
                                             <i className="fa-solid fa-cloud-arrow-up" /> Upload Replacement Document
                                         </button>
                                     </div>
                                 ) : isPdfDoc(previewDoc) ? (
-                                    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
                                         <iframe
-                                            src={resolvedUrl}
+                                            src={`${resolvedUrl}#toolbar=1&navpanes=0`}
                                             title={previewDoc.title}
                                             className="adm-doc-modal-iframe"
                                         />
-                                        <div style={{ background: 'rgba(15, 23, 42, 0.9)', padding: '8px 16px', fontSize: '11px', color: 'var(--adm-text-muted)', textAlign: 'center', borderTop: '1px solid var(--adm-border)' }}>
-                                            💡 Tip: If your mobile browser doesn't render the PDF inline, tap <strong>Open in New Tab</strong> or <strong>Download</strong> below.
+                                        <div style={{
+                                            background: 'rgba(11, 17, 32, 0.95)',
+                                            padding: '8px 16px',
+                                            fontSize: '11.5px',
+                                            color: '#94a3b8',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            flexWrap: 'wrap',
+                                            gap: '8px',
+                                            borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <i className="fa-solid fa-mobile-screen" style={{ color: '#38bdf8' }} />
+                                                <span>Mobile tip: Tap <strong>Open in New Tab</strong> or <strong>Download</strong> for native high-speed reader.</span>
+                                            </div>
+                                            <a
+                                                href={resolvedUrl}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: '700', fontSize: '11.5px' }}
+                                            >
+                                                Full View ↗
+                                            </a>
                                         </div>
                                     </div>
                                 ) : isImageDoc(previewDoc) ? (
@@ -606,8 +728,7 @@ export default function DocumentsCMS() {
                                         <a
                                             href={resolvedUrl}
                                             download={previewDoc.fileName || previewDoc.title}
-                                            className="adm-btn adm-btn-primary"
-                                            style={{ textDecoration: 'none', display: 'inline-flex' }}
+                                            className="adm-doc-btn-download"
                                         >
                                             <i className="fa-solid fa-download" /> Download File ({previewDoc.fileSize || 'File'})
                                         </a>
@@ -617,14 +738,13 @@ export default function DocumentsCMS() {
 
                             {/* Footer Controls */}
                             <div className="adm-doc-modal-footer">
-                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                     {hasValidUrl && (
                                         <a
                                             href={resolvedUrl}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="adm-btn adm-btn-secondary"
-                                            style={{ textDecoration: 'none', fontSize: '12px' }}
+                                            className="adm-doc-btn-tab"
                                         >
                                             <i className="fa-solid fa-arrow-up-right-from-square" /> Open in New Tab
                                         </a>
@@ -634,21 +754,19 @@ export default function DocumentsCMS() {
                                         <button
                                             type="button"
                                             onClick={() => handleCopyUrl(previewDoc)}
-                                            className="adm-btn adm-btn-secondary"
-                                            style={{ fontSize: '12px' }}
+                                            className="adm-doc-btn-copy"
                                         >
                                             <i className={copiedDocId ? 'fa-solid fa-check' : 'fa-solid fa-copy'} /> {copiedDocId ? 'Copied!' : 'Copy Link'}
                                         </button>
                                     )}
                                 </div>
 
-                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                     {hasValidUrl && (
                                         <a
                                             href={resolvedUrl}
                                             download={previewDoc.fileName || previewDoc.title}
-                                            className="adm-btn adm-btn-primary"
-                                            style={{ textDecoration: 'none', fontSize: '12px' }}
+                                            className="adm-doc-btn-download"
                                         >
                                             <i className="fa-solid fa-download" /> Download Document
                                         </a>
@@ -656,11 +774,10 @@ export default function DocumentsCMS() {
 
                                     <button
                                         type="button"
-                                        onClick={() => setPreviewDoc(null)}
-                                        className="adm-btn adm-btn-secondary"
-                                        style={{ fontSize: '12px' }}
+                                        onClick={() => { setPreviewDoc(null); setIsFullscreen(false); }}
+                                        className="adm-doc-btn-close"
                                     >
-                                        Close
+                                        <i className="fa-solid fa-xmark" /> Close
                                     </button>
                                 </div>
                             </div>

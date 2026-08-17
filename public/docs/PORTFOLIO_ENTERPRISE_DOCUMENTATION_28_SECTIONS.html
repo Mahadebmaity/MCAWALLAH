@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCA WALLAH Portfolio & Dynamic CMS - 28-Section Technical Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --primary-light: #e0f2fe;
+            --secondary: #6366f1;
+            --accent: #e84545;
+            --bg-dark: #090d16;
+            --surface: #ffffff;
+            --surface-alt: #f8fafc;
+            --border: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --code-bg: #0f172a;
+            --code-text: #38bdf8;
+            --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-heading: 'Plus Jakarta Sans', var(--font-sans);
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--text-main);
+            background: var(--surface);
+            line-height: 1.65;
+            font-size: 10pt;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        @page {
+            size: A4;
+            margin: 16mm 16mm 18mm 16mm;
+        }
+
+        .page-break {
+            page-break-before: always;
+            break-before: page;
+        }
+
+        /* ── COVER PAGE ── */
+        .cover {
+            height: 100vh;
+            min-height: 250mm;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e1b4b 100%);
+            color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .cover::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .cover-badge {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            color: #38bdf8;
+            font-size: 9pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 6px 16px;
+            border-radius: 999px;
+            margin-bottom: 20px;
+        }
+
+        .cover-title {
+            font-family: var(--font-heading);
+            font-size: 30pt;
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+            background: linear-gradient(to right, #ffffff, #93c5fd, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cover-tagline {
+            font-size: 13pt;
+            font-weight: 400;
+            color: #94a3b8;
+            margin-bottom: 30px;
+            max-width: 620px;
+            line-height: 1.5;
+        }
+
+        .cover-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: auto;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .meta-label {
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .meta-value {
+            font-size: 10.5pt;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        /* ── SECTION STYLING ── */
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .section-num {
+            font-family: var(--font-mono);
+            font-size: 14pt;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        h2 {
+            font-family: var(--font-heading);
+            font-size: 16pt;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.3px;
+        }
+
+        h3 {
+            font-family: var(--font-heading);
+            font-size: 12pt;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 18px;
+            margin-bottom: 8px;
+        }
+
+        p {
+            margin-bottom: 12px;
+            color: #334155;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 14px;
+            color: #334155;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+
+        /* ── TABLES ── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 14px 0 20px 0;
+            font-size: 9pt;
+            background: var(--surface);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #0f172a;
+            font-weight: 700;
+            text-align: left;
+            padding: 9px 12px;
+            border-bottom: 2px solid var(--border);
+            font-size: 8.5pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+            color: #334155;
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8fafc;
+        }
+
+        /* ── CODE BLOCKS ── */
+        pre {
+            background: var(--code-bg);
+            color: #f8fafc;
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 8.5pt;
+            line-height: 1.5;
+            overflow-x: auto;
+            margin: 12px 0 18px 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        code {
+            font-family: var(--font-mono);
+            font-size: 8.5pt;
+            background: #f1f5f9;
+            color: #0284c7;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        /* ── CALLOUT BOXES ── */
+        .callout {
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 14px 0;
+        }
+
+        .callout-title {
+            font-weight: 700;
+            font-size: 9.5pt;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .callout p {
+            margin-bottom: 0;
+            font-size: 9pt;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 7.5pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-green { background: #dcfce7; color: #166534; }
+        .badge-blue { background: #e0f2fe; color: #0369a1; }
+        .badge-purple { background: #f3e8ff; color: #6b21a8; }
+        .badge-amber { background: #fef3c7; color: #92400e; }
+
+        .diagram-container {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 14px 0 20px 0;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 12px 0;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .card-header {
+            font-weight: 700;
+            font-size: 10pt;
+            color: var(--primary-dark);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. COVER / TITLE SECTION -->
+    <div class="cover">
+        <div>
+            <div class="cover-badge">Full-Stack Enterprise Software Project</div>
+            <div class="cover-title">MCA WALLAH</div>
+            <div style="font-size: 18pt; font-weight: 700; color: #38bdf8; margin-bottom: 8px;">Personal Portfolio & Dynamic CMS System</div>
+            <div class="cover-tagline">
+                A high-performance, real-time developer showcase platform and content management architecture engineered with React 19, Vite 8, Node.js, Express, and MongoDB.
+            </div>
+        </div>
+
+        <div class="cover-meta-grid">
+            <div class="meta-item">
+                <div class="meta-label">Project Type</div>
+                <div class="meta-value">Production Web Application & CMS</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Version</div>
+                <div class="meta-value">v1.0.0 (Production Release)</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Documentation Date</div>
+                <div class="meta-value">August 17, 2026</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Primary Author / Developer</div>
+                <div class="meta-value">Mahadeb Maity</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Core Frontend Stack</div>
+                <div class="meta-value">React 19.2.4 • Vite 8 • CSS Tokens</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Core Backend Stack</div>
+                <div class="meta-value">Node.js 18+ • Express 4.21.2 • MongoDB 8</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. PROJECT OVERVIEW -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">02</span>
+            <h2>Project Overview</h2>
+        </div>
+        <p>
+            <strong>MCA WALLAH Portfolio & Dynamic CMS</strong> is an advanced, production-grade developer portfolio website tightly integrated with a secure, full-scale administrative Content Management System (CMS). Unlike conventional static portfolio sites that require developers to manually edit JSX/HTML code, push commits, and redeploy every time a project, skill, resume, or contact link changes, this system decouples content and presentation logic through an intuitive visual administration studio.
+        </p>
+        <p>
+            The platform is designed to serve two primary audiences: 
+            <strong>(1) Public Visitors & Recruiters</strong>, who experience a fast, responsive, glassmorphic portfolio equipped with real-time interactive themes, multi-resume downloads, contact dispatching, and an embedded arcade lounge; and 
+            <strong>(2) The Portfolio Owner / Admin</strong>, who maintains complete programmatic control over every single visual component, section order, layout variant, database asset, and live telemetry log without writing a single line of backend code.
+        </p>
+    </div>
+
+    <!-- 3. PROBLEM STATEMENT -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">03</span>
+            <h2>Problem Statement</h2>
+        </div>
+        <p>
+            In modern software engineering recruitment and freelance markets, static single-page portfolios suffer from major technical and operational bottlenecks:
+        </p>
+        <ul>
+            <li><strong>High Maintenance Friction:</strong> Updating resume versions, project descriptions, live deployment links, or skill proficiencies requires source code modification, recompilation, and production deployment cycles.</li>
+            <li><strong>Single-Resume Rigidity:</strong> Standard portfolios provide only a single generic resume link. Recruiters targeting specialized roles (e.g., Full Stack Engineer vs. UI/UX Designer vs. Python Specialist) require role-tailored resumes.</li>
+            <li><strong>Zero Interaction Observability:</strong> Developers typically have no insight into who downloaded their resume, which projects generated clicks, or how visitors engaged with the site beyond generic third-party analytics scripts.</li>
+            <li><strong>Monolithic Aesthetics:</strong> Traditional portfolios lock the user into a single layout and color palette, preventing personalization or dynamic theme adaptation.</li>
+        </ul>
+        <p>
+            <strong>The MCA WALLAH system resolves these challenges</strong> by implementing a dynamic, database-driven architecture featuring an administrative CRUD studio, multi-resume vault management, custom background styling engine, telemetry logging, and interactive visitor engagement modules.
+        </p>
+    </div>
+
+    <!-- 4. OBJECTIVES -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">04</span>
+            <h2>Project Objectives</h2>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">Primary Objectives</div>
+                <ul>
+                    <li>Develop a fast, modern, mobile-responsive Single Page Application using React 19 and Vite 8.</li>
+                    <li>Construct a resilient RESTful backend using Node.js, Express, and MongoDB Mongoose.</li>
+                    <li>Build a secure, authenticated Admin CMS Studio with JWT-based authorization and BCrypt password encryption.</li>
+                    <li>Provide real-time content editing for all portfolio sections without code changes or restarts.</li>
+                    <li>Implement a Multi-Resume Vault allowing concurrent activation of role-specific resumes.</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-header">Secondary Objectives</div>
+                <ul>
+                    <li>Build an interactive Developer Gaming Arcade (Snake, 2048, Typing Challenge, Tic-Tac-Toe) with MongoDB leaderboard persistence.</li>
+                    <li>Implement cross-tab instant state synchronization using the browser <code>BroadcastChannel</code> API.</li>
+                    <li>Deliver a Draggable Floating Background Widget supporting 8 backdrop presets and custom HSL color picking.</li>
+                    <li>Provide telemetry tracking, visitor analytics, and automated Nodemailer contact notifications.</li>
+                    <li>Deliver full database JSON backup, export, and restore capabilities.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- 5. KEY FEATURES -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">05</span>
+            <h2>Key Features Matrix</h2>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Feature Name</th>
+                    <th style="width: 48%;">Description</th>
+                    <th style="width: 15%;">User Role</th>
+                    <th style="width: 15%;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Dynamic Navigation Dock</strong></td>
+                    <td>4 selectable presentation layouts (Floating Dock, Cyber Capsule, Minimal Island, Full-Width Bar) with customizable brand logo, live pulse, and CTA button.</td>
+                    <td>Visitor / Admin</td>
+                    <td><span class="badge badge-green">Implemented</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Multi-Style Hero Studio</strong></td>
+                    <td>4 hero presets (Glassmorphism, Split Code IDE, Editorial Spotlight, Cyber Hologram) with dynamic typewriter roles, tech badges, and draggable backdrop widget.</td>
+                    <td>Visitor / Admin</td>
+                    <td><span class="badge badge-green">Implemented</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Multi-Resume Vault</strong></td>
+                    <td>Permanent document storage supporting multiple categorized resume uploads with custom display titles and multi-button download dropdowns.</td>
+                    <td>Visitor / Admin</td>
+                    <td><span class="badge badge-green">Implemented</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Categorized Projects Showcase</strong></td>
+                    <td>Filterable project cards with live demo triggers, GitHub repository links, star/fork metrics, and tag filtering.</td>
+                    <td>Visitor / Admin</td>
+                    <td><span class="badge badge-green">Implemented</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Interactive Gaming Arcade</strong></td>
+                    <td>4 built-in retro developer mini-games (Snake, 2048, Typing WPM Challenge, Minimax Tic-Tac-Toe) with dedicated standalone mode (<code>/arcade</code>) and global leaderboards.</td>
+                    <td>Visitor / Player</td>
+                    <td><span class="badge badge-green">Implemented</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Contact & Newsletter Dispatcher</strong></td>
+                    <td>Rate-limited contact messaging with automated Nodemailer email routing, IP logging, and newsletter subscription engine.</td>
+                    <td>Visitor / Admin</td>
+                    <td><span class="badge badge-green">Implemented</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Admin CMS Studio</strong></td>
+                    <td>Password-protected administrative dashboard with full CRUD capabilities over all 11 sections, message inbox, subscriber lists, and user role management.</td>
+                    <td>Admin</td>
+                    <td><span class="badge badge-green">Implemented</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Telemetry & Activity Logging</strong></td>
+                    <td>Audit trail recording user signups, logins, resume downloads, game plays, button clicks, and admin mutations.</td>
+                    <td>Admin</td>
+                    <td><span class="badge badge-green">Implemented</span></td>
+                </tr>
+                <tr>
+                    <td><strong>JSON Database Backup & Restore</strong></td>
+                    <td>Complete JSON snapshot export and one-click data restore mechanism for instant disaster recovery.</td>
+                    <td>Admin</td>
+                    <td><span class="badge badge-green">Implemented</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 6. USER ROLES AND PERMISSIONS -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">06</span>
+            <h2>User Roles and Permissions</h2>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>User Role</th>
+                    <th>Authentication Method</th>
+                    <th>Accessible Modules</th>
+                    <th>System Restrictions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Public Visitor / Recruiter</strong></td>
+                    <td>None (Anonymous)</td>
+                    <td>Public Portfolio, Project Links, Resume Downloads, Arcade Games, Contact Form, Newsletter.</td>
+                    <td>Cannot access <code>/admin/*</code> routes or mutate portfolio content.</td>
+                </tr>
+                <tr>
+                    <td><strong>Registered User / Player</strong></td>
+                    <td>JWT Bearer Token (User Scope)</td>
+                    <td>Public Portfolio, Authenticated Game Leaderboard Submissions, Profile Preferences, Theme Customization.</td>
+                    <td>Cannot access CMS editing controls or administrative user management.</td>
+                </tr>
+                <tr>
+                    <td><strong>Administrator (Admin)</strong></td>
+                    <td>JWT Bearer Token (Role = <code>admin</code>)</td>
+                    <td>Full Admin Studio, CRUD over all 11 sections, User Management, Activity Logs, Documents Vault, Settings & Backups.</td>
+                    <td>Full unconstrained privileges.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 7. TECHNOLOGY STACK -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">07</span>
+            <h2>Technology Stack Specification</h2>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Technology / Package</th>
+                    <th>Version</th>
+                    <th>Purpose in Project</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Frontend Framework</strong></td>
+                    <td>React + React DOM</td>
+                    <td>v19.2.4</td>
+                    <td>Component-driven declarative UI rendering and virtual DOM state management.</td>
+                </tr>
+                <tr>
+                    <td><strong>Build Tool & Bundler</strong></td>
+                    <td>Vite</td>
+                    <td>v8.0.4</td>
+                    <td>Ultra-fast Hot Module Replacement (HMR) and optimized Rollup production bundling.</td>
+                </tr>
+                <tr>
+                    <td><strong>Client-side Routing</strong></td>
+                    <td>React Router DOM</td>
+                    <td>v7.18.2</td>
+                    <td>SPA routing, protected admin guards, dynamic URL parameter matching (<code>/arcade/:slug</code>).</td>
+                </tr>
+                <tr>
+                    <td><strong>Styling Architecture</strong></td>
+                    <td>Vanilla CSS Design Tokens</td>
+                    <td>Modern CSS3</td>
+                    <td>Custom CSS variables, glassmorphic <code>backdrop-filter</code>, Flexbox & CSS Grid.</td>
+                </tr>
+                <tr>
+                    <td><strong>Backend Runtime</strong></td>
+                    <td>Node.js</td>
+                    <td>v18.0.0+</td>
+                    <td>Asynchronous event-driven server runtime.</td>
+                </tr>
+                <tr>
+                    <td><strong>Web Framework</strong></td>
+                    <td>Express.js</td>
+                    <td>v4.21.2</td>
+                    <td>REST API endpoint architecture, middleware routing, and static file serving.</td>
+                </tr>
+                <tr>
+                    <td><strong>Database & ODM</strong></td>
+                    <td>MongoDB + Mongoose</td>
+                    <td>v8.9.5</td>
+                    <td>NoSQL document database with strict Schema typing, indexing, and pre-save hooks.</td>
+                </tr>
+                <tr>
+                    <td><strong>Authentication & Security</strong></td>
+                    <td>JSON Web Tokens (JWT) & BCrypt.js</td>
+                    <td>JWT 9.0.2 / BCrypt 3.0.3</td>
+                    <td>Stateless authentication tokens and salted password hashing (10 salt rounds).</td>
+                </tr>
+                <tr>
+                    <td><strong>Rate Limiting & Spam Protection</strong></td>
+                    <td>express-rate-limit</td>
+                    <td>v7.5.0</td>
+                    <td>IP-based window rate limiting on contact form submissions (5 requests per 10 minutes).</td>
+                </tr>
+                <tr>
+                    <td><strong>File Handling & Storage</strong></td>
+                    <td>Multer & Cloudinary SDK</td>
+                    <td>Multer 1.4.5 / Cloudinary 2.5.1</td>
+                    <td>Multipart form processing with dual storage: Memory upload / Local disk & Cloudinary.</td>
+                </tr>
+                <tr>
+                    <td><strong>Email Notification Service</strong></td>
+                    <td>Nodemailer</td>
+                    <td>v6.10.0</td>
+                    <td>SMTP client for automated email dispatch on contact form submissions.</td>
+                </tr>
+                <tr>
+                    <td><strong>PDF Generation Engine</strong></td>
+                    <td>Puppeteer Core + MS Edge</td>
+                    <td>v25.7.0</td>
+                    <td>Headless browser orchestration for publication-grade A4 documentation compilation.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- 8. SYSTEM ARCHITECTURE -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">08</span>
+            <h2>System Architecture</h2>
+        </div>
+        <p>
+            The system employs a decoupled, three-tier client-server architecture. The frontend Single Page Application (SPA) communicates with the backend REST API service via asynchronous JSON HTTP requests over CORS:
+        </p>
+
+        <div class="diagram-container">
+            <pre><code>┌──────────────────────────────────────────────────────────────────────────┐
+│                             CLIENT TIER (React 19)                       │
+│  [ Public Portfolio UI ]  [ Admin CMS Studio ]  [ Dedicated Arcade /arcade ]│
+│         ▲                         ▲                         ▲            │
+│         │                         │                         │            │
+│  [ DataContext ]           [ AuthContext ]          [ BroadcastChannel ] │
+└─────────┼─────────────────────────┼─────────────────────────┼────────────┘
+          │ (REST API / JSON)       │ (Bearer Token)          │ (Cross-Tab)
+          ▼                         ▼                         ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                         APPLICATION TIER (Express 4)                     │
+│  ┌─────────────────────────┐  ┌────────────────────────────────────────┐  │
+│  │   Public Routes         │  │    Protected Admin Routes (JWT Auth)   │  │
+│  │   /api/portfolio/*      │  │    /api/admin/*, /api/auth/*, /media/* │  │
+│  └───────────┬─────────────┘  └──────────────────┬─────────────────────┘  │
+│              │                                   │                        │
+│  ┌───────────▼─────────────┐  ┌──────────────────▼─────────────────────┐  │
+│  │  Rate Limiter & Multer  │  │ Controllers, Seeds & Email Dispatcher  │  │
+│  └─────────────────────────┘  └────────────────────────────────────────┘  │
+└──────────────────────────────────────┬───────────────────────────────────┘
+                                       │ Mongoose ODM
+                                       ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                            DATA & STORAGE TIER                           │
+│     [ MongoDB Atlas (16 Collections) ]  │  [ Cloudinary / Local Disk ]   │
+└──────────────────────────────────────────────────────────────────────────┘</code></pre>
+        </div>
+    </div>
+
+    <!-- 9. APPLICATION WORKFLOW -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">09</span>
+            <h2>Application Workflow</h2>
+        </div>
+        <h3>Visitor Interaction Flow</h3>
+        <ol>
+            <li><strong>Initial Hydration:</strong> Client requests root route <code>/</code>. <code>DataContext</code> executes a single unified query to <code>GET /api/portfolio/public</code>.</li>
+            <li><strong>Dynamic Rendering:</strong> React renders all sections using retrieved CMS document settings.</li>
+            <li><strong>Live Customization:</strong> Visitor uses the draggable floating background widget to adjust visual themes locally in state.</li>
+            <li><strong>Resume Interaction:</strong> Visitor downloads or previews resumes from the dynamic dropdown populated from the Resume Vault.</li>
+            <li><strong>Engagement & Gaming:</strong> Playing arcade games triggers score recording via <code>POST /api/portfolio/games/:slug/score</code>.</li>
+            <li><strong>Contact Submission:</strong> Sending a message passes through client validation and rate-limited dispatch.</li>
+        </ol>
+
+        <h3>Admin Studio Workflow</h3>
+        <ol>
+            <li><strong>Authentication:</strong> Admin logs in via <code>/admin/login</code> against <code>POST /api/auth/login</code>.</li>
+            <li><strong>Token Verification:</strong> Server issues an Access Token stored in <code>localStorage</code>.</li>
+            <li><strong>Live Editing:</strong> Admin modifies content and saves via <code>PUT/POST</code> to <code>/api/admin/section/:type</code>.</li>
+            <li><strong>Instant Propagation:</strong> Frontend broadcasts through <code>BroadcastChannel('portfolio_updates')</code>, updating public tabs instantly.</li>
+        </ol>
+    </div>
+
+    <!-- 10. PROJECT STRUCTURE -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">10</span>
+            <h2>Project Directory Structure</h2>
+        </div>
+        <pre><code>Portfolio/
+├── public/                         # Public static files & documents repository
+│   └── docs/                       # System documentation PDF repository
+├── server/                         # Backend Express API & Database
+│   ├── config/                     # Database (db.js) & Cloudinary configurations
+│   ├── controllers/                # Business logic controllers (admin, auth, portfolio, media)
+│   ├── middleware/                 # Security, JWT protection, and Multer file upload handlers
+│   ├── models/                     # 16 Mongoose Data Models (User, Hero, About, Project, Game, etc.)
+│   ├── routes/                     # Express REST routes (adminRoutes, authRoutes, publicRoutes, mediaRoutes)
+│   ├── seeds/                      # Database auto-seeding scripts (seedData.js)
+│   ├── services/                   # Email notification service (emailService.js)
+│   └── server.js                   # Main Express application bootstrap entry point
+├── src/                            # Frontend React 19 Application
+│   ├── admin/                      # Protected Admin CMS Studio components
+│   │   ├── AdminLayout.jsx         # Admin shell navigation, sidebar, and header
+│   │   ├── DashboardOverview.jsx   # Live telemetry, KPI counters, and activity stream
+│   │   ├── NavbarCMS.jsx           # Dedicated navigation styling & CTA customizer
+│   │   ├── HeroCMS.jsx             # Hero layout switcher, typewriter roles, and badges
+│   │   ├── AboutCMS.jsx            # Biography, stats, hobbies & Multi-Resume Vault
+│   │   ├── ProjectsCMS.jsx         # Filterable project CRUD & order manager
+│   │   ├── GamesCMS.jsx            # Arcade game settings, visibility & leaderboard manager
+│   │   ├── DocumentsCMS.jsx        # Document vault & system report manager
+│   │   ├── MessagesInbox.jsx       # Contact message viewing & status management
+│   │   ├── UsersActivityCMS.jsx    # User directory, role assignment & audit logs
+│   │   └── admin.css               # Admin Studio design system & UI tokens
+│   ├── components/                 # Reusable Public UI Components
+│   │   ├── Navbar/                 # Floating Dock, Cyber, Minimal, Full-Width navbar
+│   │   ├── Header/                 # Multi-style Hero & Draggable Background Widget
+│   │   ├── About/                  # Bio, dynamic quick stats, hobbies & resume dropdowns
+│   │   ├── Projects/               # Filterable projects grid & dynamic project cards
+│   │   ├── FunGame/                # Snake, 2048, Typing, Tic-Tac-Toe & Standalone Arcade
+│   │   ├── Contact/                # Contact form, social triggers & rate limiter feedback
+│   │   └── Footer/                 # Footer component, quick links & newsletter box
+│   ├── context/                    # React Context Hubs (AuthContext.jsx, DataContext.jsx)
+│   ├── config/                     # Frontend API resolution & media path utilities (api.js)
+│   ├── App.jsx                     # Top-level route tree & protected route guards
+│   ├── main.jsx                    # React 19 root DOM renderer
+│   └── index.css                   # Global theme tokens, typography & animations
+├── scripts/                        # Automation & build scripts
+│   └── generate-pdf.js             # Puppeteer-based publication-grade PDF generator
+├── package.json                    # Project dependencies and npm scripts
+└── vite.config.js                  # Vite configuration & proxy definitions</code></pre>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- 11. FRONTEND DOCUMENTATION -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">11</span>
+            <h2>Frontend Architecture & Components</h2>
+        </div>
+        <p>
+            The frontend application is structured as a modular React 19 SPA powered by Vite. State is managed centrally through Context Providers without requiring bloated external state management libraries:
+        </p>
+
+        <h3>Core Context Providers</h3>
+        <ul>
+            <li><strong><code>DataContext.jsx</code>:</strong> Single source of truth for public portfolio content with optimistic caching and <code>BroadcastChannel</code> synchronization.</li>
+            <li><strong><code>AuthContext.jsx</code>:</strong> Manages authentication state, user profile preferences, token persistence in <code>localStorage</code>, and auth modal triggers.</li>
+        </ul>
+
+        <h3>Key Public UI Modules</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Source Directory</th>
+                    <th>Key Capabilities & Interactive Functionality</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Navbar</strong></td>
+                    <td><code>src/components/Navbar/</code></td>
+                    <td>Dynamic layout style switcher, animated logo pulse, live availability indicator pill, smooth section anchor scroll, and dark/light mode toggle.</td>
+                </tr>
+                <tr>
+                    <td><strong>Header (Hero)</strong></td>
+                    <td><code>src/components/Header/</code></td>
+                    <td>Animated typewriter role text, dynamic tech badges, interactive Draggable Background Widget supporting 8 backdrop presets and live HSL color picking.</td>
+                </tr>
+                <tr>
+                    <td><strong>About & Vault</strong></td>
+                    <td><code>src/components/About/</code></td>
+                    <td>Biography paragraphs, dynamic quick stats cards, interactive hobbies tags, and the Multi-Resume Vault with inline preview (<code>↗</code>) and direct download (<code>⬇</code>).</td>
+                </tr>
+                <tr>
+                    <td><strong>Projects Grid</strong></td>
+                    <td><code>src/components/Projects/</code></td>
+                    <td>Real-time category filtering (Full Stack, Frontend, Python, UI/UX, Open Source), live preview links, GitHub repository links, and star/fork metrics.</td>
+                </tr>
+                <tr>
+                    <td><strong>Arcade Lounge</strong></td>
+                    <td><code>src/components/FunGame/</code></td>
+                    <td>Embedded mini-games (Snake, 2048, Typing Speed, Tic-Tac-Toe) with live WPM/Accuracy meters, Minimax AI engine, and global leaderboards.</td>
+                </tr>
+                <tr>
+                    <td><strong>Dedicated Arcade</strong></td>
+                    <td><code>StandaloneArcadeWindow.jsx</code></td>
+                    <td>Dedicated full-screen distraction-free gaming environment at <code>/arcade</code> and <code>/arcade/:slug</code>.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 12. BACKEND DOCUMENTATION -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">12</span>
+            <h2>Backend Architecture & Controllers</h2>
+        </div>
+        <p>
+            The backend is structured around Express REST controllers, Mongoose data models, and specialized security middleware:
+        </p>
+        <ul>
+            <li><strong><code>portfolioController.js</code>:</strong> Handles public aggregated queries (<code>getPublicPortfolio</code>), contact message submission with Nodemailer dispatch, newsletter subscription, and game leaderboard submission/retrieval.</li>
+            <li><strong><code>adminController.js</code>:</strong> Provides complete administrative CRUD operations across all portfolio sections, user directory management, status toggles, activity log inspection, and JSON backup/restore.</li>
+            <li><strong><code>authController.js</code>:</strong> Implements secure user registration, BCrypt password validation, JWT access and refresh token generation, user preference updates, and avatar uploads.</li>
+            <li><strong><code>mediaController.js</code>:</strong> Handles multipart asset uploads via Multer, routing to Cloudinary when configured or falling back to local disk storage.</li>
+        </ul>
+    </div>
+
+    <!-- 13. API DOCUMENTATION -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">13</span>
+            <h2>API Specification</h2>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Auth</th>
+                    <th>Request Payload / Params</th>
+                    <th>Success Response</th>
+                    <th>Errors</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="badge badge-blue">GET</span></td>
+                    <td><code>/api/portfolio/public</code></td>
+                    <td>Public</td>
+                    <td>None</td>
+                    <td>200: Aggregated JSON object with hero, about, navbar, projects, skills, games, etc.</td>
+                    <td>500: Server Error</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-green">POST</span></td>
+                    <td><code>/api/portfolio/contact</code></td>
+                    <td>Public (Rate-limited)</td>
+                    <td><code>{ name, email, subject, message }</code></td>
+                    <td>201: <code>{ message: "Message sent successfully" }</code></td>
+                    <td>400: Validation, 429: Too Many Requests</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-green">POST</span></td>
+                    <td><code>/api/portfolio/subscribe</code></td>
+                    <td>Public</td>
+                    <td><code>{ email }</code></td>
+                    <td>201: <code>{ message: "Subscribed successfully" }</code></td>
+                    <td>400: Invalid Email, 409: Duplicate</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-green">POST</span></td>
+                    <td><code>/api/portfolio/games/:slug/score</code></td>
+                    <td>Public / Auth</td>
+                    <td><code>{ playerName, score, metrics }</code></td>
+                    <td>201: <code>{ message: "Score saved", scoreDoc }</code></td>
+                    <td>400: Missing Fields, 500: Error</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-blue">GET</span></td>
+                    <td><code>/api/portfolio/games/:slug/leaderboard</code></td>
+                    <td>Public</td>
+                    <td>Query: <code>?limit=10</code></td>
+                    <td>200: Array of top high score objects</td>
+                    <td>500: Server Error</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-green">POST</span></td>
+                    <td><code>/api/auth/login</code></td>
+                    <td>Public</td>
+                    <td><code>{ email, password }</code></td>
+                    <td>200: <code>{ user, accessToken, refreshToken }</code></td>
+                    <td>400: Missing fields, 401: Invalid Auth</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-blue">GET</span></td>
+                    <td><code>/api/admin/overview</code></td>
+                    <td>Admin Bearer</td>
+                    <td>None</td>
+                    <td>200: KPI metrics, unread counts, recent activity logs</td>
+                    <td>401: Unauthorized, 403: Forbidden</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-purple">PUT</span></td>
+                    <td><code>/api/admin/section/:type/:id</code></td>
+                    <td>Admin Bearer</td>
+                    <td>Updated Section Fields</td>
+                    <td>200: Updated document object</td>
+                    <td>401: Unauthorized, 404: Not Found</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-amber">POST</span></td>
+                    <td><code>/api/admin/upload/document</code></td>
+                    <td>Admin Bearer</td>
+                    <td>Multipart: <code>file</code>, title, category</td>
+                    <td>201: Created Document Record</td>
+                    <td>400: Invalid file, 401: Unauthorized</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-blue">GET</span></td>
+                    <td><code>/api/admin/backup/export</code></td>
+                    <td>Admin Bearer</td>
+                    <td>None</td>
+                    <td>200: Complete JSON database snapshot</td>
+                    <td>401: Unauthorized, 403: Forbidden</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- 14. DATABASE DOCUMENTATION -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">14</span>
+            <h2>Database Architecture (MongoDB Schemas)</h2>
+        </div>
+        <p>
+            The database layer is implemented on MongoDB using Mongoose 8. The database utilizes 16 specialized schema collections with indexed fields for high-throughput queries:
+        </p>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">User Schema (<code>users</code>)</div>
+                <ul style="font-size: 8.5pt;">
+                    <li><code>name</code> (String, required)</li>
+                    <li><code>email</code> (String, required, unique, indexed)</li>
+                    <li><code>password</code> (String, hashed via bcrypt)</li>
+                    <li><code>role</code> (Enum: 'admin' | 'editor' | 'user')</li>
+                    <li><code>preferences</code> (darkMode, background, accentColor)</li>
+                    <li><code>lastLogin</code>, <code>loginCount</code>, <code>lastIp</code>, <code>device</code></li>
+                    <li><code>isSuspended</code> (Boolean, default false)</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-header">GameScore Schema (<code>gamescores</code>)</div>
+                <ul style="font-size: 8.5pt;">
+                    <li><code>gameSlug</code> (Enum: 'snake' | '2048' | 'typing' | 'tictactoe')</li>
+                    <li><code>playerName</code> (String, default 'Player')</li>
+                    <li><code>score</code> (Number, required, indexed)</li>
+                    <li><code>metrics</code> (wpm, accuracy, highestTile, moves)</li>
+                    <li><code>userId</code> (ObjectId, ref: 'User')</li>
+                    <li><strong>Compound Index:</strong> <code>{ gameSlug: 1, score: -1 }</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">Hero Schema (<code>heroes</code>)</div>
+                <ul style="font-size: 8.5pt;">
+                    <li><code>layoutStyle</code> (Enum: 'glassmorphism' | 'split' | 'editorial' | 'hologram')</li>
+                    <li><code>typewriterRoles</code> (Array of Strings)</li>
+                    <li><code>techPills</code> (Array of Strings)</li>
+                    <li><code>stats</code> (Array of { value, label })</li>
+                    <li><code>socialLinks</code> (Array of { label, href, icon })</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-header">About Schema & Vault (<code>abouts</code>)</div>
+                <ul style="font-size: 8.5pt;">
+                    <li><code>displayName</code>, <code>title</code>, <code>location</code>, <code>avatarUrl</code></li>
+                    <li><code>paragraphs</code> (Array of Strings)</li>
+                    <li><code>quickStats</code>, <code>hobbies</code></li>
+                    <li><code>resumes</code> (Array of { title, url, fileName, fileSize, isVisible, isDefault })</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 15. AUTHENTICATION & SECURITY -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">15</span>
+            <h2>Authentication & Security Mechanisms</h2>
+        </div>
+        <div class="callout">
+            <div class="callout-title">Security Architecture Summary</div>
+            <p>The system enforces a multi-layered security perimeter incorporating stateful cryptographic hashing, stateless JWT authorization, and defensive request throttling.</p>
+        </div>
+        <ul>
+            <li><strong>Password Cryptography:</strong> Passwords are never stored in plaintext. Mongoose pre-save hooks automatically hash passwords with <strong>BCrypt using 10 salt rounds</strong>.</li>
+            <li><strong>Dual-Token Authorization:</strong> Upon successful login, the server issues a 7-day signed Access Token (<code>JWT_SECRET</code>) and a 30-day Refresh Token (<code>JWT_REFRESH_SECRET</code>).</li>
+            <li><strong>Role-Based Access Control (RBAC):</strong> The <code>protectAdmin</code> middleware verifies token signature and confirms <code>user.role === 'admin'</code> before allowing access to administrative mutation routes.</li>
+            <li><strong>Spam Throttling:</strong> The public contact form is protected by <code>express-rate-limit</code>, restricting clients to <strong>5 message submissions per 10-minute window per IP</strong>.</li>
+            <li><strong>File Upload Sanitization:</strong> Multer enforces strict MIME-type allowlists (PDF, DOC, DOCX, JPEG, PNG, WEBP, SVG) and an upper file boundary of <strong>10MB</strong>.</li>
+        </ul>
+    </div>
+
+    <!-- 16. INSTALLATION & SETUP GUIDE -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">16</span>
+            <h2>Installation & Setup Guide</h2>
+        </div>
+        <pre><code># 1. Clone the project repository
+git clone https://github.com/Mahadebmaity/MCAWALLAH.git
+cd Portfolio
+
+# 2. Install frontend dependencies
+npm install
+
+# 3. Install backend dependencies
+cd server
+npm install
+cd ..
+
+# 4. Seed initial default database data
+cd server
+npm run seed
+cd ..
+
+# 5. Start development environment concurrently (Frontend + Backend)
+npm run dev</code></pre>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- 17. ENVIRONMENT VARIABLES -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">17</span>
+            <h2>Environment Variables Configuration</h2>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Variable Name</th>
+                    <th>Purpose</th>
+                    <th>Example Value (Placeholder)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>PORT</code></td>
+                    <td>Backend HTTP server listening port</td>
+                    <td><code>5000</code></td>
+                </tr>
+                <tr>
+                    <td><code>NODE_ENV</code></td>
+                    <td>Application runtime mode</td>
+                    <td><code>development</code> or <code>production</code></td>
+                </tr>
+                <tr>
+                    <td><code>MONGODB_URI</code></td>
+                    <td>MongoDB connection string</td>
+                    <td><code>mongodb://127.0.0.1:27017/portfolio_cms</code></td>
+                </tr>
+                <tr>
+                    <td><code>JWT_SECRET</code></td>
+                    <td>Secret key for signing access tokens</td>
+                    <td><code>your_jwt_access_secret_key_here</code></td>
+                </tr>
+                <tr>
+                    <td><code>JWT_EXPIRES_IN</code></td>
+                    <td>Access token lifespan</td>
+                    <td><code>7d</code></td>
+                </tr>
+                <tr>
+                    <td><code>JWT_REFRESH_SECRET</code></td>
+                    <td>Secret key for signing refresh tokens</td>
+                    <td><code>your_jwt_refresh_secret_key_here</code></td>
+                </tr>
+                <tr>
+                    <td><code>SMTP_HOST</code></td>
+                    <td>SMTP server host for Nodemailer</td>
+                    <td><code>smtp.gmail.com</code></td>
+                </tr>
+                <tr>
+                    <td><code>SMTP_PORT</code></td>
+                    <td>SMTP communication port</td>
+                    <td><code>587</code></td>
+                </tr>
+                <tr>
+                    <td><code>SMTP_USER</code></td>
+                    <td>SMTP authenticated user account</td>
+                    <td><code>your_email@gmail.com</code></td>
+                </tr>
+                <tr>
+                    <td><code>SMTP_PASS</code></td>
+                    <td>SMTP application password</td>
+                    <td><code>your_smtp_app_password</code></td>
+                </tr>
+                <tr>
+                    <td><code>CONTACT_RECEIVER_EMAIL</code></td>
+                    <td>Destination inbox for contact messages</td>
+                    <td><code>admin@portfolio.com</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 18. TESTING -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">18</span>
+            <h2>Testing Methodologies</h2>
+        </div>
+        <ul>
+            <li><strong>Automated Test Suites (in <code>server/</code>):</strong>
+                <ul>
+                    <li><code>test-auth.js</code>: Validates user registration, token generation, password verification, and RBAC rejection.</li>
+                    <li><code>test-api.js</code>: Tests public aggregated portfolio queries and error status code handling.</li>
+                    <li><code>test-games.js</code>: Verifies high score ingestion, leaderboard compound sorting, and metrics calculation.</li>
+                    <li><code>test-typewriter.js</code>: Validates role serialization and animated typewriter string arrays.</li>
+                </ul>
+            </li>
+            <li><strong>Manual End-to-End Testing:</strong> Verified across multiple viewport widths (360px mobile to 4K displays), theme transitions, resume downloads, form error validations, and cross-tab BroadcastChannel state updates.</li>
+        </ul>
+    </div>
+
+    <!-- 19. ERROR HANDLING -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">19</span>
+            <h2>Error Handling Architecture</h2>
+        </div>
+        <pre><code>app.use((err, req, res, next) => {
+    console.error('Server error:', err);
+    res.status(err.status || 500).json({
+        message: err.message || 'Internal Server Error',
+        error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+});</code></pre>
+    </div>
+
+    <!-- 20. SCREENSHOTS / UI DOCUMENTATION -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">20</span>
+            <h2>Screenshots & User Interface Documentation</h2>
+        </div>
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">1. Dynamic Floating Navigation Dock</div>
+                <p style="font-size: 8.5pt;">Mac-style frosted glass capsule featuring active link detection, animated live availability badge, theme toggle, and customizable call-to-action button.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">2. Multi-Style Hero Section</div>
+                <p style="font-size: 8.5pt;">Showcases animated typewriter roles, quick stat pills, social triggers, and the draggable background customizer widget.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- 21. PERFORMANCE CONSIDERATIONS -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">21</span>
+            <h2>Performance Optimization</h2>
+        </div>
+        <ul>
+            <li><strong>Single Aggregated Network Request:</strong> All portfolio content is loaded in a single aggregated <code>GET /api/portfolio/public</code> query.</li>
+            <li><strong>Compound Database Indexing:</strong> Mongoose models use compound indices for sub-millisecond query responses.</li>
+            <li><strong>Zero-Dependency Styling:</strong> Clean Vanilla CSS design tokens without heavyweight styling framework overhead.</li>
+        </ul>
+    </div>
+
+    <!-- 22. LIMITATIONS -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">22</span>
+            <h2>System Limitations</h2>
+        </div>
+        <ul>
+            <li><strong>Single Primary Administrator Model:</strong> Granular role-based permissions for editors are not yet fully differentiated.</li>
+            <li><strong>Synchronous Nodemailer Dispatch:</strong> Email notifications are processed synchronously.</li>
+            <li><strong>Local Upload Fallback Dependency:</strong> Relies on local disk storage when Cloudinary credentials are not configured.</li>
+        </ul>
+    </div>
+
+    <!-- 23. FUTURE SCOPE -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">23</span>
+            <h2>Future Scope & Roadmap</h2>
+        </div>
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">Short-Term Enhancements</div>
+                <ul style="font-size: 8.5pt;">
+                    <li>OAuth2 Social Login integration (GitHub / Google SSO).</li>
+                    <li>Rich Text WYSIWYG Editor for blog posts and project case studies.</li>
+                    <li>Automated contact webhook notifications to Discord / Slack channels.</li>
+                </ul>
+            </div>
+            <div class="card">
+                <div class="card-header">Long-Term Enhancements</div>
+                <ul style="font-size: 8.5pt;">
+                    <li>Interactive 3D WebGL / Three.js portfolio scene integration.</li>
+                    <li>AI-powered chatbot assistant for automated visitor inquiries and resume Q&A.</li>
+                    <li>Redis caching layer for ultra-high traffic scaling.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 24. DEPLOYMENT -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">24</span>
+            <h2>Deployment Guide</h2>
+        </div>
+        <ul>
+            <li><strong>Frontend (Vercel / Netlify):</strong> Configured via <code>vercel.json</code> for Single Page Application routing rewrites.</li>
+            <li><strong>Backend (Render / Railway / Fly.io):</strong> Deploy the <code>server/</code> folder as a Node.js web service.</li>
+            <li><strong>Database (MongoDB Atlas):</strong> Deploy an Atlas cluster and inject the connection string as <code>MONGODB_URI</code>.</li>
+        </ul>
+    </div>
+
+    <!-- 25. MAINTENANCE & CONTRIBUTION GUIDE -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">25</span>
+            <h2>Maintenance & Contribution Guide</h2>
+        </div>
+        <ol>
+            <li><strong>Fork & Branch:</strong> Create a feature branch: <code>git checkout -b feature/amazing-feature</code></li>
+            <li><strong>Code Standards:</strong> Maintain ESLint standards (<code>npm run lint</code>).</li>
+            <li><strong>Testing:</strong> Run backend test scripts before submitting PRs.</li>
+        </ol>
+    </div>
+
+    <!-- 26. VERSION HISTORY -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">26</span>
+            <h2>Version History & Changelog</h2>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Version</th>
+                    <th>Release Date</th>
+                    <th>Key Milestones & Changes</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>v1.0.0</strong></td>
+                    <td>2026-08-17</td>
+                    <td>Initial official production release with 11 CMS sections, Multi-Resume Vault, 4 Arcade Games, Live Telemetry, and Puppeteer PDF Generation Engine.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 27. CONCLUSION -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">27</span>
+            <h2>Conclusion</h2>
+        </div>
+        <p>
+            The <strong>MCA WALLAH Portfolio & Dynamic CMS</strong> delivers a complete, enterprise-grade solution that transforms personal portfolio management from a rigid, code-heavy chore into a dynamic, real-time administrative experience.
+        </p>
+    </div>
+
+    <!-- 28. REFERENCES -->
+    <div class="section">
+        <div class="section-header">
+            <span class="section-num">28</span>
+            <h2>References & Documentation Links</h2>
+        </div>
+        <ul>
+            <li><strong>React 19 Documentation:</strong> <a href="https://react.dev/" target="_blank">https://react.dev/</a></li>
+            <li><strong>Vite Build Tool:</strong> <a href="https://vitejs.dev/" target="_blank">https://vitejs.dev/</a></li>
+            <li><strong>Express.js Framework:</strong> <a href="https://expressjs.com/" target="_blank">https://expressjs.com/</a></li>
+            <li><strong>Mongoose ODM Documentation:</strong> <a href="https://mongoosejs.com/" target="_blank">https://mongoosejs.com/</a></li>
+            <li><strong>Puppeteer Documentation:</strong> <a href="https://pptr.dev/" target="_blank">https://pptr.dev/</a></li>
+        </ul>
+    </div>
+
+</body>
+</html>
