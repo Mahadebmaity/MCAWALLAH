@@ -64,6 +64,23 @@ const siteSettingsSchema = new mongoose.Schema({
         ctaButtonText: { type: String, default: 'Play Our Games (Opens Full Arena)' },
         showCtaButton: { type: Boolean, default: true },
         isPublic: { type: Boolean, default: true }
+    },
+    aiAssistant: {
+        enabled: { type: Boolean, default: true },
+        twinName: { type: String, default: "Mahadeb's AI Digital Twin" },
+        welcomeMessage: { 
+            type: String, 
+            default: "👋 Hi there! I'm **Mahadeb's AI Digital Twin & Portfolio Assistant**.\n\nAsk me anything about his **skills, featured projects, work experience, resume downloads**, or how to get in touch for full-time & freelance opportunities!" 
+        },
+        quickPrompts: [{
+            type: String
+        }],
+        customInstructions: { 
+            type: String, 
+            default: "Represent Mahadeb professionally as a Full Stack Engineer. Highlight his React 19, Node.js, and MongoDB expertise." 
+        },
+        geminiApiKey: { type: String, default: '' },
+        preferredEngine: { type: String, enum: ['auto', 'gemini', 'semantic'], default: 'auto' }
     }
 }, {
     timestamps: true

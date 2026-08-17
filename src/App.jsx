@@ -25,6 +25,7 @@ import TimelineCMS from './admin/TimelineCMS';
 import ProjectsCMS from './admin/ProjectsCMS';
 import GamesCMS from './admin/GamesCMS';
 import DocumentsCMS from './admin/DocumentsCMS';
+import AiAssistantCMS from './admin/AiAssistantCMS';
 import MessagesInbox from './admin/MessagesInbox';
 import FooterSubscribersCMS from './admin/FooterSubscribersCMS';
 import SettingsCMS from './admin/SettingsCMS';
@@ -82,6 +83,7 @@ function App() {
           <Route path="projects" element={<ProjectsCMS />} />
           <Route path="games" element={<GamesCMS />} />
           <Route path="docs" element={<DocumentsCMS />} />
+          <Route path="ai-assistant" element={<AiAssistantCMS />} />
           <Route path="messages" element={<MessagesInbox />} />
           <Route path="footer" element={<FooterSubscribersCMS />} />
           <Route path="settings" element={<SettingsCMS />} />

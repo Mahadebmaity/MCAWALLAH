@@ -16,6 +16,7 @@ const NAV_ITEMS = [
     { to: '/admin/projects', icon: 'fa-solid fa-folder-open', label: 'Projects' },
     { to: '/admin/games', icon: 'fa-solid fa-gamepad', label: 'Games Hub' },
     { to: '/admin/docs', icon: 'fa-solid fa-file-shield', label: 'Docs & System Vault' },
+    { to: '/admin/ai-assistant', icon: 'fa-solid fa-robot', label: 'AI Assistant CMS' },
     { to: '/admin/messages', icon: 'fa-solid fa-inbox', label: 'Feedback Inbox' },
     { to: '/admin/footer', icon: 'fa-solid fa-envelope-open-text', label: 'Footer & Subscribers' },
     { to: '/admin/settings', icon: 'fa-solid fa-sliders', label: 'Settings & Backup' }

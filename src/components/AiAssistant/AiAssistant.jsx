@@ -14,38 +14,63 @@ const INITIAL_PROMPTS = [
 export default function AiAssistant() {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([
-        {
-            id: 'welcome-1',
-            sender: 'assistant',
-            text: "👋 Hi there! I'm **Mahadeb's AI Digital Twin & Portfolio Assistant**.\n\nAsk me anything about his **skills, featured projects, work experience, resume downloads**, or how to get in touch for full-time & freelance opportunities!",
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            suggestedPrompts: INITIAL_PROMPTS,
-            actionCards: [
-                {
-                    type: 'resume',
-                    title: 'Download Resume (PDF)',
-                    icon: 'fa-solid fa-file-pdf',
-                    target: '/resume.pdf',
-                    actionText: 'Download'
-                },
-                {
-                    type: 'scroll',
-                    title: 'Contact Form',
-                    icon: 'fa-solid fa-envelope',
-                    target: 'contact',
-                    actionText: "Let's Talk"
-                }
-            ]
-        }
-    ]);
+    const [aiConfig, setAiConfig] = useState({
+        enabled: true,
+        twinName: "Mahadeb's AI Digital Twin",
+        welcomeMessage: "👋 Hi there! I'm **Mahadeb's AI Digital Twin & Portfolio Assistant**.\n\nAsk me anything about his **skills, featured projects, work experience, resume downloads**, or how to get in touch for full-time & freelance opportunities!",
+        quickPrompts: INITIAL_PROMPTS
+    });
 
+    const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [hasOpened, setHasOpened] = useState(false);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
+
+    // Fetch dynamic AI Configuration from API
+    useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/portfolio/ai/config`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setAiConfig(data);
+                    
+                    // Initialize welcome message with dynamic config
+                    setMessages([
+                        {
+                            id: 'welcome-1',
+                            sender: 'assistant',
+                            text: data.welcomeMessage || "👋 Hi there! I'm **Mahadeb's AI Digital Twin & Portfolio Assistant**.\n\nAsk me anything about his **skills, featured projects, work experience, resume downloads**, or how to get in touch for full-time & freelance opportunities!",
+                            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                            suggestedPrompts: (data.quickPrompts && data.quickPrompts.length > 0) ? data.quickPrompts : INITIAL_PROMPTS,
+                            actionCards: [
+                                {
+                                    type: 'resume',
+                                    title: 'Download Resume (PDF)',
+                                    icon: 'fa-solid fa-file-pdf',
+                                    target: '/resume.pdf',
+                                    actionText: 'Download'
+                                },
+                                {
+                                    type: 'scroll',
+                                    title: 'Contact Form',
+                                    icon: 'fa-solid fa-envelope',
+                                    target: 'contact',
+                                    actionText: "Let's Talk"
+                                }
+                            ]
+                        }
+                    ]);
+                }
+            } catch (err) {
+                console.warn('Using default AI assistant configuration');
+            }
+        };
+        fetchConfig();
+    }, []);
 
     // Auto-scroll to bottom of messages
     const scrollToBottom = () => {
@@ -60,6 +85,8 @@ export default function AiAssistant() {
             setTimeout(() => inputRef.current?.focus(), 150);
         }
     }, [isOpen, messages]);
+
+    if (!aiConfig.enabled) return null;
 
     // Send Message Handler
     const handleSend = async (customText = null) => {
@@ -254,7 +281,7 @@ export default function AiAssistant() {
                                 <i className="fa-solid fa-robot" />
                             </div>
                             <div>
-                                <h4 className="ai-chat-title">Mahadeb's AI Digital Twin</h4>
+                                <h4 className="ai-chat-title">{aiConfig.twinName || "Mahadeb's AI Digital Twin"}</h4>
                                 <div className="ai-chat-subtitle">
                                     <span className="ai-online-dot" />
                                     <span>AI Assistant • Ready to help</span>

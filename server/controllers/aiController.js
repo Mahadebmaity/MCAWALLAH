@@ -378,16 +378,200 @@ Instructions:
 };
 
 /**
+ * @desc Get Public AI Assistant Configuration
+ * @route GET /api/portfolio/ai/config
+ */
+export const getAiConfig = async (req, res) => {
+    try {
+        const settings = await SiteSettings.findOne().lean();
+        const ai = settings?.aiAssistant || {};
+
+        const defaultPrompts = [
+            '💡 What are Mahadeb\'s top skills?',
+            '🚀 Show me his React projects',
+            '📄 Download his verified resume',
+            '📬 How can I contact or hire him?',
+            '🎮 Play games in Arcade Lounge'
+        ];
+
+        res.json({
+            enabled: ai.enabled !== false,
+            twinName: ai.twinName || "Mahadeb's AI Digital Twin",
+            welcomeMessage: ai.welcomeMessage || "👋 Hi there! I'm **Mahadeb's AI Digital Twin & Portfolio Assistant**.\n\nAsk me anything about his **skills, featured projects, work experience, resume downloads**, or how to get in touch for full-time & freelance opportunities!",
+            quickPrompts: (ai.quickPrompts && ai.quickPrompts.length > 0) ? ai.quickPrompts : defaultPrompts,
+            hasGeminiKey: Boolean(ai.geminiApiKey || process.env.GEMINI_API_KEY)
+        });
+    } catch (err) {
+        console.error('Error fetching AI public config:', err);
+        res.status(500).json({ enabled: true });
+    }
+};
+
+/**
  * @desc Get AI Assistant Status
  * @route GET /api/portfolio/ai/status
  */
 export const getAiStatus = async (req, res) => {
-    const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY);
+    const settings = await SiteSettings.findOne().lean();
+    const hasGeminiKey = Boolean(settings?.aiAssistant?.geminiApiKey || process.env.GEMINI_API_KEY);
     res.json({
         online: true,
         model: hasGeminiKey ? 'gemini-3.6-flash' : 'semantic-knowledge-engine',
         hasGeminiKey,
-        supportedLanguages: ['en', 'bn'],
+        enabled: settings?.aiAssistant?.enabled !== false,
         developerPersona: 'Mahadeb Maity'
     });
+};
+
+/**
+ * @desc Get Admin AI Settings & Diagnostics
+ * @route GET /api/admin/ai/settings
+ */
+export const getAiAdminSettings = async (req, res) => {
+    try {
+        let settings = await SiteSettings.findOne();
+        if (!settings) {
+            settings = await SiteSettings.create({});
+        }
+
+        const ai = settings.aiAssistant || {};
+        const hasServerEnvKey = Boolean(process.env.GEMINI_API_KEY);
+
+        const defaultPrompts = [
+            '💡 What are Mahadeb\'s top skills?',
+            '🚀 Show me his React projects',
+            '📄 Download his verified resume',
+            '📬 How can I contact or hire him?',
+            '🎮 Play games in Arcade Lounge'
+        ];
+
+        res.json({
+            enabled: ai.enabled !== false,
+            twinName: ai.twinName || "Mahadeb's AI Digital Twin",
+            welcomeMessage: ai.welcomeMessage || "👋 Hi there! I'm **Mahadeb's AI Digital Twin & Portfolio Assistant**.\n\nAsk me anything about his **skills, featured projects, work experience, resume downloads**, or how to get in touch for full-time & freelance opportunities!",
+            quickPrompts: (ai.quickPrompts && ai.quickPrompts.length > 0) ? ai.quickPrompts : defaultPrompts,
+            customInstructions: ai.customInstructions || "Represent Mahadeb professionally as a Full Stack Engineer. Highlight his React 19, Node.js, and MongoDB expertise.",
+            geminiApiKey: ai.geminiApiKey ? '••••••••' + ai.geminiApiKey.slice(-4) : (hasServerEnvKey ? 'Configured via Server Environment (.env)' : ''),
+            hasActiveKey: Boolean(ai.geminiApiKey || hasServerEnvKey),
+            preferredEngine: ai.preferredEngine || 'auto'
+        });
+    } catch (err) {
+        console.error('Error fetching admin AI settings:', err);
+        res.status(500).json({ message: err.message });
+    }
+};
+
+/**
+ * @desc Update Admin AI Settings
+ * @route PUT /api/admin/ai/settings
+ */
+export const updateAiAdminSettings = async (req, res) => {
+    try {
+        let settings = await SiteSettings.findOne();
+        if (!settings) {
+            settings = await SiteSettings.create({});
+        }
+
+        const { enabled, twinName, welcomeMessage, quickPrompts, customInstructions, geminiApiKey, preferredEngine } = req.body;
+
+        if (!settings.aiAssistant) {
+            settings.aiAssistant = {};
+        }
+
+        if (typeof enabled === 'boolean') settings.aiAssistant.enabled = enabled;
+        if (twinName) settings.aiAssistant.twinName = twinName.trim();
+        if (welcomeMessage) settings.aiAssistant.welcomeMessage = welcomeMessage.trim();
+        if (Array.isArray(quickPrompts)) settings.aiAssistant.quickPrompts = quickPrompts.filter(p => p && p.trim());
+        if (customInstructions) settings.aiAssistant.customInstructions = customInstructions.trim();
+        if (preferredEngine) settings.aiAssistant.preferredEngine = preferredEngine;
+
+        // If user submitted a new non-masked key
+        if (geminiApiKey && !geminiApiKey.startsWith('••••') && !geminiApiKey.includes('Configured via')) {
+            settings.aiAssistant.geminiApiKey = geminiApiKey.trim();
+        } else if (geminiApiKey === '') {
+            settings.aiAssistant.geminiApiKey = '';
+        }
+
+        await settings.save();
+
+        res.json({
+            success: true,
+            message: 'AI Assistant settings updated successfully! 🤖',
+            settings: settings.aiAssistant
+        });
+    } catch (err) {
+        console.error('Error updating admin AI settings:', err);
+        res.status(500).json({ message: err.message });
+    }
+};
+
+/**
+ * @desc Get AI Analytics & Chat Transcripts
+ * @route GET /api/admin/ai/analytics
+ */
+export const getAiAnalytics = async (req, res) => {
+    try {
+        const { limit = 100, page = 1 } = req.query;
+        const query = { action: 'AI_CHAT' };
+
+        const totalChats = await ActivityLog.countDocuments(query);
+        const logs = await ActivityLog.find(query)
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(parseInt(limit))
+            .lean();
+
+        // Calculate analytics insights
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayCount = await ActivityLog.countDocuments({ ...query, createdAt: { $gte: today } });
+
+        // Categorize common keywords
+        let topicStats = {
+            skills: 0,
+            projects: 0,
+            resumes: 0,
+            contact: 0,
+            arcade: 0,
+            general: 0
+        };
+
+        logs.forEach(log => {
+            const q = (log.metadata?.query || log.details || '').toLowerCase();
+            if (q.includes('skill') || q.includes('stack') || q.includes('react') || q.includes('node')) topicStats.skills++;
+            else if (q.includes('project') || q.includes('work') || q.includes('built')) topicStats.projects++;
+            else if (q.includes('resume') || q.includes('cv') || q.includes('download')) topicStats.resumes++;
+            else if (q.includes('contact') || q.includes('hire') || q.includes('email') || q.includes('phone')) topicStats.contact++;
+            else if (q.includes('game') || q.includes('arcade') || q.includes('play')) topicStats.arcade++;
+            else topicStats.general++;
+        });
+
+        res.json({
+            success: true,
+            totalChats,
+            todayCount,
+            topicStats,
+            logs
+        });
+    } catch (err) {
+        console.error('Error fetching AI analytics:', err);
+        res.status(500).json({ message: err.message });
+    }
+};
+
+/**
+ * @desc Clear AI Analytics Logs
+ * @route DELETE /api/admin/ai/analytics
+ */
+export const clearAiAnalytics = async (req, res) => {
+    try {
+        const result = await ActivityLog.deleteMany({ action: 'AI_CHAT' });
+        res.json({
+            success: true,
+            message: `Cleared ${result.deletedCount} AI chat logs successfully.`
+        });
+    } catch (err) {
+        console.error('Error clearing AI logs:', err);
+        res.status(500).json({ message: err.message });
+    }
 };
