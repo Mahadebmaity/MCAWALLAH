@@ -666,6 +666,32 @@ input:checked + .adm-slider:before {
 }
 
 /* ══════════════════════════════════════
+   SEARCH BAR INPUT WRAPPER WITH EMBEDDED ICON
+══════════════════════════════════════ */
+.adm-search-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.adm-search-input-wrap .adm-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 13px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.adm-search-input-wrap .adm-input {
+    padding-left: 36px !important;
+    width: 100%;
+}
+
+/* ══════════════════════════════════════
    INTERACTIVE TOAST POPUP NOTIFICATION
 ══════════════════════════════════════ */
 .adm-toast-container {
