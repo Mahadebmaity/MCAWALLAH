@@ -12,6 +12,7 @@ import Navbar from '../models/Navbar.js';
 import Footer from '../models/Footer.js';
 import Subscriber from '../models/Subscriber.js';
 import Document from '../models/Document.js';
+import Moment from '../models/Moment.js';
 import User from '../models/User.js';
 import ActivityLog from '../models/ActivityLog.js';
 import path from 'path';
@@ -78,6 +79,7 @@ const getModel = (type) => {
         case 'settings': return SiteSettings;
         case 'messages': return Message;
         case 'documents': return Document;
+        case 'moments': return Moment;
         default: return null;
     }
 };

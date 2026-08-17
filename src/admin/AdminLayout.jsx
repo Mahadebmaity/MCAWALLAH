@@ -10,6 +10,7 @@ const NAV_ITEMS = [
     { to: '/admin/users-activity', icon: 'fa-solid fa-users-gear', label: 'User Management' },
     { to: '/admin/navbar', icon: 'fa-solid fa-compass', label: 'Navbar & Menu' },
     { to: '/admin/hero', icon: 'fa-solid fa-wand-magic-sparkles', label: 'Hero & Header' },
+    { to: '/admin/moments', icon: 'fa-solid fa-images', label: 'Moments Gallery' },
     { to: '/admin/about', icon: 'fa-solid fa-circle-user', label: 'About Me' },
     { to: '/admin/skills', icon: 'fa-solid fa-microchip', label: 'Skills' },
     { to: '/admin/timeline', icon: 'fa-solid fa-timeline', label: 'Experience & Edu' },

@@ -168,7 +168,7 @@ export default function AiAssistantCMS() {
 
     // Live Admin AI Tester Query
     const handleRunTestQuery = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         if (!testQuery.trim() || testLoading) return;
         setTestLoading(true);
         setTestResponse(null);
@@ -178,7 +178,13 @@ export default function AiAssistantCMS() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: testQuery.trim() })
             });
-            const data = await res.json();
+            const text = await res.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch {
+                throw new Error(`Server returned non-JSON response (${res.status}). Ensure backend server is running.`);
+            }
             if (res.ok && data.success) {
                 setTestResponse(data);
             } else {

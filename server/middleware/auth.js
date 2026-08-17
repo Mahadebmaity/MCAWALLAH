@@ -74,3 +74,14 @@ export const generateTokens = (userId) => {
 
     return { accessToken, refreshToken };
 };
+
+export const protect = protectUser;
+export const adminOnly = protectAdmin;
+
+export default {
+    protectUser,
+    protectAdmin,
+    protect,
+    adminOnly,
+    generateTokens
+};

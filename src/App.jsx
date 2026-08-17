@@ -5,6 +5,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 // Public Immediate Components (Critical for initial fast paint)
 import Navbar from './components/Navbar/Navbar';
 import Header from './components/Header/Header';
+import MomentsSlider from './components/MomentsSlider/MomentsSlider';
 import About from './components/About/About';
 import Projects from './components/Projects/Projects';
 import FunGame from './components/FunGame/FunGame';
@@ -23,6 +24,7 @@ const AdminLayout = lazy(() => import('./admin/AdminLayout'));
 const DashboardOverview = lazy(() => import('./admin/DashboardOverview'));
 const NavbarCMS = lazy(() => import('./admin/NavbarCMS'));
 const HeroCMS = lazy(() => import('./admin/HeroCMS'));
+const MomentsCMS = lazy(() => import('./admin/MomentsCMS'));
 const AboutCMS = lazy(() => import('./admin/AboutCMS'));
 const SkillsCMS = lazy(() => import('./admin/SkillsCMS'));
 const TimelineCMS = lazy(() => import('./admin/TimelineCMS'));
@@ -57,11 +59,29 @@ function RouteLoadingFallback() {
 }
 
 function PublicPortfolio() {
-  const { authModalOpen, closeAuthModal, authModalPrompt, authModalMode } = useAuth();
+  const { user, loading, authModalOpen, closeAuthModal, authModalPrompt, authModalMode } = useAuth();
+
+  if (loading) {
+    return <RouteLoadingFallback />;
+  }
+
+  // ── Unauthenticated Visitor: Display Auth Wall Portal (Sign Up / Sign In Required) ──
+  if (!user) {
+    return (
+      <AuthModal
+        isWall={true}
+        defaultMode="login"
+        prompt="Please Sign In or Create an Account to unlock Mahadeb's Full Engineering Portfolio, Live Projects & AI Digital Twin."
+      />
+    );
+  }
+
+  // ── Authenticated User: Complete Portfolio Unlocked ──
   return (
     <>
       <Navbar />
       <Header />
+      <MomentsSlider />
       <About />
       <Projects />
       <FunGame />
@@ -102,6 +122,7 @@ function App() {
             <Route path="users-activity" element={<UsersActivityCMS />} />
             <Route path="navbar" element={<NavbarCMS />} />
             <Route path="hero" element={<HeroCMS />} />
+            <Route path="moments" element={<MomentsCMS />} />
             <Route path="about" element={<AboutCMS />} />
             <Route path="skills" element={<SkillsCMS />} />
             <Route path="timeline" element={<TimelineCMS />} />

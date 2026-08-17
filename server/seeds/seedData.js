@@ -13,6 +13,7 @@ import Game from '../models/Game.js';
 import SiteSettings from '../models/SiteSettings.js';
 import Document from '../models/Document.js';
 import Playground from '../models/Playground.js';
+import Moment from '../models/Moment.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,9 +21,10 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const seedInitialData = async () => {
     try {
-        const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/portfolio_cms';
-        console.log(`Connecting to MongoDB for seeding at ${uri}...`);
-        await mongoose.connect(uri);
+        if (mongoose.connection.readyState !== 1) {
+            const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/portfolio_cms';
+            await mongoose.connect(uri, { serverSelectionTimeoutMS: 2500 });
+        }
 
         console.log('🌱 Seeding database with initial portfolio data...');
 
@@ -493,6 +495,79 @@ const seedInitialData = async () => {
                 }
             ]);
             console.log('✅ Project Playgrounds seeded: 3 default sandboxes');
+        }
+
+        // 12. Seed Moments & Highlights Photo Gallery
+        const momentsCount = await Moment.countDocuments();
+        if (momentsCount === 0) {
+            await Moment.create([
+                {
+                    title: 'College Tech Fest & Hackathon Champions 🏆',
+                    subtitle: 'B.Tech CSE • Final Year Highlights',
+                    category: 'College Moments',
+                    imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1200&auto=format&fit=crop',
+                    description: 'Secured 1st position in the 36-hour intra-college hackathon building a real-time collaborative workspace. An unforgettable night of nonstop coding, pizza, and engineering camaraderie!',
+                    date: 'March 2024',
+                    location: 'College Campus Auditorium, West Bengal',
+                    tags: ['Hackathon', '1st Place', 'Team Alpha', 'College Days'],
+                    featured: true,
+                    isPublic: true,
+                    order: 0
+                },
+                {
+                    title: 'Campus Coding Bootcamp & Mentorship Workshop 💻',
+                    subtitle: 'Mentoring 50+ Junior Developers',
+                    category: 'College Moments',
+                    imageUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1200&auto=format&fit=crop',
+                    description: 'Led a hands-on React & Node.js architecture workshop for sophomore students, helping them build and deploy their very first full-stack web applications on GitHub.',
+                    date: 'November 2023',
+                    location: 'CSE Lab 3, Haldia',
+                    tags: ['Mentorship', 'React Workshop', 'Teaching', 'Campus'],
+                    featured: true,
+                    isPublic: true,
+                    order: 1
+                },
+                {
+                    title: 'MCA WALLAH Portfolio Engine Launch Day 🚀',
+                    subtitle: '11 CMS Modules & System Architecture',
+                    category: 'Project Highlights',
+                    imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1200&auto=format&fit=crop',
+                    description: 'Successfully deployed the MCA WALLAH portfolio suite with dynamic broadcast sync, automated resume vaults, interactive arcade games, and AI assistant intelligence.',
+                    date: 'January 2024',
+                    location: 'Remote Workstation',
+                    tags: ['Full Stack', 'Vite', 'React 19', 'MongoDB Atlas'],
+                    featured: true,
+                    isPublic: true,
+                    order: 2
+                },
+                {
+                    title: 'Annual Technical Symposium & Project Exhibition 🎪',
+                    subtitle: 'Demonstrating Real-Time IoT & Web Apps',
+                    category: 'Hackathons & Events',
+                    imageUrl: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=1200&auto=format&fit=crop',
+                    description: 'Showcased our automated resume parser and data visualization dashboard to visiting industry engineers and college professors during the annual tech expo.',
+                    date: 'February 2024',
+                    location: 'Main Exhibition Hall',
+                    tags: ['Exhibition', 'Live Demo', 'Tech Symposium'],
+                    featured: false,
+                    isPublic: true,
+                    order: 3
+                },
+                {
+                    title: 'Late Night Developer Jam & Arcade Game Polish 🎮',
+                    subtitle: 'Building the Retro Snake & Minimax AI',
+                    category: 'Milestones',
+                    imageUrl: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1200&auto=format&fit=crop',
+                    description: 'Designing retro arcade games with HTML5 Canvas 2D and unbeatable Minimax AI decision trees right into the developer portfolio.',
+                    date: 'December 2023',
+                    location: 'Developer Den',
+                    tags: ['GameDev', 'Canvas', 'Minimax AI', 'Milestone'],
+                    featured: false,
+                    isPublic: true,
+                    order: 4
+                }
+            ]);
+            console.log('✅ Moments & Highlights seeded: 5 default photo memories');
         }
 
         console.log('🎉 Seeding complete!');

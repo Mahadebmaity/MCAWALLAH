@@ -241,6 +241,7 @@ const DEFAULT_PORTFOLIO_DATA = {
             isPublic: true
         }
     ],
+    moments: [],
     settings: {
         siteTitle: 'Mahadeb Maity | Portfolio',
         contactEmail: 'mahadeb@portfolio.com',

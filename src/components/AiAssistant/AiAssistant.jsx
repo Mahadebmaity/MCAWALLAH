@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { API_BASE, getDocUrl } from '../../config/api';
 import './AiAssistant.css';
 
@@ -13,21 +14,59 @@ const INITIAL_PROMPTS = [
 
 export default function AiAssistant() {
     const navigate = useNavigate();
+    const { user, authModalOpen } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
     const [aiConfig, setAiConfig] = useState({
         enabled: true,
         twinName: "Mahadeb's AI Digital Twin",
+        launcherText: "Ask AI Twin",
+        avatarIcon: "fa-robot",
         welcomeMessage: "👋 Hi there! I'm **Mahadeb's AI Digital Twin & Portfolio Assistant**.\n\nAsk me anything about his **skills, featured projects, work experience, resume downloads**, or how to get in touch for full-time & freelance opportunities!",
         quickPrompts: INITIAL_PROMPTS
     });
 
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState([
+        {
+            id: 'welcome-init',
+            sender: 'assistant',
+            text: "👋 Hi there! I'm **Mahadeb's AI Digital Twin & Portfolio Assistant**.\n\nAsk me anything about his **skills, featured projects, work experience, resume downloads**, or how to get in touch for full-time & freelance opportunities!",
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            suggestedPrompts: INITIAL_PROMPTS,
+            actionCards: [
+                {
+                    type: 'resume',
+                    title: 'Download Resume (PDF)',
+                    icon: 'fa-solid fa-file-pdf',
+                    target: '/resume.pdf',
+                    actionText: 'Download'
+                },
+                {
+                    type: 'scroll',
+                    title: 'Contact Form',
+                    icon: 'fa-solid fa-envelope',
+                    target: 'contact',
+                    actionText: "Let's Talk"
+                }
+            ]
+        }
+    ]);
+
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
-    const [hasOpened, setHasOpened] = useState(false);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
+
+    // ── Screen Resize Listener ──
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // ── Draggable State & Handlers ──
     const [position, setPosition] = useState({ x: null, y: null });
@@ -58,14 +97,14 @@ export default function AiAssistant() {
         const dx = e.clientX - dragDataRef.current.startX;
         const dy = e.clientY - dragDataRef.current.startY;
 
-        if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
             dragDataRef.current.moved = true;
         }
 
-        const orbWidth = 190;
-        const orbHeight = 70;
-        const nextX = Math.max(10, Math.min(window.innerWidth - orbWidth, dragDataRef.current.initX + dx));
-        const nextY = Math.max(10, Math.min(window.innerHeight - orbHeight, dragDataRef.current.initY + dy));
+        const orbWidth = launcherRef.current?.offsetWidth || 60;
+        const orbHeight = launcherRef.current?.offsetHeight || 60;
+        const nextX = Math.max(8, Math.min(window.innerWidth - orbWidth - 8, dragDataRef.current.initX + dx));
+        const nextY = Math.max(8, Math.min(window.innerHeight - orbHeight - 8, dragDataRef.current.initY + dy));
 
         setPosition({ x: nextX, y: nextY });
     };
@@ -95,35 +134,20 @@ export default function AiAssistant() {
                     const data = await res.json();
                     setAiConfig(data);
                     
-                    // Initialize welcome message with dynamic config
-                    setMessages([
-                        {
-                            id: 'welcome-1',
-                            sender: 'assistant',
-                            text: data.welcomeMessage || "👋 Hi there! I'm **Mahadeb's AI Digital Twin & Portfolio Assistant**.\n\nAsk me anything about his **skills, featured projects, work experience, resume downloads**, or how to get in touch for full-time & freelance opportunities!",
-                            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                            suggestedPrompts: (data.quickPrompts && data.quickPrompts.length > 0) ? data.quickPrompts : INITIAL_PROMPTS,
-                            actionCards: [
-                                {
-                                    type: 'resume',
-                                    title: 'Download Resume (PDF)',
-                                    icon: 'fa-solid fa-file-pdf',
-                                    target: '/resume.pdf',
-                                    actionText: 'Download'
-                                },
-                                {
-                                    type: 'scroll',
-                                    title: 'Contact Form',
-                                    icon: 'fa-solid fa-envelope',
-                                    target: 'contact',
-                                    actionText: "Let's Talk"
-                                }
-                            ]
+                    // Update initial welcome message prompts with backend configured prompts
+                    setMessages(prev => {
+                        if (prev.length === 1 && prev[0].id === 'welcome-init') {
+                            return [{
+                                ...prev[0],
+                                text: data.welcomeMessage || prev[0].text,
+                                suggestedPrompts: (data.quickPrompts && data.quickPrompts.length > 0) ? data.quickPrompts : INITIAL_PROMPTS
+                            }];
                         }
-                    ]);
+                        return prev;
+                    });
                 }
             } catch (err) {
-                console.warn('Using default AI assistant configuration');
+                console.warn('Using default AI assistant configuration:', err.message);
             }
         };
         fetchConfig();
@@ -138,12 +162,24 @@ export default function AiAssistant() {
         if (isOpen) {
             scrollToBottom();
             setUnreadCount(0);
-            if (!hasOpened) setHasOpened(true);
             setTimeout(() => inputRef.current?.focus(), 150);
         }
     }, [isOpen, messages]);
 
-    if (!aiConfig.enabled) return null;
+    // Prevent body scroll on mobile when chat is full screen
+    useEffect(() => {
+        if (isOpen && isMobile) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => { document.body.style.overflow = ''; };
+    }, [isOpen, isMobile]);
+
+    // Gating check: Don't render floating widget if user is not authenticated or auth modal is active
+    if (!user || authModalOpen || !aiConfig.enabled) {
+        return null;
+    }
 
     // Send Message Handler
     const handleSend = async (customText = null) => {
@@ -172,7 +208,13 @@ export default function AiAssistant() {
                 })
             });
 
-            const data = await res.json();
+            const text = await res.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch {
+                throw new Error(`Server returned non-JSON response (${res.status})`);
+            }
 
             if (res.ok && data.success) {
                 const assistantMsg = {
@@ -180,7 +222,7 @@ export default function AiAssistant() {
                     sender: 'assistant',
                     text: data.reply || "I'm ready to answer any questions about Mahadeb's experience!",
                     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    suggestedPrompts: data.suggestedPrompts || [],
+                    suggestedPrompts: data.suggestedPrompts || aiConfig.quickPrompts || INITIAL_PROMPTS,
                     actionCards: data.actionCards || [],
                     source: data.source
                 };
@@ -191,11 +233,13 @@ export default function AiAssistant() {
             }
         } catch (err) {
             console.error('AI chat error:', err);
+            const fallbackPrompts = aiConfig.quickPrompts?.length ? aiConfig.quickPrompts : INITIAL_PROMPTS;
             const errorMsg = {
                 id: `ai-err-${Date.now()}`,
                 sender: 'assistant',
                 text: `💡 **Mahadeb Maity** is a **Full Stack Developer** specializing in **React 19, Node.js, Express, and MongoDB**.\n\nYou can reach him at \`mahadeb@portfolio.com\` or download his verified resume below.`,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                suggestedPrompts: fallbackPrompts,
                 actionCards: [
                     {
                         type: 'resume',
@@ -220,9 +264,8 @@ export default function AiAssistant() {
             const targetId = action.target?.replace(/^#/, '');
             const el = document.getElementById(targetId);
             if (el) {
-                el.scrollIntoView({ behavior: 'smooth' });
-                // Optional auto-close on mobile
-                if (window.innerWidth <= 640) setIsOpen(false);
+                if (isMobile) setIsOpen(false);
+                setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), isMobile ? 200 : 0);
             }
         } else if (action.type === 'resume' || action.type === 'doc') {
             const url = getDocUrl(action.target);
@@ -234,6 +277,7 @@ export default function AiAssistant() {
             link.click();
             document.body.removeChild(link);
         } else if (action.type === 'navigate') {
+            if (isMobile) setIsOpen(false);
             navigate(action.target);
         } else if (action.type === 'link') {
             window.open(action.target, '_blank', 'noopener,noreferrer');
@@ -248,7 +292,16 @@ export default function AiAssistant() {
                 sender: 'assistant',
                 text: "✨ Conversation cleared! How else can I assist you with **Mahadeb's portfolio** today?",
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                suggestedPrompts: INITIAL_PROMPTS
+                suggestedPrompts: aiConfig.quickPrompts || INITIAL_PROMPTS,
+                actionCards: [
+                    {
+                        type: 'resume',
+                        title: 'Download Resume (PDF)',
+                        icon: 'fa-solid fa-file-pdf',
+                        target: '/resume.pdf',
+                        actionText: 'Download'
+                    }
+                ]
             }
         ]);
     };
@@ -293,14 +346,19 @@ export default function AiAssistant() {
         });
     };
 
+    // Current active suggestions
+    const currentPrompts = messages.length > 0 && messages[messages.length - 1].suggestedPrompts?.length > 0
+        ? messages[messages.length - 1].suggestedPrompts
+        : (aiConfig.quickPrompts?.length > 0 ? aiConfig.quickPrompts : INITIAL_PROMPTS);
+
     return (
         <>
             {/* ══════════════════════════════════════════════════════════
-                 FLOATING LAUNCHER ORB / BADGE
+                 FLOATING LAUNCHER ORB / BADGE (DRAGGABLE & SAFE POSITION)
             ══════════════════════════════════════════════════════════ */}
             <div
                 ref={launcherRef}
-                className="ai-assistant-launcher"
+                className={`ai-assistant-launcher ${isOpen ? 'is-active-open' : ''}`}
                 onPointerDown={handlePointerDown}
                 onClick={handleLauncherClick}
                 style={{
@@ -311,8 +369,8 @@ export default function AiAssistant() {
                         right: 'auto',
                         bottom: 'auto'
                     } : {
-                        right: '28px',
-                        bottom: '28px'
+                        right: '24px',
+                        bottom: isMobile ? '86px' : '92px'
                     }),
                     zIndex: 9996,
                     cursor: isDraggingRef.current ? 'grabbing' : 'grab',
@@ -324,14 +382,7 @@ export default function AiAssistant() {
                     <span className="ai-online-dot" />
                     <span>{aiConfig.launcherText || "Ask AI Twin"}</span>
                     {unreadCount > 0 && (
-                        <span style={{
-                            background: '#ef4444',
-                            color: '#fff',
-                            fontSize: '10px',
-                            padding: '1px 6px',
-                            borderRadius: '999px',
-                            fontWeight: '800'
-                        }}>
+                        <span className="ai-unread-badge">
                             {unreadCount}
                         </span>
                     )}
@@ -355,9 +406,163 @@ export default function AiAssistant() {
             </div>
 
             {/* ══════════════════════════════════════════════════════════
-                 EXPANDABLE GLASSMORPHIC CHAT WINDOW
+                 MOBILE DEDICATED FULL-SCREEN CHAT EXPERIENCE
             ══════════════════════════════════════════════════════════ */}
-            {isOpen && (
+            {isOpen && isMobile && (
+                <div className="ai-mobile-chat-screen">
+                    {/* Mobile App Bar */}
+                    <div className="ai-mobile-header">
+                        <button
+                            type="button"
+                            onClick={() => setIsOpen(false)}
+                            className="ai-mobile-back-btn"
+                            title="Back to portfolio"
+                        >
+                            <i className="fa-solid fa-arrow-left" />
+                            <span>Back</span>
+                        </button>
+
+                        <div className="ai-mobile-header-center">
+                            <div className="ai-avatar-badge" style={{ width: '32px', height: '32px', fontSize: '14px' }}>
+                                <i className="fa-solid fa-robot" />
+                            </div>
+                            <div className="ai-mobile-header-titles">
+                                <h4 className="ai-chat-title">{aiConfig.twinName || "AI Assistant"}</h4>
+                                <div className="ai-chat-subtitle">
+                                    <span className="ai-online-dot" />
+                                    <span>Online • Instant Response</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="ai-mobile-header-actions">
+                            <button
+                                type="button"
+                                onClick={handleClearChat}
+                                className="ai-header-btn"
+                                title="Clear Conversation"
+                            >
+                                <i className="fa-solid fa-rotate-left" />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIsOpen(false)}
+                                className="ai-header-btn close"
+                                title="Close"
+                            >
+                                <i className="fa-solid fa-xmark" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Messages Scroll Area */}
+                    <div className="ai-chat-messages ai-chat-messages-mobile">
+                        {messages.map((msg) => (
+                            <div key={msg.id} className={`ai-message ${msg.sender}`}>
+                                <div className="ai-msg-avatar">
+                                    <i className={msg.sender === 'assistant' ? "fa-solid fa-sparkles" : "fa-solid fa-user"} />
+                                </div>
+
+                                <div className="ai-msg-bubble">
+                                    <div>{renderFormattedText(msg.text)}</div>
+
+                                    {msg.actionCards && msg.actionCards.length > 0 && (
+                                        <div className="ai-action-cards-wrap">
+                                            {msg.actionCards.map((card, cIdx) => (
+                                                <button
+                                                    key={cIdx}
+                                                    type="button"
+                                                    onClick={() => handleActionClick(card)}
+                                                    className="ai-action-card-btn"
+                                                >
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <i className={card.icon || 'fa-solid fa-arrow-right'} style={{ color: '#38bdf8' }} />
+                                                        <span>{card.title}</span>
+                                                    </span>
+                                                    <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                                                        {card.actionText || 'Open'} ➔
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <span className="ai-msg-time">{msg.time}</span>
+                                </div>
+                            </div>
+                        ))}
+
+                        {loading && (
+                            <div className="ai-message assistant">
+                                <div className="ai-msg-avatar">
+                                    <i className="fa-solid fa-sparkles" />
+                                </div>
+                                <div className="ai-typing-indicator">
+                                    <div className="ai-typing-dot" />
+                                    <div className="ai-typing-dot" />
+                                    <div className="ai-typing-dot" />
+                                </div>
+                            </div>
+                        )}
+
+                        <div ref={messagesEndRef} />
+                    </div>
+
+                    {/* Responsive Suggestion Chips (Always cleanly visible) */}
+                    {currentPrompts && currentPrompts.length > 0 && (
+                        <div className="ai-suggested-prompts-mobile">
+                            <div className="ai-prompts-label">
+                                <i className="fa-solid fa-lightbulb" style={{ color: '#fbbf24' }} /> Suggested Questions:
+                            </div>
+                            <div className="ai-prompts-chip-list">
+                                {currentPrompts.map((prompt, pIdx) => (
+                                    <button
+                                        key={pIdx}
+                                        type="button"
+                                        onClick={() => handleSend(prompt)}
+                                        className="ai-prompt-chip"
+                                    >
+                                        {prompt}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Bottom Input Area */}
+                    <form
+                        className="ai-chat-input-area ai-chat-input-mobile"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            handleSend();
+                        }}
+                    >
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            className="ai-chat-input"
+                            placeholder="Ask Mahadeb's AI about skills, resume, projects..."
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            disabled={loading}
+                        />
+
+                        <button
+                            type="submit"
+                            className="ai-send-btn"
+                            disabled={!input.trim() || loading}
+                            title="Send Message"
+                        >
+                            <i className="fa-solid fa-paper-plane" />
+                        </button>
+                    </form>
+                </div>
+            )}
+
+            {/* ══════════════════════════════════════════════════════════
+                 DESKTOP EXPANDABLE GLASSMORPHIC CHAT WINDOW
+            ══════════════════════════════════════════════════════════ */}
+            {isOpen && !isMobile && (
                 <div className="ai-chat-window">
                     {/* Header */}
                     <div className="ai-chat-header">
@@ -451,9 +656,9 @@ export default function AiAssistant() {
                     </div>
 
                     {/* Suggested Quick Prompt Chips */}
-                    {messages.length > 0 && messages[messages.length - 1].suggestedPrompts && (
+                    {currentPrompts && currentPrompts.length > 0 && (
                         <div className="ai-suggested-prompts">
-                            {messages[messages.length - 1].suggestedPrompts.map((prompt, pIdx) => (
+                            {currentPrompts.map((prompt, pIdx) => (
                                 <button
                                     key={pIdx}
                                     type="button"

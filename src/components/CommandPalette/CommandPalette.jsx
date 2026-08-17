@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { usePortfolioData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 import { API_BASE, getDocUrl } from '../../config/api';
 import './CommandPalette.css';
 
 export default function CommandPalette() {
+    const { user, authModalOpen } = useAuth();
     const { data } = usePortfolioData();
     const [isOpen, setIsOpen] = useState(false);
     const [query, setSearchQuery] = useState('');
@@ -41,6 +43,7 @@ export default function CommandPalette() {
         // 1. Navigation Commands
         list.push(
             { id: 'nav-hero', group: 'Navigation', title: 'Home / Hero Header', icon: 'fa-solid fa-house', desc: 'Jump to top intro', action: () => scrollToSection('hero') },
+            { id: 'nav-moments', group: 'Navigation', title: 'Moments & Photo Story', icon: 'fa-solid fa-images', desc: 'College highlights & developer memories', action: () => scrollToSection('moments') },
             { id: 'nav-about', group: 'Navigation', title: 'About Mahadeb Maity', icon: 'fa-solid fa-user', desc: 'Bio, education & journey', action: () => scrollToSection('about') },
             { id: 'nav-skills', group: 'Navigation', title: 'Skills & Tech Stack', icon: 'fa-solid fa-microchip', desc: 'React 19, Node.js, MongoDB', action: () => scrollToSection('skills') },
             { id: 'nav-projects', group: 'Navigation', title: 'Featured Projects Showcase', icon: 'fa-solid fa-folder-open', desc: 'Live applications & code', action: () => scrollToSection('projects') },
@@ -141,6 +144,10 @@ export default function CommandPalette() {
         acc[cmd.group].push(cmd);
         return acc;
     }, {});
+
+    if (!user || authModalOpen) {
+        return null;
+    }
 
     return (
         <>

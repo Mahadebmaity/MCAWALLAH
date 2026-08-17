@@ -8,7 +8,7 @@ const DocumentSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum: ['System Documentation', 'Certificates', 'Project Reports', 'Architecture', 'Notes', 'Other'],
+        enum: ['System Documentation', 'Certificates', 'Project Reports', 'Architecture', 'Notes', 'Implementation Plans', 'Other'],
         default: 'Other'
     },
     description: {

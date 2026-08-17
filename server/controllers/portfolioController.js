@@ -13,19 +13,21 @@ import Footer from '../models/Footer.js';
 import Subscriber from '../models/Subscriber.js';
 import ActivityLog from '../models/ActivityLog.js';
 import User from '../models/User.js';
+import Moment from '../models/Moment.js';
 import { sendContactNotification } from '../services/emailService.js';
 
 // @desc Get All Public Portfolio Data in One Fast Call
 // @route GET /api/portfolio/public
 export const getPublicPortfolio = async (req, res) => {
     try {
-        const [hero, about, skills, timeline, projects, games, settings, navbar, footer, adminUser] = await Promise.all([
+        const [hero, about, skills, timeline, projects, games, moments, settings, navbar, footer, adminUser] = await Promise.all([
             Hero.findOne({ isPublic: true }).lean(),
             About.findOne({ isPublic: true }).lean(),
             Skill.find({ isPublic: true }).sort({ order: 1, createdAt: 1 }).lean(),
             Timeline.find({ isPublic: true }).sort({ order: 1, year: -1 }).lean(),
             Project.find({ isPublic: true }).sort({ order: 1, createdAt: -1 }).lean(),
             Game.find({ isPublic: true }).sort({ order: 1, createdAt: 1 }).lean(),
+            Moment.find({ isPublic: true }).sort({ order: 1, createdAt: -1 }).lean(),
             SiteSettings.findOne().lean(),
             Navbar.findOne({ isPublic: true }).lean(),
             Footer.findOne({ isPublic: true }).lean(),
@@ -44,6 +46,7 @@ export const getPublicPortfolio = async (req, res) => {
             timeline: timeline || [],
             projects: projects || [],
             games: games || [],
+            moments: moments || [],
             settings: settings || null,
             navbar: navbar || null,
             footer: footer || null

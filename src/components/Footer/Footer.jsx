@@ -24,7 +24,7 @@ const DEFAULT_SOCIALS = [
 ];
 
 export default function Footer() {
-    const { user, requireAuth } = useAuth();
+    const { user, requireAuth, authModalOpen } = useAuth();
 
     /* ── state ── */
     const [footerConfig, setFooterConfig] = useState(null);
@@ -536,15 +536,17 @@ export default function Footer() {
                 </div>
             </footer>
 
-            {/* ── Back to Top ── */}
-            <button
-                className={`footer__back-top ${backVisible ? "footer__back-top--visible" : ""}`}
-                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                aria-label="Back to top"
-                title="Back to top"
-            >
-                <i className="fa-solid fa-chevron-up" />
-            </button>
+            {/* ── Back to Top (Visible only for authenticated users) ── */}
+            {user && !authModalOpen && (
+                <button
+                    className={`footer__back-top ${backVisible ? "footer__back-top--visible" : ""}`}
+                    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                    aria-label="Back to top"
+                    title="Back to top"
+                >
+                    <i className="fa-solid fa-chevron-up" />
+                </button>
+            )}
         </>
     );
 }
