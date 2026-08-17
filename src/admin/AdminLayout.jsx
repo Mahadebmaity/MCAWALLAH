@@ -17,6 +17,7 @@ const NAV_ITEMS = [
     { to: '/admin/playground', icon: 'fa-solid fa-laptop-code', label: 'Playground CMS' },
     { to: '/admin/games', icon: 'fa-solid fa-gamepad', label: 'Games Hub' },
     { to: '/admin/docs', icon: 'fa-solid fa-file-shield', label: 'Docs & System Vault' },
+    { to: '/admin/plans', icon: 'fa-solid fa-list-check', label: 'Feature Plans & Specs' },
     { to: '/admin/ai-assistant', icon: 'fa-solid fa-robot', label: 'AI Assistant CMS' },
     { to: '/admin/messages', icon: 'fa-solid fa-inbox', label: 'Feedback Inbox' },
     { to: '/admin/footer', icon: 'fa-solid fa-envelope-open-text', label: 'Footer & Subscribers' },

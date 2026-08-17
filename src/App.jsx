@@ -26,6 +26,7 @@ import ProjectsCMS from './admin/ProjectsCMS';
 import PlaygroundCMS from './admin/PlaygroundCMS';
 import GamesCMS from './admin/GamesCMS';
 import DocumentsCMS from './admin/DocumentsCMS';
+import ImplementationPlansCMS from './admin/ImplementationPlansCMS';
 import AiAssistantCMS from './admin/AiAssistantCMS';
 import MessagesInbox from './admin/MessagesInbox';
 import FooterSubscribersCMS from './admin/FooterSubscribersCMS';
@@ -85,6 +86,7 @@ function App() {
           <Route path="playground" element={<PlaygroundCMS />} />
           <Route path="games" element={<GamesCMS />} />
           <Route path="docs" element={<DocumentsCMS />} />
+          <Route path="plans" element={<ImplementationPlansCMS />} />
           <Route path="ai-assistant" element={<AiAssistantCMS />} />
           <Route path="messages" element={<MessagesInbox />} />
           <Route path="footer" element={<FooterSubscribersCMS />} />
