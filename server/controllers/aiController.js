@@ -399,7 +399,7 @@ export const getAiConfig = async (req, res) => {
             twinName: ai.twinName || "Mahadeb's AI Digital Twin",
             subtitle: ai.subtitle || "Full Stack Assistant • Online",
             launcherText: ai.launcherText || "Ask AI Twin",
-            avatarIcon: ai.avatarIcon || "fa-robot",
+            avatarIcon: (ai.avatarIcon && ai.avatarIcon !== 'fa-robot') ? ai.avatarIcon : "fa-wand-magic-sparkles",
             welcomeMessage: ai.welcomeMessage || "👋 Hi there! I'm **Mahadeb's AI Digital Twin & Portfolio Assistant**.\n\nAsk me anything about his **skills, featured projects, work experience, resume downloads**, or how to get in touch for full-time & freelance opportunities!",
             quickPrompts: (ai.quickPrompts && ai.quickPrompts.length > 0) ? ai.quickPrompts : defaultPrompts,
             showActionCards: ai.showActionCards !== false,

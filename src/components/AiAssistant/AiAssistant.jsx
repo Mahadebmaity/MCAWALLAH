@@ -339,7 +339,18 @@ export default function AiAssistant() {
 
                 <div className="ai-assistant-launcher-orb" style={{ cursor: 'inherit' }}>
                     <div className="ai-launcher-pulse-ring" />
-                    <i className={isOpen ? "fa-solid fa-xmark" : `fa-solid ${aiConfig.avatarIcon || "fa-robot"}`} />
+                    {isOpen ? (
+                        <i className="fa-solid fa-xmark" />
+                    ) : aiConfig.avatarIcon === 'fa-robot' || !aiConfig.avatarIcon ? (
+                        <i className="fa-solid fa-wand-magic-sparkles" style={{
+                            background: 'linear-gradient(135deg, #ffffff 0%, #38bdf8 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            filter: 'drop-shadow(0 0 8px rgba(56, 189, 248, 0.6))'
+                        }} />
+                    ) : (
+                        <i className={`fa-solid ${aiConfig.avatarIcon}`} />
+                    )}
                 </div>
             </div>
 
