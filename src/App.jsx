@@ -10,6 +10,7 @@ import FunGame from './components/FunGame/FunGame';
 import Contact from './components/Contact/Contact';
 import Footer from './components/Footer/Footer';
 import StandaloneArcadeWindow from './components/FunGame/StandaloneArcadeWindow';
+import AiAssistant from './components/AiAssistant/AiAssistant';
 
 // Admin Components
 import AdminLogin from './admin/AdminLogin';
@@ -42,6 +43,7 @@ function PublicPortfolio() {
       <FunGame />
       <Contact />
       <Footer />
+      <AiAssistant />
       {authModalOpen && (
         <AuthModal
           onClose={closeAuthModal}
