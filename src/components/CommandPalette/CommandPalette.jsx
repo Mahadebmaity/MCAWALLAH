@@ -65,11 +65,11 @@ export default function CommandPalette() {
             });
         }
 
-        // 3. Resume & System Documents
+        // 3. Resume (Public)
         list.push(
             {
                 id: 'doc-resume',
-                group: 'Documents & Resumes',
+                group: 'Resume',
                 title: 'Download Verified Resume (PDF)',
                 icon: 'fa-solid fa-file-arrow-down',
                 desc: 'Full-stack software developer resume',
@@ -78,16 +78,6 @@ export default function CommandPalette() {
                     dlLink.href = getDocUrl('/docs/PORTFOLIO_SYSTEM_DOCUMENTATION.pdf');
                     dlLink.download = 'Mahadeb_Maity_Resume.pdf';
                     dlLink.click();
-                }
-            },
-            {
-                id: 'doc-spec',
-                group: 'Documents & Resumes',
-                title: '28-Section Enterprise System Architecture Spec',
-                icon: 'fa-solid fa-file-shield',
-                desc: 'Technical specification with Mermaid diagrams',
-                action: () => {
-                    window.open(getDocUrl('/docs/PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf'), '_blank');
                 }
             }
         );
