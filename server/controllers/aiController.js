@@ -397,8 +397,13 @@ export const getAiConfig = async (req, res) => {
         res.json({
             enabled: ai.enabled !== false,
             twinName: ai.twinName || "Mahadeb's AI Digital Twin",
+            subtitle: ai.subtitle || "Full Stack Assistant • Online",
+            launcherText: ai.launcherText || "Ask AI Twin",
+            avatarIcon: ai.avatarIcon || "fa-robot",
             welcomeMessage: ai.welcomeMessage || "👋 Hi there! I'm **Mahadeb's AI Digital Twin & Portfolio Assistant**.\n\nAsk me anything about his **skills, featured projects, work experience, resume downloads**, or how to get in touch for full-time & freelance opportunities!",
             quickPrompts: (ai.quickPrompts && ai.quickPrompts.length > 0) ? ai.quickPrompts : defaultPrompts,
+            showActionCards: ai.showActionCards !== false,
+            enableSoundEffects: ai.enableSoundEffects !== false,
             hasGeminiKey: Boolean(ai.geminiApiKey || process.env.GEMINI_API_KEY)
         });
     } catch (err) {
@@ -448,12 +453,19 @@ export const getAiAdminSettings = async (req, res) => {
         res.json({
             enabled: ai.enabled !== false,
             twinName: ai.twinName || "Mahadeb's AI Digital Twin",
+            subtitle: ai.subtitle || "Full Stack Assistant • Online",
+            launcherText: ai.launcherText || "Ask AI Twin",
+            avatarIcon: ai.avatarIcon || "fa-robot",
             welcomeMessage: ai.welcomeMessage || "👋 Hi there! I'm **Mahadeb's AI Digital Twin & Portfolio Assistant**.\n\nAsk me anything about his **skills, featured projects, work experience, resume downloads**, or how to get in touch for full-time & freelance opportunities!",
             quickPrompts: (ai.quickPrompts && ai.quickPrompts.length > 0) ? ai.quickPrompts : defaultPrompts,
             customInstructions: ai.customInstructions || "Represent Mahadeb professionally as a Full Stack Engineer. Highlight his React 19, Node.js, and MongoDB expertise.",
             geminiApiKey: ai.geminiApiKey ? '••••••••' + ai.geminiApiKey.slice(-4) : (hasServerEnvKey ? 'Configured via Server Environment (.env)' : ''),
             hasActiveKey: Boolean(ai.geminiApiKey || hasServerEnvKey),
-            preferredEngine: ai.preferredEngine || 'auto'
+            preferredEngine: ai.preferredEngine || 'auto',
+            temperature: typeof ai.temperature === 'number' ? ai.temperature : 0.7,
+            showActionCards: ai.showActionCards !== false,
+            enableSoundEffects: ai.enableSoundEffects !== false,
+            rateLimitPerMin: ai.rateLimitPerMin || 30
         });
     } catch (err) {
         console.error('Error fetching admin AI settings:', err);
@@ -472,7 +484,22 @@ export const updateAiAdminSettings = async (req, res) => {
             settings = await SiteSettings.create({});
         }
 
-        const { enabled, twinName, welcomeMessage, quickPrompts, customInstructions, geminiApiKey, preferredEngine } = req.body;
+        const { 
+            enabled, 
+            twinName, 
+            subtitle,
+            launcherText,
+            avatarIcon,
+            welcomeMessage, 
+            quickPrompts, 
+            customInstructions, 
+            geminiApiKey, 
+            preferredEngine,
+            temperature,
+            showActionCards,
+            enableSoundEffects,
+            rateLimitPerMin
+        } = req.body;
 
         if (!settings.aiAssistant) {
             settings.aiAssistant = {};
@@ -480,10 +507,17 @@ export const updateAiAdminSettings = async (req, res) => {
 
         if (typeof enabled === 'boolean') settings.aiAssistant.enabled = enabled;
         if (twinName) settings.aiAssistant.twinName = twinName.trim();
+        if (subtitle) settings.aiAssistant.subtitle = subtitle.trim();
+        if (launcherText) settings.aiAssistant.launcherText = launcherText.trim();
+        if (avatarIcon) settings.aiAssistant.avatarIcon = avatarIcon.trim();
         if (welcomeMessage) settings.aiAssistant.welcomeMessage = welcomeMessage.trim();
         if (Array.isArray(quickPrompts)) settings.aiAssistant.quickPrompts = quickPrompts.filter(p => p && p.trim());
         if (customInstructions) settings.aiAssistant.customInstructions = customInstructions.trim();
         if (preferredEngine) settings.aiAssistant.preferredEngine = preferredEngine;
+        if (typeof temperature === 'number') settings.aiAssistant.temperature = temperature;
+        if (typeof showActionCards === 'boolean') settings.aiAssistant.showActionCards = showActionCards;
+        if (typeof enableSoundEffects === 'boolean') settings.aiAssistant.enableSoundEffects = enableSoundEffects;
+        if (typeof rateLimitPerMin === 'number') settings.aiAssistant.rateLimitPerMin = rateLimitPerMin;
 
         // If user submitted a new non-masked key
         if (geminiApiKey && !geminiApiKey.startsWith('••••') && !geminiApiKey.includes('Configured via')) {
@@ -496,7 +530,7 @@ export const updateAiAdminSettings = async (req, res) => {
 
         res.json({
             success: true,
-            message: 'AI Assistant settings updated successfully! 🤖',
+            message: 'All AI Assistant customizations saved and active live! 🤖',
             settings: settings.aiAssistant
         });
     } catch (err) {

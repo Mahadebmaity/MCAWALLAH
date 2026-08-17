@@ -4,22 +4,39 @@ import { API_BASE } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
+const ICON_OPTIONS = [
+    { value: 'fa-robot', label: 'Robot 🤖' },
+    { value: 'fa-wand-magic-sparkles', label: 'Magic Wand ✨' },
+    { value: 'fa-sparkles', label: 'Sparkles 🌟' },
+    { value: 'fa-brain', label: 'Neural Brain 🧠' },
+    { value: 'fa-code', label: 'Code Bracket 💻' },
+    { value: 'fa-terminal', label: 'Terminal ⌨️' },
+    { value: 'fa-circle-user', label: 'Avatar User 👤' }
+];
+
 export default function AiAssistantCMS() {
     const { authFetch } = useAuth();
-    const [activeTab, setActiveTab] = useState('analytics'); // 'analytics' | 'config' | 'prompts' | 'tester'
+    const [activeTab, setActiveTab] = useState('analytics'); // 'analytics' | 'branding' | 'engine' | 'prompts' | 'toggles' | 'tester'
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [toast, setToast] = useState(null);
 
-    // AI Settings State
+    // AI Comprehensive Settings State
     const [settings, setSettings] = useState({
         enabled: true,
         twinName: "Mahadeb's AI Digital Twin",
+        subtitle: "Full Stack Assistant • Online",
+        launcherText: "Ask AI Twin",
+        avatarIcon: "fa-robot",
         welcomeMessage: "👋 Hi there! I'm **Mahadeb's AI Digital Twin & Portfolio Assistant**.\n\nAsk me anything about his **skills, featured projects, work experience, resume downloads**, or how to get in touch for full-time & freelance opportunities!",
         quickPrompts: [],
         customInstructions: "Represent Mahadeb professionally as a Full Stack Engineer. Highlight his React 19, Node.js, and MongoDB expertise.",
         geminiApiKey: '',
-        preferredEngine: 'auto'
+        preferredEngine: 'auto',
+        temperature: 0.7,
+        showActionCards: true,
+        enableSoundEffects: true,
+        rateLimitPerMin: 30
     });
 
     // Analytics & Logs State
@@ -30,12 +47,13 @@ export default function AiAssistantCMS() {
         logs: []
     });
     const [searchQuery, setSearchQuery] = useState('');
+    const [topicFilter, setTopicFilter] = useState('all');
     const [clearingLogs, setClearingLogs] = useState(false);
 
-    // Prompt chip input state
+    // Prompt chip builder input
     const [newPromptInput, setNewPromptInput] = useState('');
 
-    // Interactive Admin Tester state
+    // Interactive Admin Sandbox state
     const [testQuery, setTestQuery] = useState('');
     const [testLoading, setTestLoading] = useState(false);
     const [testResponse, setTestResponse] = useState(null);
@@ -45,7 +63,7 @@ export default function AiAssistantCMS() {
             setLoading(true);
             const [settingsRes, analyticsRes] = await Promise.all([
                 authFetch(`${API_BASE}/portfolio/ai/admin/settings`),
-                authFetch(`${API_BASE}/portfolio/ai/admin/analytics?limit=150`)
+                authFetch(`${API_BASE}/portfolio/ai/admin/analytics?limit=200`)
             ]);
 
             if (settingsRes.ok) {
@@ -81,8 +99,8 @@ export default function AiAssistantCMS() {
             if (res.ok && data.success) {
                 setToast({
                     type: 'success',
-                    title: 'Settings Saved! 🤖',
-                    message: 'AI Assistant parameters and behaviors have been updated live.',
+                    title: 'All Settings Saved! 🤖',
+                    message: 'AI Assistant customizations and persona are now live on your portfolio.',
                     duration: 4000
                 });
                 fetchAllAiData();
@@ -110,14 +128,26 @@ export default function AiAssistantCMS() {
         setSettings(p => ({ ...p, quickPrompts: updated }));
     };
 
+    // Reset Default Prompts
+    const handleResetDefaultPrompts = () => {
+        const defaults = [
+            '💡 What are Mahadeb\'s top skills?',
+            '🚀 Show me his React projects',
+            '📄 Download his verified resume',
+            '📬 How can I contact or hire him?',
+            '🎮 Play games in Arcade Lounge'
+        ];
+        setSettings(p => ({ ...p, quickPrompts: defaults }));
+    };
+
     // Clear Logs
     const handleClearLogs = async () => {
-        if (!window.confirm('Are you sure you want to purge all AI interaction history logs?')) return;
+        if (!window.confirm('Are you sure you want to purge all visitor question logs?')) return;
         setClearingLogs(true);
         try {
             const res = await authFetch(`${API_BASE}/portfolio/ai/admin/analytics`, { method: 'DELETE' });
             if (res.ok) {
-                setToast({ type: 'success', title: 'Logs Cleared', message: 'AI chat history purged successfully.' });
+                setToast({ type: 'success', title: 'Logs Cleared', message: 'Chat history cleared.' });
                 fetchAllAiData();
             }
         } catch (err) {
@@ -125,6 +155,15 @@ export default function AiAssistantCMS() {
         } finally {
             setClearingLogs(false);
         }
+    };
+
+    // Export Logs as JSON
+    const handleExportLogs = () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(analytics.logs, null, 2));
+        const dlAnchor = document.createElement('a');
+        dlAnchor.setAttribute("href", dataStr);
+        dlAnchor.setAttribute("download", `ai_chat_logs_${new Date().toISOString().slice(0,10)}.json`);
+        dlAnchor.click();
     };
 
     // Live Admin AI Tester Query
@@ -154,7 +193,9 @@ export default function AiAssistantCMS() {
 
     const filteredLogs = analytics.logs.filter(log => {
         const q = (log.metadata?.query || log.details || '').toLowerCase();
-        return q.includes(searchQuery.toLowerCase());
+        const matchesSearch = q.includes(searchQuery.toLowerCase());
+        if (topicFilter === 'all') return matchesSearch;
+        return matchesSearch && q.includes(topicFilter);
     });
 
     return (
@@ -162,17 +203,17 @@ export default function AiAssistantCMS() {
             <ToastNotification toast={toast} onClose={() => setToast(null)} />
 
             {/* ══════════════════════════════════════════════════════════
-                 TOP SPOTLIGHT & METRICS CARDS
+                 TOP SPOTLIGHT & KPI ANALYTICS BAR
             ══════════════════════════════════════════════════════════ */}
             <div className="adm-card" style={{
-                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 27, 75, 0.98) 100%)',
+                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(24, 24, 68, 0.98) 100%)',
                 border: '1.5px solid rgba(56, 189, 248, 0.35)',
                 marginBottom: '24px',
                 boxShadow: '0 12px 35px rgba(0, 0, 0, 0.35)'
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                     <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', flexWrap: 'wrap' }}>
                             <span style={{
                                 background: settings.enabled ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)',
                                 border: `1px solid ${settings.enabled ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
@@ -202,12 +243,24 @@ export default function AiAssistantCMS() {
                             }}>
                                 <i className="fa-solid fa-microchip" /> Engine: {settings.hasActiveKey ? 'Gemini 3.6 Flash' : 'Semantic Knowledge Engine'}
                             </span>
+
+                            <span style={{
+                                background: 'rgba(168, 85, 247, 0.15)',
+                                border: '1px solid rgba(168, 85, 247, 0.3)',
+                                color: '#c084fc',
+                                fontSize: '11px',
+                                fontWeight: '600',
+                                padding: '4px 10px',
+                                borderRadius: '999px'
+                            }}>
+                                <i className={`fa-solid ${settings.avatarIcon || 'fa-robot'}`} /> Persona: {settings.twinName}
+                            </span>
                         </div>
                         <h2 style={{ fontSize: '22px', fontWeight: '800', color: '#ffffff', margin: 0 }}>
-                            AI Assistant &amp; Intelligence Hub
+                            AI Assistant &amp; Intelligence Control Hub
                         </h2>
                         <p style={{ fontSize: '13px', color: '#94a3b8', margin: '4px 0 0 0' }}>
-                            Monitor visitor queries in real time, customize persona instructions, configure prompt chips, and test replies.
+                            Full-suite customization: persona branding, system instructions, prompt builder, action cards, rate limiting, and live sandbox.
                         </p>
                     </div>
 
@@ -236,7 +289,7 @@ export default function AiAssistantCMS() {
                     </div>
 
                     <div style={{ background: 'rgba(255, 255, 255, 0.04)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '12px', padding: '14px 16px' }}>
-                        <span style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Skills Queries</span>
+                        <span style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Skills &amp; React Queries</span>
                         <div style={{ fontSize: '24px', fontWeight: '800', color: '#a78bfa', marginTop: '4px' }}>{analytics.topicStats?.skills || 0}</div>
                     </div>
 
@@ -250,7 +303,7 @@ export default function AiAssistantCMS() {
             </div>
 
             {/* ══════════════════════════════════════════════════════════
-                 TABBED NAVIGATION
+                 TABBED NAVIGATION (FULL SUITE)
             ══════════════════════════════════════════════════════════ */}
             <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--adm-border)', marginBottom: '22px', overflowX: 'auto', paddingBottom: '4px' }}>
                 <button
@@ -261,38 +314,62 @@ export default function AiAssistantCMS() {
                         background: activeTab === 'analytics' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
                         color: activeTab === 'analytics' ? '#38bdf8' : '#94a3b8',
                         border: activeTab === 'analytics' ? '1px solid rgba(56, 189, 248, 0.35)' : '1px solid transparent',
-                        padding: '9px 18px',
+                        padding: '9px 16px',
                         borderRadius: '10px',
                         fontWeight: '700',
-                        fontSize: '13px',
+                        fontSize: '12.5px',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px'
+                        gap: '8px',
+                        whiteSpace: 'nowrap'
                     }}
                 >
-                    <i className="fa-solid fa-chart-line" /> Visitor Questions &amp; Logs ({analytics.totalChats})
+                    <i className="fa-solid fa-chart-line" /> Visitor Logs &amp; Questions ({analytics.totalChats})
                 </button>
 
                 <button
                     type="button"
-                    onClick={() => setActiveTab('config')}
-                    className={`adm-tab-btn ${activeTab === 'config' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('branding')}
+                    className={`adm-tab-btn ${activeTab === 'branding' ? 'active' : ''}`}
                     style={{
-                        background: activeTab === 'config' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
-                        color: activeTab === 'config' ? '#38bdf8' : '#94a3b8',
-                        border: activeTab === 'config' ? '1px solid rgba(56, 189, 248, 0.35)' : '1px solid transparent',
-                        padding: '9px 18px',
+                        background: activeTab === 'branding' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
+                        color: activeTab === 'branding' ? '#38bdf8' : '#94a3b8',
+                        border: activeTab === 'branding' ? '1px solid rgba(56, 189, 248, 0.35)' : '1px solid transparent',
+                        padding: '9px 16px',
                         borderRadius: '10px',
                         fontWeight: '700',
-                        fontSize: '13px',
+                        fontSize: '12.5px',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px'
+                        gap: '8px',
+                        whiteSpace: 'nowrap'
                     }}
                 >
-                    <i className="fa-solid fa-sliders" /> Persona &amp; Settings
+                    <i className="fa-solid fa-palette" /> Branding &amp; Persona
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => setActiveTab('engine')}
+                    className={`adm-tab-btn ${activeTab === 'engine' ? 'active' : ''}`}
+                    style={{
+                        background: activeTab === 'engine' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
+                        color: activeTab === 'engine' ? '#38bdf8' : '#94a3b8',
+                        border: activeTab === 'engine' ? '1px solid rgba(56, 189, 248, 0.35)' : '1px solid transparent',
+                        padding: '9px 16px',
+                        borderRadius: '10px',
+                        fontWeight: '700',
+                        fontSize: '12.5px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        whiteSpace: 'nowrap'
+                    }}
+                >
+                    <i className="fa-solid fa-brain" /> Engine &amp; Gemini AI
                 </button>
 
                 <button
@@ -303,17 +380,40 @@ export default function AiAssistantCMS() {
                         background: activeTab === 'prompts' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
                         color: activeTab === 'prompts' ? '#38bdf8' : '#94a3b8',
                         border: activeTab === 'prompts' ? '1px solid rgba(56, 189, 248, 0.35)' : '1px solid transparent',
-                        padding: '9px 18px',
+                        padding: '9px 16px',
                         borderRadius: '10px',
                         fontWeight: '700',
-                        fontSize: '13px',
+                        fontSize: '12.5px',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px'
+                        gap: '8px',
+                        whiteSpace: 'nowrap'
                     }}
                 >
-                    <i className="fa-solid fa-lightbulb" /> Suggested Prompt Chips
+                    <i className="fa-solid fa-lightbulb" /> Prompt Chips Builder
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => setActiveTab('toggles')}
+                    className={`adm-tab-btn ${activeTab === 'toggles' ? 'active' : ''}`}
+                    style={{
+                        background: activeTab === 'toggles' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
+                        color: activeTab === 'toggles' ? '#38bdf8' : '#94a3b8',
+                        border: activeTab === 'toggles' ? '1px solid rgba(56, 189, 248, 0.35)' : '1px solid transparent',
+                        padding: '9px 16px',
+                        borderRadius: '10px',
+                        fontWeight: '700',
+                        fontSize: '12.5px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        whiteSpace: 'nowrap'
+                    }}
+                >
+                    <i className="fa-solid fa-toggle-on" /> Action Cards &amp; Features
                 </button>
 
                 <button
@@ -324,17 +424,18 @@ export default function AiAssistantCMS() {
                         background: activeTab === 'tester' ? 'rgba(56, 189, 248, 0.15)' : 'transparent',
                         color: activeTab === 'tester' ? '#38bdf8' : '#94a3b8',
                         border: activeTab === 'tester' ? '1px solid rgba(56, 189, 248, 0.35)' : '1px solid transparent',
-                        padding: '9px 18px',
+                        padding: '9px 16px',
                         borderRadius: '10px',
                         fontWeight: '700',
-                        fontSize: '13px',
+                        fontSize: '12.5px',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px'
+                        gap: '8px',
+                        whiteSpace: 'nowrap'
                     }}
                 >
-                    <i className="fa-solid fa-vial" /> Live Assistant Tester
+                    <i className="fa-solid fa-vial" /> Live Sandbox Tester
                 </button>
             </div>
 
@@ -344,45 +445,71 @@ export default function AiAssistantCMS() {
             {activeTab === 'analytics' && (
                 <div className="adm-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '18px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 280px' }}>
-                            <div className="adm-search-input-wrap" style={{ width: '100%' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1 1 320px', flexWrap: 'wrap' }}>
+                            <div className="adm-search-input-wrap" style={{ flex: '1 1 200px' }}>
                                 <i className="fa-solid fa-magnifying-glass adm-search-icon" />
                                 <input
                                     type="text"
-                                    placeholder="Search visitor questions or details..."
+                                    placeholder="Search visitor questions..."
                                     className="adm-input"
                                     style={{ paddingLeft: '38px' }}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
+
+                            <select
+                                className="adm-select"
+                                style={{ width: '160px' }}
+                                value={topicFilter}
+                                onChange={(e) => setTopicFilter(e.target.value)}
+                            >
+                                <option value="all">All Topics</option>
+                                <option value="skill">Skills / Tech</option>
+                                <option value="project">Projects</option>
+                                <option value="resume">Resumes</option>
+                                <option value="contact">Contact / Hire</option>
+                                <option value="game">Arcade Games</option>
+                            </select>
                         </div>
 
-                        <button
-                            type="button"
-                            onClick={handleClearLogs}
-                            className="adm-btn adm-btn-danger"
-                            disabled={clearingLogs || analytics.logs.length === 0}
-                            style={{ fontSize: '12px' }}
-                        >
-                            <i className="fa-solid fa-trash" /> Purge Chat History
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <button
+                                type="button"
+                                onClick={handleExportLogs}
+                                className="adm-btn adm-btn-secondary"
+                                disabled={analytics.logs.length === 0}
+                                style={{ fontSize: '12px' }}
+                            >
+                                <i className="fa-solid fa-download" /> Export JSON
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={handleClearLogs}
+                                className="adm-btn adm-btn-danger"
+                                disabled={clearingLogs || analytics.logs.length === 0}
+                                style={{ fontSize: '12px' }}
+                            >
+                                <i className="fa-solid fa-trash" /> Purge Logs
+                            </button>
+                        </div>
                     </div>
 
                     {filteredLogs.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--adm-text-muted)' }}>
                             <i className="fa-solid fa-comments" style={{ fontSize: '38px', color: '#64748b', marginBottom: '12px' }} />
-                            <p style={{ margin: 0, fontSize: '14px' }}>No visitor questions recorded yet. Try asking a question from the portfolio!</p>
+                            <p style={{ margin: 0, fontSize: '14px' }}>No visitor questions match your criteria.</p>
                         </div>
                     ) : (
                         <div className="adm-table-wrap">
                             <table className="adm-table">
                                 <thead>
                                     <tr>
-                                        <th style={{ width: '180px' }}>Timestamp</th>
-                                        <th style={{ width: '140px' }}>User / IP</th>
-                                        <th>Question / Interaction</th>
-                                        <th style={{ width: '140px' }}>Engine Used</th>
+                                        <th style={{ width: '170px' }}>Timestamp</th>
+                                        <th style={{ width: '130px' }}>User / IP</th>
+                                        <th>Question Asked</th>
+                                        <th style={{ width: '130px' }}>Engine Source</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -397,7 +524,7 @@ export default function AiAssistantCMS() {
                                             </td>
                                             <td>
                                                 <div style={{ fontWeight: '600', color: '#38bdf8', fontSize: '13px' }}>
-                                                    {log.metadata?.query || log.details}
+                                                    "{log.metadata?.query || log.details}"
                                                 </div>
                                                 {log.metadata?.replySnippet && (
                                                     <div style={{ fontSize: '11.5px', color: '#94a3b8', marginTop: '4px', fontStyle: 'italic' }}>
@@ -427,19 +554,19 @@ export default function AiAssistantCMS() {
             )}
 
             {/* ══════════════════════════════════════════════════════════
-                 TAB 2: PERSONA & SETTINGS
+                 TAB 2: BRANDING & PERSONA SETTINGS
             ══════════════════════════════════════════════════════════ */}
-            {activeTab === 'config' && (
-                <form onSubmit={handleSaveSettings} className="adm-card" style={{ maxWidth: '800px' }}>
+            {activeTab === 'branding' && (
+                <form onSubmit={handleSaveSettings} className="adm-card" style={{ maxWidth: '820px' }}>
                     <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#ffffff', margin: '0 0 16px 0' }}>
-                        AI Persona &amp; Behavior Configuration
+                        Assistant Identity &amp; Visual Branding
                     </h3>
 
-                    {/* Enable Switch */}
+                    {/* Enable Toggle */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: 'rgba(255, 255, 255, 0.04)', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: '18px' }}>
                         <div>
-                            <div style={{ fontWeight: '700', color: '#ffffff', fontSize: '14px' }}>Enable AI Floating Assistant Widget</div>
-                            <div style={{ fontSize: '12px', color: '#94a3b8' }}>Show the interactive AI digital twin launcher across the public portfolio.</div>
+                            <div style={{ fontWeight: '700', color: '#ffffff', fontSize: '14px' }}>Enable AI Floating Widget on Site</div>
+                            <div style={{ fontSize: '12px', color: '#94a3b8' }}>Turn the floating launcher pill and chat interface on or off.</div>
                         </div>
                         <label className="adm-switch">
                             <input
@@ -451,20 +578,62 @@ export default function AiAssistantCMS() {
                         </label>
                     </div>
 
-                    {/* Twin Name */}
-                    <div className="adm-form-group">
-                        <label className="adm-label">Assistant Display Name</label>
-                        <input
-                            type="text"
-                            className="adm-input"
-                            value={settings.twinName}
-                            onChange={(e) => setSettings(p => ({ ...p, twinName: e.target.value }))}
-                            placeholder="e.g. Mahadeb's AI Digital Twin"
-                            required
-                        />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        {/* Display Name */}
+                        <div className="adm-form-group">
+                            <label className="adm-label">Assistant Title / Name</label>
+                            <input
+                                type="text"
+                                className="adm-input"
+                                value={settings.twinName}
+                                onChange={(e) => setSettings(p => ({ ...p, twinName: e.target.value }))}
+                                placeholder="e.g. Mahadeb's AI Digital Twin"
+                                required
+                            />
+                        </div>
+
+                        {/* Subtitle */}
+                        <div className="adm-form-group">
+                            <label className="adm-label">Status Subtitle / Tagline</label>
+                            <input
+                                type="text"
+                                className="adm-input"
+                                value={settings.subtitle}
+                                onChange={(e) => setSettings(p => ({ ...p, subtitle: e.target.value }))}
+                                placeholder="e.g. Full Stack Assistant • Online"
+                            />
+                        </div>
                     </div>
 
-                    {/* Welcome Greeting */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        {/* Launcher Pill Badge Text */}
+                        <div className="adm-form-group">
+                            <label className="adm-label">Floating Launcher Badge Text</label>
+                            <input
+                                type="text"
+                                className="adm-input"
+                                value={settings.launcherText}
+                                onChange={(e) => setSettings(p => ({ ...p, launcherText: e.target.value }))}
+                                placeholder="e.g. Ask AI Twin"
+                            />
+                        </div>
+
+                        {/* Avatar Icon */}
+                        <div className="adm-form-group">
+                            <label className="adm-label">Assistant Avatar Icon</label>
+                            <select
+                                className="adm-select"
+                                value={settings.avatarIcon}
+                                onChange={(e) => setSettings(p => ({ ...p, avatarIcon: e.target.value }))}
+                            >
+                                {ICON_OPTIONS.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Welcome Greeting Message */}
                     <div className="adm-form-group">
                         <label className="adm-label">Welcome Greeting Message (Markdown Supported)</label>
                         <textarea
@@ -472,63 +641,113 @@ export default function AiAssistantCMS() {
                             rows={4}
                             value={settings.welcomeMessage}
                             onChange={(e) => setSettings(p => ({ ...p, welcomeMessage: e.target.value }))}
-                            placeholder="Type the greeting message visitors see when opening the assistant..."
+                            placeholder="Type the message visitors see when opening the assistant..."
                             required
                         />
                     </div>
 
-                    {/* System Persona Instructions */}
-                    <div className="adm-form-group">
-                        <label className="adm-label">System Persona Guidelines &amp; Custom Instructions</label>
-                        <textarea
-                            className="adm-textarea"
-                            rows={3}
-                            value={settings.customInstructions}
-                            onChange={(e) => setSettings(p => ({ ...p, customInstructions: e.target.value }))}
-                            placeholder="e.g. Speak with technical confidence, highlight React and Node skills, mention resume download..."
-                        />
-                    </div>
-
-                    {/* Gemini API Key */}
-                    <div className="adm-form-group">
-                        <label className="adm-label">
-                            Google Gemini API Key (Optional — Supports Gemini 3.6 Flash)
-                        </label>
-                        <input
-                            type="text"
-                            className="adm-input"
-                            value={settings.geminiApiKey}
-                            onChange={(e) => setSettings(p => ({ ...p, geminiApiKey: e.target.value }))}
-                            placeholder="AIzaSy... (Leave empty to use built-in offline Semantic Knowledge Engine)"
-                        />
-                        <div style={{ fontSize: '11.5px', color: '#94a3b8', marginTop: '4px' }}>
-                            💡 If no key is entered, the assistant uses the built-in deterministic Knowledge Graph to answer questions with zero API costs.
-                        </div>
-                    </div>
-
-                    <div style={{ marginTop: '24px', display: 'flex', gap: '10px' }}>
-                        <button
-                            type="submit"
-                            className="adm-btn adm-btn-primary"
-                            disabled={saving}
-                        >
-                            <i className="fa-solid fa-floppy-disk" /> {saving ? 'Saving Changes...' : 'Save AI Settings'}
+                    <div style={{ marginTop: '20px' }}>
+                        <button type="submit" className="adm-btn adm-btn-primary" disabled={saving}>
+                            <i className="fa-solid fa-floppy-disk" /> {saving ? 'Saving...' : 'Save Persona & Branding'}
                         </button>
                     </div>
                 </form>
             )}
 
             {/* ══════════════════════════════════════════════════════════
-                 TAB 3: QUICK PROMPT CHIPS BUILDER
+                 TAB 3: ENGINE & GEMINI AI CONFIGURATION
+            ══════════════════════════════════════════════════════════ */}
+            {activeTab === 'engine' && (
+                <form onSubmit={handleSaveSettings} className="adm-card" style={{ maxWidth: '820px' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#ffffff', margin: '0 0 16px 0' }}>
+                        AI Engine &amp; Intelligence Configuration
+                    </h3>
+
+                    {/* Preferred Engine */}
+                    <div className="adm-form-group">
+                        <label className="adm-label">Preferred Processing Engine</label>
+                        <select
+                            className="adm-select"
+                            value={settings.preferredEngine}
+                            onChange={(e) => setSettings(p => ({ ...p, preferredEngine: e.target.value }))}
+                        >
+                            <option value="auto">Auto (Google Gemini 3.6 Flash with Semantic Fallback)</option>
+                            <option value="gemini">Gemini 3.6 Flash Only</option>
+                            <option value="semantic">Built-in Semantic Knowledge Engine Only (Zero API Costs)</option>
+                        </select>
+                    </div>
+
+                    {/* Gemini API Key */}
+                    <div className="adm-form-group">
+                        <label className="adm-label">Google Gemini API Key (Optional)</label>
+                        <input
+                            type="text"
+                            className="adm-input"
+                            value={settings.geminiApiKey}
+                            onChange={(e) => setSettings(p => ({ ...p, geminiApiKey: e.target.value }))}
+                            placeholder="AIzaSy... (Leave empty to use built-in offline engine)"
+                        />
+                        <div style={{ fontSize: '11.5px', color: '#94a3b8', marginTop: '4px' }}>
+                            💡 Supports Google Gemini 3.6 Flash via @google/genai.
+                        </div>
+                    </div>
+
+                    {/* System Persona Guidelines */}
+                    <div className="adm-form-group">
+                        <label className="adm-label">System Persona Guidelines &amp; Custom Rules</label>
+                        <textarea
+                            className="adm-textarea"
+                            rows={4}
+                            value={settings.customInstructions}
+                            onChange={(e) => setSettings(p => ({ ...p, customInstructions: e.target.value }))}
+                            placeholder="e.g. Always speak in a polite, confident tone. Highlight Mahadeb's React 19 and Node.js achievements..."
+                        />
+                    </div>
+
+                    {/* Rate Limiting Per Minute */}
+                    <div className="adm-form-group">
+                        <label className="adm-label">Rate Limit (Max Queries / Minute Per IP)</label>
+                        <input
+                            type="number"
+                            className="adm-input"
+                            min={5}
+                            max={120}
+                            value={settings.rateLimitPerMin || 30}
+                            onChange={(e) => setSettings(p => ({ ...p, rateLimitPerMin: parseInt(e.target.value) || 30 }))}
+                        />
+                    </div>
+
+                    <div style={{ marginTop: '20px' }}>
+                        <button type="submit" className="adm-btn adm-btn-primary" disabled={saving}>
+                            <i className="fa-solid fa-floppy-disk" /> {saving ? 'Saving...' : 'Save Engine Settings'}
+                        </button>
+                    </div>
+                </form>
+            )}
+
+            {/* ══════════════════════════════════════════════════════════
+                 TAB 4: SUGGESTED PROMPT CHIPS BUILDER
             ══════════════════════════════════════════════════════════ */}
             {activeTab === 'prompts' && (
-                <div className="adm-card" style={{ maxWidth: '800px' }}>
-                    <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#ffffff', margin: '0 0 8px 0' }}>
-                        Suggested Prompt Chips Manager
-                    </h3>
-                    <p style={{ fontSize: '13px', color: '#94a3b8', margin: '0 0 18px 0' }}>
-                        These quick-tap question pills appear above the chat input to guide recruiters and visitors.
-                    </p>
+                <div className="adm-card" style={{ maxWidth: '820px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                        <div>
+                            <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#ffffff', margin: 0 }}>
+                                Suggested Prompt Chips Manager
+                            </h3>
+                            <p style={{ fontSize: '13px', color: '#94a3b8', margin: '4px 0 0 0' }}>
+                                Quick-tap prompt pills that appear in the chat launcher to guide recruiters.
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleResetDefaultPrompts}
+                            className="adm-btn adm-btn-secondary"
+                            style={{ fontSize: '12px' }}
+                        >
+                            <i className="fa-solid fa-rotate-left" /> Reset Defaults
+                        </button>
+                    </div>
 
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '18px' }}>
                         <input
@@ -591,15 +810,64 @@ export default function AiAssistantCMS() {
             )}
 
             {/* ══════════════════════════════════════════════════════════
-                 TAB 4: LIVE ASSISTANT TESTER PLAYGROUND
+                 TAB 5: ACTION CARDS & FEATURE TOGGLES
+            ══════════════════════════════════════════════════════════ */}
+            {activeTab === 'toggles' && (
+                <form onSubmit={handleSaveSettings} className="adm-card" style={{ maxWidth: '820px' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#ffffff', margin: '0 0 16px 0' }}>
+                        Action Cards &amp; Interactive Triggers
+                    </h3>
+
+                    {/* Show Action Cards */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: 'rgba(255, 255, 255, 0.04)', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: '14px' }}>
+                        <div>
+                            <div style={{ fontWeight: '700', color: '#ffffff', fontSize: '14px' }}>Enable Direct Action Cards in Replies</div>
+                            <div style={{ fontSize: '12px', color: '#94a3b8' }}>Shows clickable action buttons (e.g. Download Resume, Jump to Contact Form).</div>
+                        </div>
+                        <label className="adm-switch">
+                            <input
+                                type="checkbox"
+                                checked={settings.showActionCards}
+                                onChange={(e) => setSettings(p => ({ ...p, showActionCards: e.target.checked }))}
+                            />
+                            <span className="adm-slider" />
+                        </label>
+                    </div>
+
+                    {/* Sound Effects & Animations */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: 'rgba(255, 255, 255, 0.04)', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: '20px' }}>
+                        <div>
+                            <div style={{ fontWeight: '700', color: '#ffffff', fontSize: '14px' }}>Sound &amp; Micro-Animations</div>
+                            <div style={{ fontSize: '12px', color: '#94a3b8' }}>Play smooth UI typing animations when the AI generates responses.</div>
+                        </div>
+                        <label className="adm-switch">
+                            <input
+                                type="checkbox"
+                                checked={settings.enableSoundEffects}
+                                onChange={(e) => setSettings(p => ({ ...p, enableSoundEffects: e.target.checked }))}
+                            />
+                            <span className="adm-slider" />
+                        </label>
+                    </div>
+
+                    <div>
+                        <button type="submit" className="adm-btn adm-btn-primary" disabled={saving}>
+                            <i className="fa-solid fa-floppy-disk" /> {saving ? 'Saving...' : 'Save Feature Toggles'}
+                        </button>
+                    </div>
+                </form>
+            )}
+
+            {/* ══════════════════════════════════════════════════════════
+                 TAB 6: LIVE AI ASSISTANT SANDBOX
             ══════════════════════════════════════════════════════════ */}
             {activeTab === 'tester' && (
-                <div className="adm-card" style={{ maxWidth: '800px' }}>
+                <div className="adm-card" style={{ maxWidth: '820px' }}>
                     <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#ffffff', margin: '0 0 8px 0' }}>
                         Live AI Assistant Sandbox
                     </h3>
                     <p style={{ fontSize: '13px', color: '#94a3b8', margin: '0 0 18px 0' }}>
-                        Test questions against your portfolio knowledge base in real time without opening the public site.
+                        Test any visitor query against your current portfolio data in real time.
                     </p>
 
                     <form onSubmit={handleRunTestQuery} style={{ display: 'flex', gap: '8px', marginBottom: '18px' }}>
