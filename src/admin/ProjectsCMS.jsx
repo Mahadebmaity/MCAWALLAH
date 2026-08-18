@@ -77,7 +77,7 @@ function ProjectImagePreview({ src, onRemove }) {
     if (!src) return null;
 
     return (
-        <div style={{
+        <div className="adm-project-preview-wrap" style={{
             marginTop: '12px',
             padding: '10px 14px',
             background: 'rgba(255, 255, 255, 0.03)',
@@ -86,12 +86,13 @@ function ProjectImagePreview({ src, onRemove }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '14px'
+            gap: '12px',
+            flexWrap: 'wrap'
         }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: '1 1 200px' }}>
                 <div style={{
-                    width: '90px',
-                    height: '60px',
+                    width: '80px',
+                    height: '56px',
                     borderRadius: '6px',
                     overflow: 'hidden',
                     background: '#0a0f1d',
@@ -125,7 +126,7 @@ function ProjectImagePreview({ src, onRemove }) {
                     )}
                 </div>
 
-                <div style={{ minWidth: 0 }}>
+                <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{
                         fontSize: '12.5px',
                         fontWeight: '600',
@@ -140,7 +141,6 @@ function ProjectImagePreview({ src, onRemove }) {
                     <div style={{
                         fontSize: '11px',
                         color: 'var(--adm-text-muted)',
-                        maxWidth: '260px',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
@@ -397,7 +397,7 @@ export default function ProjectsCMS() {
                     </button>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+                <div className="adm-projects-grid">
                     {projects.map((project) => {
                         const getCategoryIcon = (cat) => {
                             switch ((cat || '').toLowerCase()) {
@@ -742,7 +742,7 @@ export default function ProjectsCMS() {
                             {/* ── Image Upload & Preview ── */}
                             <div className="adm-form-group">
                                 <label className="adm-label">Project Screenshot / Cover Image</label>
-                                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                <div className="adm-project-upload-row">
                                     <input
                                         type="text"
                                         className="adm-input"
