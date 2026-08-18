@@ -4,6 +4,13 @@ import { API_BASE } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
+const DEFAULT_HERO_STATS = [
+    { value: '3+', label: 'Years Exp.' },
+    { value: '40+', label: 'Projects' },
+    { value: '15+', label: 'Clients' },
+    { value: '∞', label: 'Coffee ☕' }
+];
+
 export default function HeroCMS() {
     const { authFetch } = useAuth();
     const [hero, setHero] = useState(null);
@@ -21,6 +28,10 @@ export default function HeroCMS() {
             const res = await authFetch(`${API_BASE}/admin/section/hero`);
             if (res.ok) {
                 const data = await res.json();
+                const loadedStats = (data && Array.isArray(data.stats) && data.stats.length > 0)
+                    ? data.stats
+                    : DEFAULT_HERO_STATS;
+
                 setHero({
                     badgeText: 'Available for work',
                     showBadge: true,
@@ -39,7 +50,7 @@ export default function HeroCMS() {
                     secondaryCtaText: "Let's Talk",
                     secondaryCtaTarget: 'contact',
                     showCtas: true,
-                    stats: [],
+                    stats: loadedStats,
                     showStats: true,
                     socialLinks: [],
                     showSocials: true,
@@ -51,7 +62,8 @@ export default function HeroCMS() {
                     buttonRadius: '10px',
                     defaultBackground: 'mesh',
                     isPublic: true,
-                    ...data
+                    ...data,
+                    stats: loadedStats
                 });
             }
         } catch (err) {
@@ -158,6 +170,42 @@ export default function HeroCMS() {
         setHero(prev => ({
             ...prev,
             socialLinks: prev.socialLinks.filter((_, i) => i !== index)
+        }));
+    };
+
+    // Hero Stats Handlers
+    const updateStat = (index, field, value) => {
+        setHero(prev => {
+            const stats = [...(prev.stats || [])];
+            stats[index] = { ...stats[index], [field]: value };
+            return { ...prev, stats };
+        });
+    };
+
+    const addStat = (preset = null) => {
+        const newStat = preset || { value: '10+', label: 'New Metric' };
+        setHero(prev => ({
+            ...prev,
+            stats: [...(prev.stats || []), newStat]
+        }));
+    };
+
+    const removeStat = (index) => {
+        setHero(prev => ({
+            ...prev,
+            stats: prev.stats.filter((_, i) => i !== index)
+        }));
+    };
+
+    const resetStatsToDefaults = () => {
+        setHero(prev => ({
+            ...prev,
+            stats: [
+                { value: '3+', label: 'Years Exp.' },
+                { value: '40+', label: 'Projects' },
+                { value: '15+', label: 'Clients' },
+                { value: '∞', label: 'Coffee ☕' }
+            ]
         }));
     };
 
@@ -536,6 +584,128 @@ export default function HeroCMS() {
                                         >
                                             <i className="fa-solid fa-trash" />
                                         </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* ── Hero Quick Stats Capsules (Years Exp, Projects, Clients, Coffee) ── */}
+                        <div style={{ marginTop: '28px', borderTop: '1px solid var(--adm-border)', paddingTop: '20px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+                                <div>
+                                    <label className="adm-label" style={{ fontSize: '14px', fontWeight: '700', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <i className="fa-solid fa-chart-simple" style={{ color: 'var(--adm-primary)' }} /> Hero Quick Stats Capsules ({hero.stats?.length || 0})
+                                    </label>
+                                    <span style={{ fontSize: '12px', color: 'var(--adm-text-muted)', display: 'block', marginTop: '2px' }}>
+                                        Edit the 4 stat boxes (e.g. 3+ Years Exp., 40+ Projects, 15+ Clients, ∞ Coffee ☕) displayed on the Hero header banner.
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                    <button
+                                        type="button"
+                                        onClick={() => addStat({ value: '3+', label: 'Years Exp.' })}
+                                        className="adm-btn adm-btn-sm adm-btn-secondary"
+                                        style={{ fontSize: '11px' }}
+                                    >
+                                        + 3+ Years
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => addStat({ value: '40+', label: 'Projects' })}
+                                        className="adm-btn adm-btn-sm adm-btn-secondary"
+                                        style={{ fontSize: '11px' }}
+                                    >
+                                        + 40+ Projects
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => addStat({ value: '15+', label: 'Clients' })}
+                                        className="adm-btn adm-btn-sm adm-btn-secondary"
+                                        style={{ fontSize: '11px' }}
+                                    >
+                                        + 15+ Clients
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => addStat({ value: '∞', label: 'Coffee ☕' })}
+                                        className="adm-btn adm-btn-sm adm-btn-secondary"
+                                        style={{ fontSize: '11px' }}
+                                    >
+                                        + ∞ Coffee ☕
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => addStat({ value: '10+', label: 'New Metric' })}
+                                        className="adm-btn adm-btn-sm adm-btn-primary"
+                                        style={{ fontSize: '11px' }}
+                                    >
+                                        <i className="fa-solid fa-plus" /> Custom Stat
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={resetStatsToDefaults}
+                                        className="adm-btn adm-btn-sm adm-btn-secondary"
+                                        style={{ fontSize: '11px', color: '#f59e0b' }}
+                                        title="Reset to 4 default cards"
+                                    >
+                                        <i className="fa-solid fa-rotate-left" /> Reset
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Stat Cards Grid */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                                {hero.stats?.map((stat, idx) => (
+                                    <div
+                                        key={idx}
+                                        style={{
+                                            background: 'var(--adm-surface-2)',
+                                            border: '1px solid var(--adm-border)',
+                                            borderRadius: '10px',
+                                            padding: '14px',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '8px'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--adm-primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                Stat Box #{idx + 1}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => removeStat(idx)}
+                                                style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '12px', padding: '2px 6px' }}
+                                                title="Delete this stat box"
+                                            >
+                                                <i className="fa-solid fa-trash" />
+                                            </button>
+                                        </div>
+
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            <div style={{ flex: '0 0 85px' }}>
+                                                <label style={{ fontSize: '10px', color: 'var(--adm-text-muted)', display: 'block', marginBottom: '2px' }}>Number/Value</label>
+                                                <input
+                                                    type="text"
+                                                    className="adm-input"
+                                                    style={{ padding: '6px 8px', fontSize: '13px', fontWeight: '800', textAlign: 'center', color: '#e84545' }}
+                                                    value={stat.value || ''}
+                                                    onChange={(e) => updateStat(idx, 'value', e.target.value)}
+                                                    placeholder="3+"
+                                                />
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <label style={{ fontSize: '10px', color: 'var(--adm-text-muted)', display: 'block', marginBottom: '2px' }}>Label Text</label>
+                                                <input
+                                                    type="text"
+                                                    className="adm-input"
+                                                    style={{ padding: '6px 8px', fontSize: '12px' }}
+                                                    value={stat.label || ''}
+                                                    onChange={(e) => updateStat(idx, 'label', e.target.value)}
+                                                    placeholder="Years Exp."
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
