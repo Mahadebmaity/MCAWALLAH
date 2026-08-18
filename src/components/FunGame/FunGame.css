@@ -941,3 +941,356 @@
         gap: 16px;
     }
 }
+
+/* ══════════════════════════════════════════════════════════
+   ARCADE ARENA & IN-GAME COMPONENT ENGINE STYLING
+   ══════════════════════════════════════════════════════════ */
+.game__engine-wrap {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) minmax(300px, 420px);
+    gap: 28px;
+    align-items: start;
+    width: 100%;
+}
+
+@media (max-width: 860px) {
+    .game__engine-wrap {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+.game__info-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    width: 100%;
+}
+
+.game__scores {
+    display: flex;
+    gap: 12px;
+}
+
+.game__score-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 12px 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    color: #f8fafc;
+}
+
+.game__score-card strong {
+    font-family: var(--gm-font-m);
+    font-size: 1.5rem;
+    color: #38bdf8;
+}
+
+.game__score-card span {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.game__score-card i {
+    font-size: 16px;
+    color: #f59e0b;
+}
+
+.game__speed {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 14px;
+    border-radius: 12px;
+}
+
+.game__speed-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+}
+
+.game__speed-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    font-family: var(--gm-font-m);
+    font-size: 0.78rem;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.game__speed-btn:hover:not(:disabled) {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: #38bdf8;
+    color: #ffffff;
+}
+
+.game__speed-btn--active {
+    background: #0284c7 !important;
+    border-color: #38bdf8 !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.game__controls-box {
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.game__guide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.game__guide-row {
+    display: flex;
+    gap: 4px;
+}
+
+.game__guide-key {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #e2e8f0;
+    font-size: 0.85rem;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: all 0.15s ease;
+}
+
+.game__guide-key:hover {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.2);
+    color: #38bdf8;
+    transform: scale(1.08);
+}
+
+.game__guide-note {
+    font-family: var(--gm-font-m);
+    font-size: 0.7rem;
+    color: #94a3b8;
+    margin-top: 6px;
+    text-align: center;
+}
+
+.game__canvas-wrap {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 1 / 1;
+    min-width: 280px;
+    min-height: 280px;
+    margin: 0 auto;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    background: #020617;
+}
+
+.game__canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: 1 / 1;
+    display: block;
+}
+
+.game__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.94);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    text-align: center;
+    animation: fadeIn 0.25s ease;
+    z-index: 10;
+}
+
+.game__overlay-icon {
+    font-size: 3rem;
+}
+
+.game__overlay-title {
+    font-family: var(--gm-font-d);
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff !important;
+    margin: 0;
+}
+
+.game__overlay-sub {
+    font-size: 0.88rem;
+    color: #cbd5e1 !important;
+    margin: 0;
+    max-width: 320px;
+}
+
+.game__overlay-best {
+    font-family: var(--gm-font-m);
+    font-size: 0.85rem;
+    color: #f59e0b;
+    margin: 0;
+}
+
+.game__overlay-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 26px;
+    margin-top: 8px;
+    background: linear-gradient(135deg, #0284c7 0%, #6366f1 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--gm-font-d);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35);
+}
+
+.game__overlay-btn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(56, 189, 248, 0.5);
+}
+
+/* Standalone Arcade Top Bar & Buttons */
+.game__tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    border-radius: 12px;
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    background: rgba(15, 23, 42, 0.85);
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    user-select: none;
+}
+
+.game__tab-btn:hover {
+    color: #f8fafc;
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(30, 41, 59, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.game__tab-btn--active {
+    color: #ffffff !important;
+    font-weight: 800;
+    border-color: transparent !important;
+    box-shadow: 0 6px 22px rgba(56, 189, 248, 0.4);
+    transform: translateY(-2px);
+}
+
+.game__leaderboard-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.25));
+    border: 1.5px solid rgba(245, 158, 11, 0.45);
+    color: #fbbf24;
+    font-weight: 700;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.15);
+}
+
+.game__leaderboard-btn:hover {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.28), rgba(217, 119, 6, 0.4));
+    border-color: #f59e0b;
+    color: #ffffff;
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+}
+
+/* Fallback Admin UI Buttons inside Arcade Window */
+.adm-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.adm-btn-primary {
+    background: linear-gradient(135deg, #0284c7 0%, #6366f1 100%);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+}
+
+.adm-btn-primary:hover {
+    filter: brightness(1.12);
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 18px rgba(2, 132, 199, 0.45);
+}
+
+.adm-btn-secondary {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+}
+
+.adm-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+.adm-btn-sm {
+    padding: 5px 12px;
+    font-size: 12px;
+    border-radius: 7px;
+}
