@@ -237,12 +237,15 @@
 }
 
 /* ══════════════════════════════════════════════════════════
-   MODE 1: INTERACTIVE CYBER ARCADE CONSOLE HUD
+   MODE 1: INTERACTIVE CYBER ARCADE CONSOLE (VERTICAL SLIDER)
    ══════════════════════════════════════════════════════════ */
 .arcade-station-wrapper {
     position: relative;
     width: 100%;
     margin-top: 8px;
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
 }
 
 .arcade-station-ambient {
@@ -256,9 +259,111 @@
     z-index: 0;
 }
 
+/* ── Vertical Slider Controls Deck ── */
+.arcade-vertical-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--gm-border);
+    border-radius: 999px;
+    padding: 16px 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    z-index: 2;
+    flex-shrink: 0;
+}
+
+.arcade-v-nav-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.arcade-v-nav-btn:hover {
+    background: var(--accent-color, #e84545);
+    color: #ffffff;
+    border-color: var(--accent-color, #e84545);
+    transform: scale(1.1);
+}
+
+.arcade-v-track {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+}
+
+.arcade-v-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--gm-text-3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--gm-font-m);
+    font-size: 10px;
+    font-weight: 700;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+}
+
+.arcade-v-dot:hover {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.arcade-v-dot.active {
+    background: var(--dot-color, #e84545);
+    border-color: var(--dot-color, #e84545);
+    color: #ffffff;
+    transform: scale(1.15);
+    box-shadow: 0 0 15px var(--dot-color, #e84545);
+}
+
+.arcade-v-autoplay-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--gm-text-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s ease;
+    margin-top: 4px;
+}
+
+.arcade-v-autoplay-btn.active {
+    color: var(--accent-color, #e84545);
+    border-color: var(--accent-color, #e84545);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Main Station Card (Vertical Transition) ── */
 .arcade-station-card {
     position: relative;
     z-index: 1;
+    flex: 1;
     display: grid;
     grid-template-columns: 420px 1fr;
     gap: 32px;
@@ -268,17 +373,17 @@
     border-radius: 24px;
     padding: 32px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 0, 0, 0.3);
-    animation: stationFade 0.4s ease both;
+    animation: verticalSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-@keyframes stationFade {
+@keyframes verticalSlideIn {
     from {
         opacity: 0;
-        transform: translateY(14px);
+        transform: translateY(-20px) scale(0.98);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -455,27 +560,19 @@
     gap: 6px;
 }
 
-.arcade-hud-status {
+.arcade-hud-level-pill {
     font-family: var(--gm-font-m);
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 700;
     color: var(--gm-text-3);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    letter-spacing: 0.5px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.arcade-hud-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    animation: hudDotPulse 1.5s infinite ease-in-out;
-}
-
-@keyframes hudDotPulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.3); opacity: 0.6; }
+.arcade-hud-level-pill span:first-child {
+    color: #f59e0b;
 }
 
 .arcade-hud-info {
@@ -769,6 +866,22 @@
    RESPONSIVE MEDIA QUERIES
    ══════════════════════════════════════════════════════════ */
 @media (max-width: 960px) {
+    .arcade-station-wrapper {
+        flex-direction: column;
+    }
+
+    .arcade-vertical-controls {
+        flex-direction: row;
+        width: 100%;
+        border-radius: 16px;
+        padding: 8px 16px;
+        justify-content: space-between;
+    }
+
+    .arcade-v-track {
+        flex-direction: row;
+    }
+
     .arcade-station-card {
         grid-template-columns: 1fr;
         gap: 24px;

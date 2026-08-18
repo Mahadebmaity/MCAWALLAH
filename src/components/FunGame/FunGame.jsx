@@ -14,6 +14,7 @@ const DEFAULT_GAMES = [
         categoryBadge: "Arcade Classic",
         color: "#e84545",
         difficulty: "Medium",
+        level: "01",
         engine: "Canvas 2D & State Machine",
         controls: ["W, A, S, D", "Arrow Keys", "Touch D-Pad"],
         features: ["3 Speed Modes", "Dynamic D-Pad", "Global Leaderboard"]
@@ -27,6 +28,7 @@ const DEFAULT_GAMES = [
         categoryBadge: "Puzzle & Logic",
         color: "#f59e0b",
         difficulty: "Hard",
+        level: "02",
         engine: "Matrix Grid Algorithm",
         controls: ["Swipe Gestures", "Arrow Keys", "Undo Move"],
         features: ["4x4 Animated Grid", "Touch Swipe", "Score Multipliers"]
@@ -40,6 +42,7 @@ const DEFAULT_GAMES = [
         categoryBadge: "Skill & Speed",
         color: "#10b981",
         difficulty: "Dynamic",
+        level: "03",
         engine: "Real-time Telemetry & Sound FX",
         controls: ["Physical Keyboard", "Keystroke Timing", "Audio FX"],
         features: ["Live WPM Telemetry", "Mechanical Sound FX", "Visual Keyboard Guide"]
@@ -53,6 +56,7 @@ const DEFAULT_GAMES = [
         categoryBadge: "AI & 2-Player",
         color: "#38bdf8",
         difficulty: "Unbeatable AI",
+        level: "04",
         engine: "Minimax Game Tree & Heuristics",
         controls: ["Mouse Click", "Touch Tap", "Reset Grid"],
         features: ["Unbeatable AI Bot", "2-Player Pass Mode", "Win Streak Animations"]
@@ -261,8 +265,10 @@ export default function FunGame() {
     const { data } = usePortfolioData();
     const { requireAuth } = useAuth();
     const sectionRef = useRef(null);
-    const [viewMode, setViewMode] = useState("arcade"); // 'arcade' (Interactive Console HUD) or 'grid' (Matrix Grid)
+    const [viewMode, setViewMode] = useState("arcade"); // 'arcade' (Vertical Slider Console) or 'grid' (Matrix Grid)
     const [selectedGameIndex, setSelectedGameIndex] = useState(0);
+    const [isAutoplay, setIsAutoplay] = useState(true);
+    const [isHovered, setIsHovered] = useState(false);
 
     const sectionConfig = data?.settings?.gamesSection || {
         badgeText: "Fun Zone Arcade",
@@ -277,7 +283,7 @@ export default function FunGame() {
     // Merge data from database with rich fallbacks
     const rawGames = data?.games?.length ? data.games : DEFAULT_GAMES;
 
-    const defaultMappedGames = DEFAULT_GAMES.map(defaultGame => {
+    const defaultMappedGames = DEFAULT_GAMES.map((defaultGame, i) => {
         const found = rawGames.find(g =>
             g.slug === defaultGame.slug ||
             (g.slug === 'speed-typer' && defaultGame.slug === 'typing')
@@ -293,6 +299,7 @@ export default function FunGame() {
             icon: found.icon || defaultGame.icon,
             color: found.color || defaultGame.color,
             difficulty: found.difficulty || defaultGame.difficulty,
+            level: found.level || defaultGame.level || `0${i + 1}`,
             engine: found.engine || defaultGame.engine,
             controls: (found.controls && found.controls.length > 0) ? found.controls : defaultGame.controls,
             features: (found.features && found.features.length > 0) ? found.features : defaultGame.features
@@ -304,7 +311,56 @@ export default function FunGame() {
     );
 
     const gamesList = [...defaultMappedGames, ...customGames];
+    const total = gamesList.length;
     const activeGame = gamesList[selectedGameIndex] || gamesList[0] || DEFAULT_GAMES[0];
+
+    // Vertical Navigation Functions (Top to Bottom)
+    const slideDown = () => {
+        if (total <= 1) return;
+        setSelectedGameIndex(prev => (prev + 1) % total);
+    };
+
+    const slideUp = () => {
+        if (total <= 1) return;
+        setSelectedGameIndex(prev => (prev - 1 + total) % total);
+    };
+
+    // Autoplay Timer (Top to Bottom Roll)
+    useEffect(() => {
+        if (viewMode !== 'arcade' || !isAutoplay || isHovered || total <= 1) return;
+        const interval = setInterval(() => {
+            slideDown();
+        }, 4500);
+        return () => clearInterval(interval);
+    }, [viewMode, isAutoplay, isHovered, total, selectedGameIndex]);
+
+    // Keyboard Arrow navigation (Up/Down)
+    useEffect(() => {
+        if (viewMode !== 'arcade') return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'ArrowDown') {
+                slideDown();
+            } else if (e.key === 'ArrowUp') {
+                slideUp();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [viewMode, total]);
+
+    // Touch Swipe handling (Vertical Up/Down)
+    const touchStartY = useRef(0);
+    const handleTouchStart = (e) => {
+        touchStartY.current = e.touches[0].clientY;
+    };
+    const handleTouchEnd = (e) => {
+        const touchEndY = e.changedTouches[0].clientY;
+        const diff = touchStartY.current - touchEndY;
+        if (Math.abs(diff) > 40) {
+            if (diff > 0) slideDown(); // Swipe up moves to next game downwards
+            else slideUp();           // Swipe down moves to previous game upwards
+        }
+    };
 
     if (sectionConfig.isPublic === false) return null;
 
@@ -388,14 +444,69 @@ export default function FunGame() {
                 </div>
 
                 {/* ══════════════════════════════════════════════════════════
-                     MODE 1: INTERACTIVE CYBER ARCADE CONSOLE HUD
+                     MODE 1: INTERACTIVE CYBER ARCADE CONSOLE (VERTICAL SLIDER)
                 ══════════════════════════════════════════════════════════ */}
                 {viewMode === 'arcade' && activeGame && (
-                    <div className="arcade-station-wrapper" style={{ '--accent-color': activeGame.color || '#e84545' }}>
+                    <div
+                        className="arcade-station-wrapper"
+                        style={{ '--accent-color': activeGame.color || '#e84545' }}
+                        onMouseEnter={() => setIsHovered(true)}
+                        onMouseLeave={() => setIsHovered(false)}
+                        onTouchStart={handleTouchStart}
+                        onTouchEnd={handleTouchEnd}
+                    >
                         {/* Ambient Neon Backing */}
                         <div className="arcade-station-ambient" />
 
-                        <div className="arcade-station-card">
+                        {/* ── Vertical Navigation Control Deck (Top to Bottom Slider) ── */}
+                        <div className="arcade-vertical-controls">
+                            <button
+                                type="button"
+                                className="arcade-v-nav-btn up"
+                                onClick={slideUp}
+                                title="Previous Game (Slide Up)"
+                                aria-label="Previous Game"
+                            >
+                                <i className="fa-solid fa-chevron-up" />
+                            </button>
+
+                            <div className="arcade-v-track">
+                                {gamesList.map((g, idx) => (
+                                    <button
+                                        key={g.slug || idx}
+                                        type="button"
+                                        className={`arcade-v-dot ${selectedGameIndex === idx ? 'active' : ''}`}
+                                        onClick={() => setSelectedGameIndex(idx)}
+                                        style={{ '--dot-color': g.color || '#e84545' }}
+                                        title={`Jump to ${g.title}`}
+                                    >
+                                        <span className="arcade-v-dot-label">0{idx + 1}</span>
+                                    </button>
+                                ))}
+                            </div>
+
+                            <button
+                                type="button"
+                                className="arcade-v-nav-btn down"
+                                onClick={slideDown}
+                                title="Next Game (Slide Down)"
+                                aria-label="Next Game"
+                            >
+                                <i className="fa-solid fa-chevron-down" />
+                            </button>
+
+                            <button
+                                type="button"
+                                className={`arcade-v-autoplay-btn ${isAutoplay ? 'active' : ''}`}
+                                onClick={() => setIsAutoplay(prev => !prev)}
+                                title={isAutoplay ? "Pause Vertical Auto-Roll" : "Resume Vertical Auto-Roll"}
+                            >
+                                <i className={`fa-solid ${isAutoplay ? 'fa-pause' : 'fa-play'}`} />
+                            </button>
+                        </div>
+
+                        {/* Main Station Content (Keyed to trigger smooth vertical transition) */}
+                        <div className="arcade-station-card" key={activeGame.slug || selectedGameIndex}>
                             {/* Left: CRT Screen Monitor Frame */}
                             <div className="arcade-station-screen-col">
                                 <div className="arcade-cabinet-frame">
@@ -403,7 +514,9 @@ export default function FunGame() {
                                         <span className="arcade-cabinet-dot red" />
                                         <span className="arcade-cabinet-dot yellow" />
                                         <span className="arcade-cabinet-dot green" />
-                                        <span className="arcade-cabinet-title">ARCADE_OS v2.4 // {activeGame.slug.toUpperCase()}</span>
+                                        <span className="arcade-cabinet-title">
+                                            LEVEL {activeGame.level || `0${selectedGameIndex + 1}`} // {activeGame.slug.toUpperCase()}
+                                        </span>
                                     </div>
 
                                     {/* Animated Canvas CRT Screen */}
@@ -430,9 +543,9 @@ export default function FunGame() {
                                     <span className="arcade-hud-badge" style={{ color: activeGame.color, borderColor: `${activeGame.color}40`, background: `${activeGame.color}15` }}>
                                         <i className={activeGame.icon || "fa-solid fa-gamepad"} /> {activeGame.categoryBadge || "Arcade"}
                                     </span>
-                                    <span className="arcade-hud-status">
-                                        <span className="arcade-hud-dot" style={{ background: activeGame.color }} /> READY TO PLAY
-                                    </span>
+                                    <div className="arcade-hud-level-pill">
+                                        LEVEL <span>{activeGame.level || `0${selectedGameIndex + 1}`}</span> / <span>0{total}</span>
+                                    </div>
                                 </div>
 
                                 <div className="arcade-hud-info">
@@ -444,7 +557,7 @@ export default function FunGame() {
                                 {/* Spec Telemetry Grid */}
                                 <div className="arcade-telemetry-grid">
                                     <div className="arcade-telemetry-item">
-                                        <span className="arcade-telemetry-label">DIFFICULTY</span>
+                                        <span className="arcade-telemetry-label">DIFFICULTY LEVEL</span>
                                         <span className="arcade-telemetry-val" style={{ color: activeGame.color }}>
                                             {activeGame.difficulty || "Dynamic"}
                                         </span>
