@@ -113,7 +113,7 @@ export default function About() {
     const hobbies = about.hobbies?.length ? about.hobbies : DEFAULT_HOBBIES;
 
     const handleResumeDownload = (resItem) => {
-        requireAuth(() => {
+        const performDownload = () => {
             const a = document.createElement("a");
             a.href = resItem.url;
             a.download = (resItem.title || 'Resume').replace(/[^a-zA-Z0-9_-]/g, "_") + ".pdf";
@@ -121,13 +121,15 @@ export default function About() {
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-        }, "Please Sign In or Sign Up to download full resume & CV documents.", "register");
+        };
+        if (!requireAuth(performDownload, "Please Sign In or Sign Up to download full resume & CV documents.", "register")) return;
+        performDownload();
     };
 
     const handleResumePreview = (resItem) => {
-        requireAuth(() => {
-            window.open(resItem.url, "_blank");
-        }, "Please Sign In or Sign Up to preview resume documents.", "register");
+        const performPreview = () => window.open(resItem.url, "_blank");
+        if (!requireAuth(performPreview, "Please Sign In or Sign Up to preview resume documents.", "register")) return;
+        performPreview();
     };
 
     return (

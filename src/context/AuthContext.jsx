@@ -112,6 +112,10 @@ export function AuthProvider({ children }) {
         saveTokens(data.accessToken, data.refreshToken);
         setUser(data.user);
         applyPrefs(data.user.preferences);
+        if (typeof pendingAction === "function") {
+            try { pendingAction(); } catch { }
+            setPendingAction(null);
+        }
         return data.user;
     };
 
@@ -126,6 +130,10 @@ export function AuthProvider({ children }) {
         saveTokens(data.accessToken, data.refreshToken);
         setUser(data.user);
         applyPrefs(data.user.preferences);
+        if (typeof pendingAction === "function") {
+            try { pendingAction(); } catch { }
+            setPendingAction(null);
+        }
         return data.user;
     };
 
@@ -230,7 +238,6 @@ export function AuthProvider({ children }) {
 
     const requireAuth = (callbackAction, promptMessage = "Please Sign In or Sign Up to continue.", defaultMode = "login") => {
         if (user) {
-            if (typeof callbackAction === "function") callbackAction();
             return true;
         }
         if (typeof callbackAction === "function") {
