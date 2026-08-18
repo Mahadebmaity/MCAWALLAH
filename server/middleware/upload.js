@@ -34,3 +34,21 @@ export const upload = multer({
         fileSize: 10 * 1024 * 1024 // 10MB max limit
     }
 });
+
+/**
+ * Flexible upload middleware that accepts any field name ('image', 'file', 'avatar', 'document', 'photo')
+ * and normalizes the first uploaded file to req.file.
+ * Prevents "MulterError: Unexpected field" errors across all upload endpoints.
+ */
+export const uploadFlexible = (req, res, next) => {
+    upload.any()(req, res, (err) => {
+        if (err) {
+            return res.status(400).json({ message: err.message || 'File upload error' });
+        }
+        if (req.files && req.files.length > 0) {
+            req.file = req.files[0];
+        }
+        next();
+    });
+};
+

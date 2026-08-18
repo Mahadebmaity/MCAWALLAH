@@ -83,3 +83,139 @@ input, textarea, select {
     padding-right: clamp(1rem, 4vw, 2.5rem);
 }
 
+/* ══════════════════════════════════════════════════
+   GLOBAL UI CONTROLS (Buttons, Inputs, Selects)
+   ══════════════════════════════════════════════════ */
+.adm-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    border-radius: 9px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    line-height: 1.4;
+    white-space: nowrap;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.adm-btn:active {
+    transform: scale(0.97);
+}
+
+.adm-btn-primary {
+    background: linear-gradient(135deg, #38bdf8, #0284c7);
+    color: #090d16 !important;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(56, 189, 248, 0.28);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+.adm-btn-primary:hover {
+    background: linear-gradient(135deg, #7dd3fc, #0ea5e9);
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
+    color: #090d16 !important;
+}
+
+.adm-btn-secondary {
+    background: rgba(255, 255, 255, 0.07);
+    color: #e2e8f0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(10px);
+}
+
+.adm-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.28);
+    color: #ffffff !important;
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.adm-btn-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171 !important;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.adm-btn-danger:hover {
+    background: #ef4444;
+    color: #ffffff !important;
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+}
+
+.adm-btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 7px;
+    gap: 6px;
+}
+
+.adm-input,
+.adm-select,
+.adm-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 9px;
+    color: #f8fafc;
+    font-size: 13.5px;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.adm-input:focus,
+.adm-select:focus,
+.adm-textarea:focus {
+    border-color: #38bdf8;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+
+.adm-input::placeholder,
+.adm-textarea::placeholder {
+    color: #64748b;
+}
+
+.adm-select option {
+    background: #0f172a;
+    color: #f8fafc;
+}
+
+.adm-modal-close {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #94a3b8;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+}
+
+.adm-modal-close:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #f87171;
+    transform: scale(1.06);
+}
+
+
+

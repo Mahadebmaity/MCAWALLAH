@@ -7,12 +7,20 @@ import './admin.css';
 const ICON_OPTIONS = [
     { value: 'fa-robot', label: 'Robot 🤖' },
     { value: 'fa-wand-magic-sparkles', label: 'Magic Wand ✨' },
-    { value: 'fa-sparkles', label: 'Sparkles 🌟' },
     { value: 'fa-brain', label: 'Neural Brain 🧠' },
     { value: 'fa-code', label: 'Code Bracket 💻' },
     { value: 'fa-terminal', label: 'Terminal ⌨️' },
     { value: 'fa-circle-user', label: 'Avatar User 👤' }
 ];
+
+const cleanSnippet = (text) => {
+    if (!text) return '';
+    return text
+        .replace(/[*#_`]/g, '') // remove markdown artifacts
+        .replace(/^[•\-\+]\s+/gm, '') // remove bullet list marks
+        .replace(/\s+/g, ' ') // join newlines and multiple spaces
+        .trim();
+};
 
 export default function AiAssistantCMS() {
     const { authFetch } = useAuth();
@@ -508,45 +516,103 @@ export default function AiAssistantCMS() {
                             <p style={{ margin: 0, fontSize: '14px' }}>No visitor questions match your criteria.</p>
                         </div>
                     ) : (
-                        <div className="adm-table-wrap">
-                            <table className="adm-table">
+                        <div className="adm-table-wrap" style={{ overflowX: 'auto' }}>
+                            <table className="adm-table" style={{ minWidth: '720px' }}>
                                 <thead>
                                     <tr>
-                                        <th style={{ width: '170px' }}>Timestamp</th>
-                                        <th style={{ width: '130px' }}>User / IP</th>
-                                        <th>Question Asked</th>
-                                        <th style={{ width: '130px' }}>Engine Source</th>
+                                        <th style={{ width: '160px' }}>
+                                            <i className="fa-solid fa-clock" style={{ marginRight: '6px', color: '#38bdf8' }} />
+                                            Timestamp
+                                        </th>
+                                        <th style={{ width: '150px' }}>
+                                            <i className="fa-solid fa-user-shield" style={{ marginRight: '6px', color: '#818cf8' }} />
+                                            Visitor / IP
+                                        </th>
+                                        <th>
+                                            <i className="fa-solid fa-message" style={{ marginRight: '6px', color: '#38bdf8' }} />
+                                            Question &amp; AI Response
+                                        </th>
+                                        <th style={{ width: '130px', textAlign: 'center' }}>Engine</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {filteredLogs.map((log) => (
                                         <tr key={log._id}>
-                                            <td style={{ fontSize: '12px', color: '#94a3b8' }}>
-                                                {new Date(log.createdAt).toLocaleString()}
-                                            </td>
-                                            <td style={{ fontSize: '12px' }}>
-                                                <div style={{ fontWeight: '600', color: '#ffffff' }}>{log.userName}</div>
-                                                <div style={{ fontSize: '11px', color: '#64748b' }}>{log.ipAddress || 'Client'}</div>
+                                            <td>
+                                                <div style={{ fontSize: '12px', color: '#f8fafc', fontWeight: '600' }}>
+                                                    {new Date(log.createdAt).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                </div>
+                                                <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px', fontFamily: 'monospace' }}>
+                                                    {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                                </div>
                                             </td>
                                             <td>
-                                                <div style={{ fontWeight: '600', color: '#38bdf8', fontSize: '13px' }}>
-                                                    "{log.metadata?.query || log.details}"
+                                                <div style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    padding: '3px 8px',
+                                                    borderRadius: '6px',
+                                                    background: 'rgba(255, 255, 255, 0.05)',
+                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                    fontSize: '11.5px',
+                                                    fontWeight: '600',
+                                                    color: '#ffffff'
+                                                }}>
+                                                    <i className="fa-solid fa-user" style={{ fontSize: '10px', color: '#38bdf8' }} />
+                                                    <span>{log.userName || 'Visitor'}</span>
+                                                </div>
+                                                <div style={{ fontSize: '10.5px', color: '#64748b', marginTop: '4px', fontFamily: 'monospace' }}>
+                                                    {log.ipAddress ? (log.ipAddress.includes(',') ? log.ipAddress.split(',')[0].trim() : log.ipAddress) : 'Web Client'}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style={{
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                    fontWeight: '700',
+                                                    color: '#38bdf8',
+                                                    fontSize: '13px',
+                                                    background: 'rgba(56, 189, 248, 0.08)',
+                                                    padding: '4px 10px',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid rgba(56, 189, 248, 0.2)',
+                                                    marginBottom: log.metadata?.replySnippet ? '6px' : '0'
+                                                }}>
+                                                    <i className="fa-solid fa-quote-left" style={{ fontSize: '10px', opacity: 0.7 }} />
+                                                    <span>{log.metadata?.query || log.details}</span>
                                                 </div>
                                                 {log.metadata?.replySnippet && (
-                                                    <div style={{ fontSize: '11.5px', color: '#94a3b8', marginTop: '4px', fontStyle: 'italic' }}>
-                                                        AI: {log.metadata.replySnippet}...
+                                                    <div style={{
+                                                        fontSize: '12px',
+                                                        color: '#cbd5e1',
+                                                        lineHeight: '1.45',
+                                                        background: 'rgba(15, 23, 42, 0.6)',
+                                                        padding: '8px 12px',
+                                                        borderRadius: '8px',
+                                                        borderLeft: '3px solid #38bdf8',
+                                                        marginTop: '4px'
+                                                    }}>
+                                                        <span style={{ color: '#38bdf8', fontWeight: '700', marginRight: '6px' }}>AI Reply:</span>
+                                                        {cleanSnippet(log.metadata.replySnippet)}
                                                     </div>
                                                 )}
                                             </td>
-                                            <td>
+                                            <td style={{ textAlign: 'center' }}>
                                                 <span style={{
                                                     fontSize: '11px',
-                                                    padding: '3px 8px',
-                                                    borderRadius: '6px',
+                                                    padding: '4px 10px',
+                                                    borderRadius: '999px',
                                                     background: log.metadata?.engine?.includes('gemini') ? 'rgba(56, 189, 248, 0.15)' : 'rgba(168, 85, 247, 0.15)',
                                                     color: log.metadata?.engine?.includes('gemini') ? '#38bdf8' : '#c084fc',
-                                                    fontWeight: '700'
+                                                    border: `1px solid ${log.metadata?.engine?.includes('gemini') ? 'rgba(56, 189, 248, 0.35)' : 'rgba(168, 85, 247, 0.35)'}`,
+                                                    fontWeight: '700',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '5px'
                                                 }}>
+                                                    <i className={log.metadata?.engine?.includes('gemini') ? 'fa-solid fa-bolt' : 'fa-solid fa-robot'} style={{ fontSize: '10px' }} />
                                                     {log.metadata?.engine || 'semantic'}
                                                 </span>
                                             </td>
@@ -569,10 +635,25 @@ export default function AiAssistantCMS() {
                     </h3>
 
                     {/* Enable Toggle */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: 'rgba(255, 255, 255, 0.04)', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: '18px' }}>
-                        <div>
-                            <div style={{ fontWeight: '700', color: '#ffffff', fontSize: '14px' }}>Enable AI Floating Widget on Site</div>
-                            <div style={{ fontSize: '12px', color: '#94a3b8' }}>Turn the floating launcher pill and chat interface on or off.</div>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '20px',
+                        padding: '18px 22px',
+                        background: 'rgba(255, 255, 255, 0.04)',
+                        borderRadius: '14px',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        marginBottom: '20px',
+                        boxShadow: '0 4px 14px rgba(0, 0, 0, 0.15)'
+                    }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: '700', color: '#ffffff', fontSize: '14.5px', letterSpacing: '0.2px' }}>
+                                Enable AI Floating Widget on Site
+                            </div>
+                            <div style={{ fontSize: '12.5px', color: '#94a3b8', marginTop: '4px', lineHeight: '1.4' }}>
+                                Turn the floating launcher pill and chat interface on or off.
+                            </div>
                         </div>
                         <label className="adm-switch">
                             <input
@@ -825,10 +906,25 @@ export default function AiAssistantCMS() {
                     </h3>
 
                     {/* Show Action Cards */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: 'rgba(255, 255, 255, 0.04)', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: '14px' }}>
-                        <div>
-                            <div style={{ fontWeight: '700', color: '#ffffff', fontSize: '14px' }}>Enable Direct Action Cards in Replies</div>
-                            <div style={{ fontSize: '12px', color: '#94a3b8' }}>Shows clickable action buttons (e.g. Download Resume, Jump to Contact Form).</div>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '20px',
+                        padding: '18px 22px',
+                        background: 'rgba(255, 255, 255, 0.04)',
+                        borderRadius: '14px',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        marginBottom: '16px',
+                        boxShadow: '0 4px 14px rgba(0, 0, 0, 0.15)'
+                    }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: '700', color: '#ffffff', fontSize: '14.5px', letterSpacing: '0.2px' }}>
+                                Enable Direct Action Cards in Replies
+                            </div>
+                            <div style={{ fontSize: '12.5px', color: '#94a3b8', marginTop: '4px', lineHeight: '1.4' }}>
+                                Shows clickable action buttons (e.g. Download Resume, Jump to Contact Form).
+                            </div>
                         </div>
                         <label className="adm-switch">
                             <input
@@ -841,10 +937,25 @@ export default function AiAssistantCMS() {
                     </div>
 
                     {/* Sound Effects & Animations */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', background: 'rgba(255, 255, 255, 0.04)', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)', marginBottom: '20px' }}>
-                        <div>
-                            <div style={{ fontWeight: '700', color: '#ffffff', fontSize: '14px' }}>Sound &amp; Micro-Animations</div>
-                            <div style={{ fontSize: '12px', color: '#94a3b8' }}>Play smooth UI typing animations when the AI generates responses.</div>
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '20px',
+                        padding: '18px 22px',
+                        background: 'rgba(255, 255, 255, 0.04)',
+                        borderRadius: '14px',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        marginBottom: '24px',
+                        boxShadow: '0 4px 14px rgba(0, 0, 0, 0.15)'
+                    }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: '700', color: '#ffffff', fontSize: '14.5px', letterSpacing: '0.2px' }}>
+                                Sound &amp; Micro-Animations
+                            </div>
+                            <div style={{ fontSize: '12.5px', color: '#94a3b8', marginTop: '4px', lineHeight: '1.4' }}>
+                                Play smooth UI typing animations when the AI generates responses.
+                            </div>
                         </div>
                         <label className="adm-switch">
                             <input

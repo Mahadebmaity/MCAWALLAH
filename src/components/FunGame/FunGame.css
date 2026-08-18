@@ -732,3 +732,62 @@
         font-size: 1.15rem;
     }
 }
+
+/* ══════════════════════════════════════════════════
+   STANDALONE ARCADE LOUNGE CONTROLS & TABS
+   ══════════════════════════════════════════════════ */
+.game__tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    border-radius: 12px;
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    background: rgba(15, 23, 42, 0.75);
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    user-select: none;
+}
+
+.game__tab-btn:hover {
+    color: #f8fafc;
+    border-color: rgba(255, 255, 255, 0.28);
+    background: rgba(30, 41, 59, 0.85);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.game__tab-btn--active {
+    color: #ffffff !important;
+    font-weight: 800;
+    box-shadow: 0 6px 22px rgba(56, 189, 248, 0.35);
+    transform: translateY(-2px);
+}
+
+.game__leaderboard-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.25));
+    border: 1.5px solid rgba(245, 158, 11, 0.45);
+    color: #fbbf24;
+    font-weight: 700;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.15);
+}
+
+.game__leaderboard-btn:hover {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.28), rgba(217, 119, 6, 0.4));
+    border-color: #f59e0b;
+    color: #ffffff;
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+}

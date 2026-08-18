@@ -13,7 +13,7 @@ import {
     resetToDefaultCredentials
 } from '../controllers/authController.js';
 import { protectUser } from '../middleware/auth.js';
-import { upload } from '../middleware/upload.js';
+import { uploadFlexible } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -31,7 +31,7 @@ router.put('/preferences', protectUser, updatePreferences);
 router.post('/reset-defaults', protectUser, resetToDefaultCredentials);
 
 // Avatar management
-router.post('/avatar', protectUser, upload.single('avatar'), uploadAvatar);
+router.post('/avatar', protectUser, uploadFlexible, uploadAvatar);
 router.delete('/avatar', protectUser, removeAvatar);
 
 export default router;

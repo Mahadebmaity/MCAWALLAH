@@ -27,9 +27,18 @@ export const getMediaUrl = (path) => {
         return pathPart.startsWith('/') ? pathPart : `/${pathPart}`;
     }
 
-    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:') || path.startsWith('blob:')) {
+    if (path.startsWith('https://') || path.startsWith('data:') || path.startsWith('blob:')) {
         return path;
     }
+
+    // Auto-upgrade http to https for live deployments (e.g. onrender.com, vercel.app, cloudinary)
+    if (path.startsWith('http://')) {
+        if (path.includes('onrender.com') || path.includes('vercel.app') || path.includes('cloudinary.com') || path.includes('netlify.app')) {
+            return path.replace(/^http:\/\//, 'https://');
+        }
+        return path;
+    }
+
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
 
     if (import.meta.env?.VITE_API_URL) {
@@ -64,8 +73,16 @@ export const getDocUrl = (urlOrDoc) => {
         url = url.replace(/^https?:\/\/(localhost|127\.0\.0\.1):5000/, '');
     }
 
+    // Auto-upgrade http to https for live hostings
+    if (url.startsWith('http://')) {
+        if (url.includes('onrender.com') || url.includes('vercel.app') || url.includes('cloudinary.com') || url.includes('netlify.app')) {
+            url = url.replace(/^http:\/\//, 'https://');
+        }
+        return url;
+    }
+
     // External Cloudinary / AWS / HTTPS URLs
-    if (url.startsWith('https://') || url.startsWith('http://')) {
+    if (url.startsWith('https://')) {
         return url;
     }
 
@@ -87,3 +104,4 @@ export const getDocUrl = (urlOrDoc) => {
 
     return cleanPath;
 };
+

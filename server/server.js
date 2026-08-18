@@ -59,6 +59,24 @@ if (fs.existsSync(docsPath)) {
     app.use('/api/docs', express.static(docsPath));
 }
 
+// Graceful fallback for missing local uploads (e.g. Render ephemeral disk restarts)
+app.get(['/uploads/:filename', '/api/uploads/:filename'], (req, res) => {
+    const filename = req.params.filename || '';
+    // If a PDF was requested, fallback to default system resume
+    if (filename.toLowerCase().endsWith('.pdf')) {
+        const fallbackPdf = path.resolve(docsPath, 'PORTFOLIO_SYSTEM_DOCUMENTATION.pdf');
+        if (fs.existsSync(fallbackPdf)) {
+            return res.sendFile(fallbackPdf);
+        }
+    }
+    res.status(404).json({
+        status: 404,
+        message: `File "${filename}" was stored on temporary instance storage and has expired. Please re-upload via the Admin CMS with Cloudinary enabled.`,
+        filename
+    });
+});
+
+
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({

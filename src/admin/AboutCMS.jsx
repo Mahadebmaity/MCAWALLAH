@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { API_BASE } from '../config/api';
+import { API_BASE, getDocUrl } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
@@ -449,6 +449,19 @@ export default function AboutCMS() {
         });
     };
 
+    const copyResumeUrl = () => {
+        if (!about.resumeUrl) return;
+        const resolved = getDocUrl(about.resumeUrl);
+        navigator.clipboard.writeText(resolved);
+        setCopiedUrl(true);
+        setToast({
+            type: 'success',
+            title: 'URL Copied! 📋',
+            message: 'Direct resume URL copied to clipboard.'
+        });
+        setTimeout(() => setCopiedUrl(false), 2000);
+    };
+
     const deleteResumeItem = (index) => {
         if (!window.confirm('Are you sure you want to remove this resume from your vault?')) return;
         setAbout(prev => {
@@ -493,13 +506,6 @@ export default function AboutCMS() {
             title: 'Resume Link Added! 🔗',
             message: 'External CV link saved in your vault.'
         });
-    };
-
-    const copyResumeUrl = () => {
-        if (!about.resumeUrl) return;
-        navigator.clipboard.writeText(about.resumeUrl);
-        setCopiedUrl(true);
-        setTimeout(() => setCopiedUrl(false), 3000);
     };
 
     if (loading) {
@@ -792,7 +798,7 @@ export default function AboutCMS() {
                                 {about.resumeUrl && (
                                     <>
                                         <a
-                                            href={about.resumeUrl}
+                                            href={getDocUrl(about.resumeUrl)}
                                             target="_blank"
                                             rel="noreferrer"
                                             className="adm-btn adm-btn-secondary adm-btn-sm"
@@ -801,7 +807,7 @@ export default function AboutCMS() {
                                             <i className="fa-solid fa-arrow-up-right-from-square" /> Preview
                                         </a>
                                         <a
-                                            href={about.resumeUrl}
+                                            href={getDocUrl(about.resumeUrl)}
                                             download
                                             className="adm-btn adm-btn-primary adm-btn-sm"
                                             style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}

@@ -452,8 +452,9 @@ export default function SkillsCMS() {
                                 {editingSkill ? 'Edit Technical Skill' : 'Add New Technical Skill'}
                             </h3>
                             <button
+                                type="button"
                                 onClick={() => setModalOpen(false)}
-                                style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '20px', cursor: 'pointer' }}
+                                className="adm-modal-close"
                             >
                                 <i className="fa-solid fa-xmark"></i>
                             </button>

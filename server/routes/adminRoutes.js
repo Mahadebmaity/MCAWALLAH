@@ -28,7 +28,7 @@ import {
     deleteSubscriber
 } from '../controllers/adminController.js';
 import { protectAdmin } from '../middleware/auth.js';
-import { upload } from '../middleware/upload.js';
+import { uploadFlexible } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -77,7 +77,7 @@ router.get('/games/scores', getGameAnalytics);
 router.delete('/games/scores/:id', deleteGameScore);
 
 // Document Upload
-router.post('/upload/document', upload.single('document'), uploadDocument);
+router.post('/upload/document', uploadFlexible, uploadDocument);
 
 // JSON Backup & Restore
 router.get('/backup/export', exportBackup);

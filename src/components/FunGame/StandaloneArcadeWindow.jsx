@@ -333,12 +333,11 @@ export default function StandaloneArcadeWindow() {
                         key={g.slug}
                         onClick={() => handleSwitchGame(g.slug)}
                         className={`game__tab-btn ${activeSlug === g.slug ? "game__tab-btn--active" : ""}`}
-                        style={{
-                            fontSize: '13px',
-                            padding: '10px 22px',
-                            borderColor: activeSlug === g.slug ? g.color : 'transparent',
-                            background: activeSlug === g.slug ? g.color : undefined
-                        }}
+                        style={activeSlug === g.slug ? {
+                            borderColor: g.color,
+                            background: g.color,
+                            boxShadow: `0 6px 20px ${g.color}55`
+                        } : {}}
                     >
                         <i className={g.icon} />
                         <span>{g.title}</span>

@@ -674,8 +674,9 @@ export default function GamesCMS() {
                                 {editingGame ? 'Edit Game Card' : 'Add New Game Card'}
                             </h3>
                             <button
+                                type="button"
                                 onClick={() => setModalOpen(false)}
-                                style={{ background: 'none', border: 'none', color: 'var(--adm-text-muted)', cursor: 'pointer', fontSize: '18px' }}
+                                className="adm-modal-close"
                             >
                                 <i className="fa-solid fa-xmark"></i>
                             </button>

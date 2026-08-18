@@ -505,7 +505,7 @@ export default function ProjectsCMS() {
                     <div className="adm-modal">
                         <div className="adm-modal-header">
                             <h3 className="adm-card-title">{editingProject ? 'Edit Project' : 'Add New Project'}</h3>
-                            <button onClick={() => setModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '20px', cursor: 'pointer' }}>
+                            <button type="button" onClick={() => setModalOpen(false)} className="adm-modal-close">
                                 <i className="fa-solid fa-xmark"></i>
                             </button>
                         </div>

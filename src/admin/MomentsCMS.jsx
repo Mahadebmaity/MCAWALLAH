@@ -103,6 +103,7 @@ export default function MomentsCMS() {
 
         setUploading(true);
         const data = new FormData();
+        data.append('image', file);
         data.append('file', file);
         data.append('folder', 'moments');
 

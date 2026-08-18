@@ -396,7 +396,7 @@ export default function TimelineCMS() {
                     <div className="adm-modal" style={{ maxWidth: '580px', width: '100%' }}>
                         <div className="adm-modal-header">
                             <h3 className="adm-card-title">{editingItem ? 'Edit Timeline Entry' : 'Add New Milestone'}</h3>
-                            <button onClick={() => setModalOpen(false)} style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '20px', cursor: 'pointer' }}>
+                            <button type="button" onClick={() => setModalOpen(false)} className="adm-modal-close">
                                 <i className="fa-solid fa-xmark"></i>
                             </button>
                         </div>

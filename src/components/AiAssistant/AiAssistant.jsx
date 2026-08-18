@@ -460,7 +460,7 @@ export default function AiAssistant() {
                         {messages.map((msg) => (
                             <div key={msg.id} className={`ai-message ${msg.sender}`}>
                                 <div className="ai-msg-avatar">
-                                    <i className={msg.sender === 'assistant' ? "fa-solid fa-sparkles" : "fa-solid fa-user"} />
+                                    <i className={msg.sender === 'assistant' ? "fa-solid fa-robot" : "fa-solid fa-user"} />
                                 </div>
 
                                 <div className="ai-msg-bubble">
@@ -495,7 +495,7 @@ export default function AiAssistant() {
                         {loading && (
                             <div className="ai-message assistant">
                                 <div className="ai-msg-avatar">
-                                    <i className="fa-solid fa-sparkles" />
+                                    <i className="fa-solid fa-robot" />
                                 </div>
                                 <div className="ai-typing-indicator">
                                     <div className="ai-typing-dot" />
@@ -605,7 +605,7 @@ export default function AiAssistant() {
                         {messages.map((msg) => (
                             <div key={msg.id} className={`ai-message ${msg.sender}`}>
                                 <div className="ai-msg-avatar">
-                                    <i className={msg.sender === 'assistant' ? "fa-solid fa-sparkles" : "fa-solid fa-user"} />
+                                    <i className={msg.sender === 'assistant' ? "fa-solid fa-robot" : "fa-solid fa-user"} />
                                 </div>
 
                                 <div className="ai-msg-bubble">
@@ -642,7 +642,7 @@ export default function AiAssistant() {
                         {loading && (
                             <div className="ai-message assistant">
                                 <div className="ai-msg-avatar">
-                                    <i className="fa-solid fa-sparkles" />
+                                    <i className="fa-solid fa-robot" />
                                 </div>
                                 <div className="ai-typing-indicator">
                                     <div className="ai-typing-dot" />

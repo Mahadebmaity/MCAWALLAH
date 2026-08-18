@@ -97,13 +97,6 @@ function processSemanticIntent(query, knowledge) {
                 icon: 'fa-solid fa-file-pdf',
                 target: '/resume.pdf',
                 actionText: 'Download Resume'
-            },
-            {
-                type: 'doc',
-                title: 'View 28-Section System Spec',
-                icon: 'fa-solid fa-graduation-cap',
-                target: '/docs/PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf',
-                actionText: 'View Spec PDF'
             }
         ];
     }
