@@ -379,23 +379,69 @@
 
 .adm-input,
 .adm-textarea,
-.adm-select {
+.adm-select,
+select {
     width: 100%;
     padding: 11px 14px;
-    background: var(--adm-surface-2);
-    border: 1px solid var(--adm-border);
+    background: var(--adm-surface-2, #1e293b);
+    border: 1px solid var(--adm-border, rgba(255, 255, 255, 0.1));
     border-radius: 8px;
-    color: #fff;
+    color: #f8fafc;
     font-size: 14px;
     outline: none;
     transition: all 0.2s ease;
+    color-scheme: dark;
+}
+
+select option,
+.adm-select option,
+.adm-input option,
+option {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    padding: 10px 14px;
+}
+
+select option:hover,
+select option:focus,
+select option:checked {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
 }
 
 .adm-input:focus,
 .adm-textarea:focus,
-.adm-select:focus {
-    border-color: var(--adm-border-focus);
+.adm-select:focus,
+select:focus {
+    border-color: var(--adm-border-focus, #38bdf8);
     box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+/* Styled File Upload Input */
+input[type="file"].adm-input {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+input[type="file"].adm-input::file-selector-button {
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #38bdf8;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    margin-right: 12px;
+    transition: all 0.2s ease;
+}
+
+input[type="file"].adm-input::file-selector-button:hover {
+    background: rgba(56, 189, 248, 0.3);
+    border-color: #38bdf8;
+    color: #ffffff;
 }
 
 .adm-grid-2 {

@@ -162,7 +162,8 @@ input, textarea, select {
 
 .adm-input,
 .adm-select,
-.adm-textarea {
+.adm-textarea,
+select {
     width: 100%;
     padding: 10px 14px;
     background: rgba(255, 255, 255, 0.06);
@@ -174,11 +175,13 @@ input, textarea, select {
     outline: none;
     transition: all 0.2s ease;
     box-sizing: border-box;
+    color-scheme: dark;
 }
 
 .adm-input:focus,
 .adm-select:focus,
-.adm-textarea:focus {
+.adm-textarea:focus,
+select:focus {
     border-color: #38bdf8;
     background: rgba(255, 255, 255, 0.1);
     box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
@@ -189,9 +192,12 @@ input, textarea, select {
     color: #64748b;
 }
 
-.adm-select option {
-    background: #0f172a;
-    color: #f8fafc;
+select option,
+.adm-select option,
+.adm-input option,
+option {
+    background: #0f172a !important;
+    color: #f8fafc !important;
 }
 
 .adm-modal-close {

@@ -886,7 +886,7 @@ export default function DocumentsCMS() {
                             <button
                                 type="button"
                                 onClick={() => setShowUploadModal(false)}
-                                style={{ background: 'none', border: 'none', color: 'var(--adm-text-muted)', fontSize: '16px', cursor: 'pointer' }}
+                                className="adm-modal-close"
                             >
                                 <i className="fa-solid fa-xmark" />
                             </button>
@@ -909,7 +909,7 @@ export default function DocumentsCMS() {
                                 <div className="adm-form-group">
                                     <label className="adm-label">Category</label>
                                     <select
-                                        className="adm-input"
+                                        className="adm-select"
                                         value={form.category}
                                         onChange={(e) => setForm(p => ({ ...p, category: e.target.value }))}
                                     >
