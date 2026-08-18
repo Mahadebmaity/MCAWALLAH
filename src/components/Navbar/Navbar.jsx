@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { usePortfolioData } from "../../context/DataContext";
 import { trackActivity } from "../../utils/analytics";
 import AuthModal from "../AuthModal/AuthModal";
+import LogoutFeedbackModal from "../Feedback/LogoutFeedbackModal";
 import "./Navbar.css";
 
 const DEFAULT_NAV_LINKS = [
@@ -61,6 +62,7 @@ export default function Navbar() {
     const [resumeDropdown, setResumeDropdown] = useState(false);
     const [activePanel, setActivePanel] = useState(null); // "profile"|"avatar"|"prefs"|"password"
     const [panelOpen, setPanelOpen] = useState(false);
+    const [showExitFeedback, setShowExitFeedback] = useState(false);
 
     /* ── form state ── */
     const [profileForm, setProfileForm] = useState({ name: "", email: "" });
@@ -211,10 +213,39 @@ export default function Navbar() {
         performDownload();
     };
 
+    /* ── exit intent feedback for logged-in public users ── */
+    useEffect(() => {
+        if (!user || user.role === 'admin') return;
+        let triggered = false;
+
+        const handleMouseLeave = (e) => {
+            if (e.clientY <= 6 && !triggered) {
+                const hasShown = sessionStorage.getItem("exit_feedback_shown");
+                if (!hasShown) {
+                    sessionStorage.setItem("exit_feedback_shown", "true");
+                    triggered = true;
+                    setShowExitFeedback(true);
+                }
+            }
+        };
+
+        document.addEventListener("mouseleave", handleMouseLeave);
+        return () => document.removeEventListener("mouseleave", handleMouseLeave);
+    }, [user]);
+
     /* ── logout ── */
     const handleLogout = async () => {
         setDropdown(false);
         closePanel();
+        if (user && user.role !== 'admin') {
+            setShowExitFeedback(true);
+        } else {
+            await logout();
+        }
+    };
+
+    const performFinalLogout = async () => {
+        setShowExitFeedback(false);
         await logout();
     };
 
@@ -922,6 +953,16 @@ export default function Navbar() {
                         )}
                     </div>
                 </div>
+            )}
+
+            {/* ── User Exit & Logout Feedback Modal ── */}
+            {showExitFeedback && user && (
+                <LogoutFeedbackModal
+                    isOpen={showExitFeedback}
+                    user={user}
+                    onClose={() => setShowExitFeedback(false)}
+                    onLogout={performFinalLogout}
+                />
             )}
         </>
     );
