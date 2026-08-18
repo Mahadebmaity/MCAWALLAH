@@ -77,8 +77,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 0 clamp(1rem, 3vw, 2.5rem);
+  gap: clamp(8px, 1.2vw, 16px);
+  padding: 0 clamp(10px, 1.5vw, 24px);
   background: var(--nav-bg);
   border-bottom: 1px solid var(--nav-border);
   backdrop-filter: blur(var(--nav-blur, 20px)) saturate(160%);
@@ -86,19 +86,20 @@
   font-family: var(--font-b);
   pointer-events: auto;
   transition: all var(--t);
+  box-sizing: border-box;
 }
 
 /* 1. Floating Frosted Glass Dock (macOS island) */
 .navbar-wrapper--floating-dock .navbar {
   top: 14px;
-  width: max-content;
-  max-width: min(96vw, 1320px);
+  width: fit-content;
+  max-width: calc(100vw - 28px);
   border-radius: var(--nav-radius, 999px);
   border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 16px 45px rgba(0, 0, 0, 0.35);
   background: var(--nav-bg);
-  padding: 0 24px;
-  gap: 18px;
+  padding: 0 clamp(12px, 1.4vw, 22px);
+  gap: clamp(8px, 1.1vw, 16px);
 }
 
 .navbar-wrapper--floating-dock.navbar-wrapper--scrolled .navbar {
@@ -110,14 +111,14 @@
 /* 2. Cyber Neon Capsule */
 .navbar-wrapper--cyber-capsule .navbar {
   top: 14px;
-  width: max-content;
-  max-width: min(96vw, 1320px);
+  width: fit-content;
+  max-width: calc(100vw - 28px);
   border-radius: 14px;
   background: rgba(6, 10, 25, 0.92);
   border: 1.5px solid var(--nav-accent, var(--accent));
   box-shadow: 0 0 25px color-mix(in srgb, var(--nav-accent, var(--accent)) 40%, transparent), inset 0 0 15px color-mix(in srgb, var(--nav-accent, var(--accent)) 15%, transparent);
-  padding: 0 24px;
-  gap: 16px;
+  padding: 0 clamp(12px, 1.4vw, 22px);
+  gap: clamp(8px, 1.1vw, 16px);
 }
 
 [data-theme="light"] .navbar-wrapper--cyber-capsule .navbar {
@@ -127,14 +128,14 @@
 /* 3. Minimalist Island Pill */
 .navbar-wrapper--minimal-island .navbar {
   top: 14px;
-  width: max-content;
-  max-width: min(96vw, 1260px);
+  width: fit-content;
+  max-width: calc(100vw - 28px);
   border-radius: var(--nav-radius, 999px);
   background: rgba(15, 23, 42, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
-  padding: 0 22px;
-  gap: 16px;
+  padding: 0 clamp(12px, 1.4vw, 20px);
+  gap: clamp(8px, 1.1vw, 16px);
 }
 
 [data-theme="light"] .navbar-wrapper--minimal-island .navbar {
@@ -459,7 +460,7 @@
 .navbar__links {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: clamp(2px, 0.4vw, 5px);
   list-style: none;
   flex-shrink: 0;
 }
@@ -467,12 +468,12 @@
 .navbar__link {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: 5px;
+  padding: 6px clamp(6px, 0.7vw, 11px);
   background: none;
   border: none;
   font-family: var(--font-b);
-  font-size: 0.84rem;
+  font-size: clamp(0.78rem, 0.85vw, 0.84rem);
   font-weight: 500;
   color: var(--text-secondary);
   border-radius: 999px;
@@ -531,7 +532,7 @@
 .navbar__actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: clamp(6px, 0.7vw, 10px);
   flex-shrink: 0;
 }
 
@@ -544,17 +545,18 @@
 .navbar__resume-btn {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 14px;
+  gap: 6px;
+  padding: 6px clamp(8px, 0.8vw, 12px);
   background: transparent;
   color: var(--text-primary);
   border: 1.5px solid var(--nav-border);
   border-radius: 8px;
   font-family: var(--font-b);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--t);
+  white-space: nowrap;
 }
 
 .navbar__resume-btn:hover,
@@ -590,11 +592,11 @@
 .navbar__cta-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 16px;
+  gap: 6px;
+  padding: 6px clamp(10px, 1vw, 14px);
   border-radius: 999px;
   font-family: var(--font-b);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   border: none;
@@ -1616,6 +1618,28 @@
 /* ══════════════════════════
    RESPONSIVE
 ══════════════════════════ */
+@media (max-width: 1240px) {
+  .navbar__status-pill {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1080px) {
+  .navbar__cta-btn {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+  .navbar__resume-btn {
+    padding: 6px 9px;
+    font-size: 0.78rem;
+  }
+  .navbar__link {
+    padding: 5px 7px;
+    font-size: 0.78rem;
+    gap: 4px;
+  }
+}
+
 @media (max-width: 960px) {
   .navbar__links {
     display: none;
