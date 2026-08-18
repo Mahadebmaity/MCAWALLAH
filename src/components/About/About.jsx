@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePortfolioData } from "../../context/DataContext";
 import { useAuth } from "../../context/AuthContext";
 import { getDocUrl, downloadFile } from "../../config/api";
+import ResumeModal from "../ResumeModal/ResumeModal";
 import "./About.css";
 
 const DEFAULT_SKILLS = [
@@ -104,6 +105,7 @@ export default function About() {
     const [hobbyRef, hobbyIn] = useInView(0.2);
 
     const [imgError, setImgError] = useState(false);
+    const [previewResume, setPreviewResume] = useState(null);
 
     const initials = about.displayName
         ? about.displayName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
@@ -126,7 +128,8 @@ export default function About() {
     const handleResumePreview = (resItem) => {
         const performPreview = () => {
             const targetUrl = resItem.url || about.resumeUrl || "/resume.pdf";
-            window.open(getDocUrl(targetUrl), "_blank");
+            const title = resItem.title || about.resumeLabel || "Resume";
+            setPreviewResume({ url: targetUrl, title, fileSize: resItem.fileSize || 'PDF' });
         };
         if (!requireAuth(performPreview, "Please Sign In or Sign Up to preview resume documents.", "register")) return;
         performPreview();
@@ -326,6 +329,14 @@ export default function About() {
                 </div>
 
             </div>
+
+            {/* ══ Dedicated Glassmorphic Resume Viewer Popup Modal ══ */}
+            {previewResume && (
+                <ResumeModal
+                    resume={previewResume}
+                    onClose={() => setPreviewResume(null)}
+                />
+            )}
         </section>
     );
 }

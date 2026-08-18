@@ -6,6 +6,7 @@ import { trackActivity } from "../../utils/analytics";
 import { getDocUrl, downloadFile } from "../../config/api";
 import AuthModal from "../AuthModal/AuthModal";
 import LogoutFeedbackModal from "../Feedback/LogoutFeedbackModal";
+import ResumeModal from "../ResumeModal/ResumeModal";
 import "./Navbar.css";
 
 const DEFAULT_NAV_LINKS = [
@@ -61,6 +62,7 @@ export default function Navbar() {
     const [showAuth, setShowAuth] = useState(false);
     const [dropdown, setDropdown] = useState(false);
     const [resumeDropdown, setResumeDropdown] = useState(false);
+    const [previewResumeModal, setPreviewResumeModal] = useState(null);
     const [activePanel, setActivePanel] = useState(null); // "profile"|"avatar"|"prefs"|"password"
     const [panelOpen, setPanelOpen] = useState(false);
     const [showExitFeedback, setShowExitFeedback] = useState(false);
@@ -410,16 +412,21 @@ export default function Navbar() {
                                                                 <span className="navbar__resume-dropdown-title">{r.title || r.fileName || `Resume ${idx + 1}`}</span>
                                                             </div>
                                                             <div className="navbar__resume-dropdown-actions">
-                                                                <a
-                                                                    href={getDocUrl(r.url)}
-                                                                    target="_blank"
-                                                                    rel="noreferrer"
+                                                                <button
+                                                                    type="button"
                                                                     className="navbar__resume-icon-btn"
-                                                                    title="Preview Online"
-                                                                    onClick={() => setResumeDropdown(false)}
+                                                                    title="Preview Online (Popup)"
+                                                                    onClick={() => {
+                                                                        setResumeDropdown(false);
+                                                                        setPreviewResumeModal({
+                                                                            url: r.url || about.resumeUrl || '/resume.pdf',
+                                                                            title: r.title || r.fileName || 'Resume',
+                                                                            fileSize: r.fileSize || 'PDF'
+                                                                        });
+                                                                    }}
                                                                 >
-                                                                    <i className="fa-solid fa-arrow-up-right-from-square" />
-                                                                </a>
+                                                                    <i className="fa-solid fa-eye" />
+                                                                </button>
                                                                 <button
                                                                     type="button"
                                                                     className="navbar__resume-icon-btn navbar__resume-icon-btn--dl"
@@ -956,6 +963,14 @@ export default function Navbar() {
                     user={user}
                     onClose={() => setShowExitFeedback(false)}
                     onLogout={performFinalLogout}
+                />
+            )}
+
+            {/* ── Dedicated Glassmorphic Resume Viewer Popup Modal ── */}
+            {previewResumeModal && (
+                <ResumeModal
+                    resume={previewResumeModal}
+                    onClose={() => setPreviewResumeModal(null)}
                 />
             )}
         </>
