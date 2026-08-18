@@ -183,6 +183,8 @@ export default function ProjectsCMS() {
     const [editingProject, setEditingProject] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [toast, setToast] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('All');
     const fileInputRef = useRef(null);
 
     const [formData, setFormData] = useState({
@@ -376,6 +378,16 @@ export default function ProjectsCMS() {
         return <div style={{ textAlign: 'center', padding: '60px' }}>Loading Projects...</div>;
     }
 
+    const filteredProjects = projects.filter(p => {
+        const matchesCat = categoryFilter === 'All' || p.category === categoryFilter;
+        const query = searchQuery.trim().toLowerCase();
+        const matchesSearch = !query || 
+            (p.title && p.title.toLowerCase().includes(query)) ||
+            (p.desc && p.desc.toLowerCase().includes(query)) ||
+            (Array.isArray(p.tags) ? p.tags.join(' ') : (p.tags || '')).toLowerCase().includes(query);
+        return matchesCat && matchesSearch;
+    });
+
     return (
         <div>
             {/* Interactive Toast Notification Popup */}
@@ -397,8 +409,56 @@ export default function ProjectsCMS() {
                     </button>
                 </div>
 
-                <div className="adm-projects-grid">
-                    {projects.map((project) => {
+                {/* ── Quick Stats Metric Counters ── */}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                    <span style={{ padding: '5px 12px', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '8px', fontSize: '12px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <i className="fa-solid fa-layer-group" /> Total: {projects.length}
+                    </span>
+                    <span style={{ padding: '5px 12px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px', fontSize: '12px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <i className="fa-solid fa-globe" /> Public: {projects.filter(p => p.isPublic).length}
+                    </span>
+                    <span style={{ padding: '5px 12px', background: 'rgba(99, 102, 241, 0.1)', color: '#818cf8', border: '1px solid rgba(99, 102, 241, 0.3)', borderRadius: '8px', fontSize: '12px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <i className="fa-solid fa-bolt" /> Live Apps: {projects.filter(p => p.status === 'Live').length}
+                    </span>
+                    <span style={{ padding: '5px 12px', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '8px', fontSize: '12px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <i className="fa-solid fa-code-branch" /> Open Source: {projects.filter(p => p.status === 'Open Source').length}
+                    </span>
+                </div>
+
+                {/* ── Search & Filter Toolbar ── */}
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', flex: '1 1 240px' }}>
+                        <i className="fa-solid fa-magnifying-glass" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--adm-text-muted)', fontSize: '13px' }} />
+                        <input
+                            type="text"
+                            className="adm-input"
+                            placeholder="Search projects by title, tag, or description..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{ paddingLeft: '36px' }}
+                        />
+                    </div>
+
+                    <select
+                        className="adm-select"
+                        value={categoryFilter}
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                        style={{ width: 'auto', minWidth: '140px', flex: '0 0 auto' }}
+                    >
+                        <option value="All">All Categories</option>
+                        {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                    </select>
+                </div>
+
+                {filteredProjects.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '48px 20px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '12px', border: '1px dashed var(--adm-border)' }}>
+                        <i className="fa-solid fa-folder-open" style={{ fontSize: '32px', color: 'var(--adm-text-muted)', marginBottom: '12px', display: 'block' }} />
+                        <p style={{ margin: '0 0 6px', fontSize: '14px', fontWeight: 600, color: 'var(--adm-text-main)' }}>No matching projects found</p>
+                        <p style={{ margin: 0, fontSize: '12.5px', color: 'var(--adm-text-muted)' }}>Try adjusting your search query or category filter.</p>
+                    </div>
+                ) : (
+                    <div className="adm-projects-grid">
+                        {filteredProjects.map((project) => {
                         const getCategoryIcon = (cat) => {
                             switch ((cat || '').toLowerCase()) {
                                 case 'react': return 'fa-brands fa-react';
@@ -642,7 +702,8 @@ export default function ProjectsCMS() {
                         );
                     })}
                 </div>
-            </div>
+            )}
+        </div>
 
             {/* ── Add/Edit Modal ── */}
             {modalOpen && (
@@ -781,6 +842,38 @@ export default function ProjectsCMS() {
 
                             <div className="adm-grid-2">
                                 <div className="adm-form-group">
+                                    <label className="adm-label">
+                                        <i className="fa-solid fa-star" style={{ color: '#f59e0b', marginRight: '6px' }} />
+                                        GitHub Stars
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        className="adm-input"
+                                        value={formData.stars}
+                                        onChange={(e) => setFormData(p => ({ ...p, stars: parseInt(e.target.value) || 0 }))}
+                                        placeholder="0"
+                                    />
+                                </div>
+
+                                <div className="adm-form-group">
+                                    <label className="adm-label">
+                                        <i className="fa-solid fa-code-fork" style={{ color: '#38bdf8', marginRight: '6px' }} />
+                                        GitHub Forks
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        className="adm-input"
+                                        value={formData.forks}
+                                        onChange={(e) => setFormData(p => ({ ...p, forks: parseInt(e.target.value) || 0 }))}
+                                        placeholder="0"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="adm-grid-2">
+                                <div className="adm-form-group">
                                     <label className="adm-label">Accent Color</label>
                                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                                         <input
@@ -799,19 +892,35 @@ export default function ProjectsCMS() {
                                 </div>
 
                                 <div className="adm-form-group">
-                                    <label className="adm-label">Visibility</label>
-                                    <div className="adm-toggle-wrap" style={{ marginTop: '10px' }}>
-                                        <label className="adm-switch">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.isPublic}
-                                                onChange={(e) => setFormData(p => ({ ...p, isPublic: e.target.checked }))}
-                                            />
-                                            <span className="adm-slider"></span>
-                                        </label>
-                                        <span style={{ fontSize: '13px', color: 'var(--adm-text-muted)' }}>
-                                            {formData.isPublic ? 'Public' : 'Private'}
-                                        </span>
+                                    <label className="adm-label">Visibility & Showcase</label>
+                                    <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginTop: '8px' }}>
+                                        <div className="adm-toggle-wrap">
+                                            <label className="adm-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.isPublic}
+                                                    onChange={(e) => setFormData(p => ({ ...p, isPublic: e.target.checked }))}
+                                                />
+                                                <span className="adm-slider"></span>
+                                            </label>
+                                            <span style={{ fontSize: '13px', color: 'var(--adm-text-muted)' }}>
+                                                {formData.isPublic ? 'Public' : 'Private'}
+                                            </span>
+                                        </div>
+
+                                        <div className="adm-toggle-wrap">
+                                            <label className="adm-switch">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.isFeatured}
+                                                    onChange={(e) => setFormData(p => ({ ...p, isFeatured: e.target.checked }))}
+                                                />
+                                                <span className="adm-slider"></span>
+                                            </label>
+                                            <span style={{ fontSize: '13px', color: 'var(--adm-text-muted)' }}>
+                                                {formData.isFeatured ? '🌟 Featured' : 'Normal'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
