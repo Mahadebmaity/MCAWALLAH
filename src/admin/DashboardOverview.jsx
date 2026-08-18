@@ -1,8 +1,7 @@
-// src/admin/DashboardOverview.jsx
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { API_BASE } from '../config/api';
+import { API_BASE, downloadFile } from '../config/api';
 import './admin.css';
 
 export default function DashboardOverview() {
@@ -71,15 +70,14 @@ export default function DashboardOverview() {
                     <Link to="/admin/docs" className="adm-btn adm-btn-primary" style={{ textDecoration: 'none' }}>
                         <i className="fa-solid fa-folder-open" /> Open Docs &amp; Files Vault
                     </Link>
-                    <a
-                        href="/docs/PORTFOLIO_SYSTEM_DOCUMENTATION.pdf"
-                        target="_blank"
-                        rel="noreferrer"
+                    <button
+                        type="button"
+                        onClick={() => downloadFile('/docs/PORTFOLIO_SYSTEM_DOCUMENTATION.pdf', 'PORTFOLIO_SYSTEM_DOCUMENTATION.pdf')}
                         className="adm-btn adm-btn-secondary"
-                        style={{ color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.4)', textDecoration: 'none' }}
+                        style={{ color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.4)', cursor: 'pointer' }}
                     >
                         <i className="fa-solid fa-download" /> Download PDF (1.6 MB)
-                    </a>
+                    </button>
                 </div>
             </div>
 

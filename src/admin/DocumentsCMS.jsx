@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { API_BASE, getDocUrl } from '../config/api';
+import { API_BASE, getDocUrl, downloadFile } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
@@ -304,14 +304,14 @@ export default function DocumentsCMS() {
                             <i className="fa-solid fa-eye" /> Preview PDF
                         </button>
 
-                        <a
-                            href={getDocUrl('/docs/PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf')}
-                            download="MCA_WALLAH_28_Section_Documentation.pdf"
+                        <button
+                            type="button"
+                            onClick={() => downloadFile('/docs/PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf', 'MCA_WALLAH_28_Section_Documentation.pdf')}
                             className="adm-doc-btn-download"
-                            style={{ flex: '1 1 120px' }}
+                            style={{ flex: '1 1 120px', cursor: 'pointer' }}
                         >
                             <i className="fa-solid fa-download" /> Download PDF
-                        </a>
+                        </button>
 
                         <button
                             type="button"
@@ -581,15 +581,15 @@ export default function DocumentsCMS() {
 
                                             {/* Direct Download Button */}
                                             {hasValidUrl ? (
-                                                <a
-                                                    href={docUrl}
-                                                    download={doc.fileName || doc.title}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => downloadFile(doc, doc.fileName || doc.title)}
                                                     className="adm-btn adm-btn-primary"
-                                                    style={{ padding: '6px 12px', fontSize: '12px', textDecoration: 'none' }}
+                                                    style={{ padding: '6px 12px', fontSize: '12px', cursor: 'pointer' }}
                                                     title="Download Document"
                                                 >
                                                     <i className="fa-solid fa-download" />
-                                                </a>
+                                                </button>
                                             ) : (
                                                 <button
                                                     type="button"
@@ -790,13 +790,14 @@ export default function DocumentsCMS() {
                                         <p style={{ maxWidth: '400px', margin: '0 auto 20px auto', fontSize: '13px' }}>
                                             {previewDoc.description || 'This file format is ready for direct viewing or download.'}
                                         </p>
-                                        <a
-                                            href={resolvedUrl}
-                                            download={previewDoc.fileName || previewDoc.title}
+                                        <button
+                                            type="button"
+                                            onClick={() => downloadFile(previewDoc, previewDoc.fileName || previewDoc.title)}
                                             className="adm-doc-btn-download"
+                                            style={{ cursor: 'pointer' }}
                                         >
                                             <i className="fa-solid fa-download" /> Download File ({previewDoc.fileSize || 'File'})
-                                        </a>
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -828,13 +829,14 @@ export default function DocumentsCMS() {
 
                                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                     {hasValidUrl && (
-                                        <a
-                                            href={resolvedUrl}
-                                            download={previewDoc.fileName || previewDoc.title}
+                                        <button
+                                            type="button"
+                                            onClick={() => downloadFile(previewDoc, previewDoc.fileName || previewDoc.title)}
                                             className="adm-doc-btn-download"
+                                            style={{ cursor: 'pointer' }}
                                         >
                                             <i className="fa-solid fa-download" /> Download Document
-                                        </a>
+                                        </button>
                                     )}
 
                                     <button

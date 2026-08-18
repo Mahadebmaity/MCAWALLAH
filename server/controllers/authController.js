@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import cloudinary, { isCloudinaryConfigured } from '../config/cloudinary.js';
 import path from 'path';
 import fs from 'fs';
+import { saveBufferToAllUploadDirs } from '../utils/fileStorage.js';
 
 // @desc Register User / Admin
 // @route POST /api/auth/register
@@ -334,11 +335,8 @@ export const uploadAvatar = async (req, res) => {
         } else {
             // Local fallback
             const filename = `avatar-${Date.now()}-${req.file.originalname.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-            const uploadPath = path.resolve('public', 'uploads', filename);
-            fs.writeFileSync(uploadPath, req.file.buffer);
-            const protocol = req.protocol;
-            const host = req.get('host');
-            avatarUrl = `${protocol}://${host}/uploads/${filename}`;
+            saveBufferToAllUploadDirs(filename, req.file.buffer);
+            avatarUrl = `/uploads/${filename}`;
         }
 
         const user = await User.findByIdAndUpdate(req.user._id, { avatar: avatarUrl }, { new: true });

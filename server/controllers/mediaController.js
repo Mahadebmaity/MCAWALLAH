@@ -1,6 +1,7 @@
 import cloudinary, { isCloudinaryConfigured } from '../config/cloudinary.js';
 import path from 'path';
 import fs from 'fs';
+import { saveBufferToAllUploadDirs } from '../utils/fileStorage.js';
 
 // @desc Upload Image to Cloudinary (or Local Disk Fallback)
 // @route POST /api/media/upload
@@ -36,18 +37,8 @@ export const uploadImage = async (req, res) => {
         }
 
         // Local storage fallback if Cloudinary credentials are not configured yet
-        const targetDirs = [
-            path.resolve('public', 'uploads'),
-            path.resolve('server', 'public', 'uploads')
-        ];
         const filename = `${Date.now()}-${req.file.originalname.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-
-        targetDirs.forEach(dir => {
-            try {
-                if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-                fs.writeFileSync(path.resolve(dir, filename), req.file.buffer);
-            } catch (_) {}
-        });
+        saveBufferToAllUploadDirs(filename, req.file.buffer);
 
         const fileUrl = `/uploads/${filename}`;
 

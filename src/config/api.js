@@ -76,7 +76,7 @@ export const getDocUrl = (urlOrDoc) => {
     // Auto-upgrade http to https for live hostings
     if (url.startsWith('http://')) {
         if (url.includes('onrender.com') || url.includes('vercel.app') || url.includes('cloudinary.com') || url.includes('netlify.app')) {
-            url = url.replace(/^http:\/\//, 'https://');
+            return url.replace(/^http:\/\//, 'https://');
         }
         return url;
     }
@@ -95,13 +95,80 @@ export const getDocUrl = (urlOrDoc) => {
 
     // For /uploads/ or /api/uploads/
     if (cleanPath.startsWith('/uploads/') || cleanPath.startsWith('/api/uploads/')) {
-        const rawApi = import.meta.env?.VITE_API_URL || (typeof window !== 'undefined' ? window.location.origin : '');
-        // Strip trailing /api or slashes to get pure domain origin
-        const base = rawApi.replace(/\/api\/?$/, '').replace(/\/+$/, '');
-        const normPath = cleanPath.startsWith('/api/uploads/') ? cleanPath.replace(/^\/api/, '') : cleanPath;
-        return `${base}${normPath}`;
+        if (import.meta.env?.VITE_API_URL) {
+            const base = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '').replace(/\/+$/, '');
+            const normPath = cleanPath.startsWith('/api/uploads/') ? cleanPath.replace(/^\/api/, '') : cleanPath;
+            return `${base}${normPath}`;
+        }
+        // In local development or same-domain proxy, return clean relative route
+        return cleanPath;
     }
 
     return cleanPath;
 };
 
+/**
+ * Universal Safe Document Downloader
+ * - Fixes browser cross-origin download restrictions by fetching as binary Blob
+ * - Validates MIME type to prevent downloading HTML 404/SPA error pages as corrupted PDF files
+ * - Automatically ensures clean and proper '.pdf' file extension
+ */
+export const downloadFile = async (urlOrDoc, defaultFileName = 'Resume.pdf') => {
+    try {
+        const resolvedUrl = getDocUrl(urlOrDoc);
+        if (!resolvedUrl || resolvedUrl === '#') {
+            console.error('Download cancelled: Invalid document URL');
+            return false;
+        }
+
+        // Clean desired filename
+        let cleanName = (defaultFileName || 'Resume').trim().replace(/[/\\?%*:|"<>]/g, '_');
+        if (!cleanName.toLowerCase().endsWith('.pdf') && !cleanName.toLowerCase().endsWith('.docx') && !cleanName.toLowerCase().endsWith('.doc')) {
+            cleanName = `${cleanName}.pdf`;
+        }
+
+        // 1. If it's a data or blob URL, trigger instant direct download
+        if (resolvedUrl.startsWith('data:') || resolvedUrl.startsWith('blob:')) {
+            const a = document.createElement('a');
+            a.href = resolvedUrl;
+            a.download = cleanName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            return true;
+        }
+
+        // 2. Fetch as binary Blob to ensure reliable cross-origin & local downloads
+        const response = await fetch(resolvedUrl);
+        if (!response.ok) {
+            throw new Error(`Server returned HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const contentType = response.headers.get('content-type') || '';
+        // If server returned HTML (SPA fallback or 404 web page), do NOT save it as a PDF
+        if (contentType.includes('text/html')) {
+            console.warn('Server returned HTML response instead of binary PDF stream. Opening directly in new tab.');
+            window.open(resolvedUrl, '_blank');
+            return false;
+        }
+
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = cleanName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => window.URL.revokeObjectURL(blobUrl), 2000);
+        return true;
+    } catch (err) {
+        console.warn('Blob download fetch error, falling back to direct window download:', err.message);
+        // Fallback: Open in new tab so browser native PDF viewer handles it
+        const fallbackUrl = getDocUrl(urlOrDoc);
+        if (fallbackUrl && fallbackUrl !== '#') {
+            window.open(fallbackUrl, '_blank');
+        }
+        return false;
+    }
+};

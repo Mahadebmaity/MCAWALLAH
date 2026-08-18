@@ -47,41 +47,85 @@ app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
 // Serve static uploaded files and documentation under root and /api prefixes
-const possibleUploads = [
-    path.resolve('public', 'uploads'),
-    path.resolve(__dirname, 'public', 'uploads'),
-    path.resolve(__dirname, '..', 'public', 'uploads')
-];
+import { getUploadDirectories, getDocsDirectories, findFileInUploadsOrDocs } from './utils/fileStorage.js';
 
-possibleUploads.forEach(dir => {
+getUploadDirectories().forEach(dir => {
     if (!fs.existsSync(dir)) {
         try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
     }
     if (fs.existsSync(dir)) {
-        app.use('/uploads', express.static(dir));
-        app.use('/api/uploads', express.static(dir));
+        app.use('/uploads', express.static(dir, {
+            setHeaders: (res, filePath) => {
+                if (filePath.toLowerCase().endsWith('.pdf')) {
+                    res.setHeader('Content-Type', 'application/pdf');
+                }
+            }
+        }));
+        app.use('/api/uploads', express.static(dir, {
+            setHeaders: (res, filePath) => {
+                if (filePath.toLowerCase().endsWith('.pdf')) {
+                    res.setHeader('Content-Type', 'application/pdf');
+                }
+            }
+        }));
     }
 });
 
-const docsPath = path.resolve('public', 'docs');
-if (fs.existsSync(docsPath)) {
-    app.use('/docs', express.static(docsPath));
-    app.use('/api/docs', express.static(docsPath));
-}
+getDocsDirectories().forEach(dir => {
+    if (fs.existsSync(dir)) {
+        app.use('/docs', express.static(dir, {
+            setHeaders: (res, filePath) => {
+                if (filePath.toLowerCase().endsWith('.pdf')) {
+                    res.setHeader('Content-Type', 'application/pdf');
+                }
+            }
+        }));
+        app.use('/api/docs', express.static(dir, {
+            setHeaders: (res, filePath) => {
+                if (filePath.toLowerCase().endsWith('.pdf')) {
+                    res.setHeader('Content-Type', 'application/pdf');
+                }
+            }
+        }));
+    }
+});
 
-// Graceful fallback for missing local uploads (e.g. Render ephemeral disk restarts)
-app.get(['/uploads/:filename', '/api/uploads/:filename'], (req, res) => {
-    const filename = req.params.filename || '';
-    // If a PDF was requested, fallback to default system resume
+// Dedicated file download / preview route that guarantees valid PDF headers and avoids HTML fallbacks
+app.get(['/uploads/:filename', '/api/uploads/:filename', '/api/download'], (req, res) => {
+    const filename = req.params.filename || req.query.file || req.query.url || '';
+    const isDownload = req.query.download === '1' || req.query.dl === 'true';
+    const customTitle = req.query.title || filename;
+
+    const localFilePath = findFileInUploadsOrDocs(filename);
+
+    if (localFilePath) {
+        if (localFilePath.toLowerCase().endsWith('.pdf')) {
+            res.setHeader('Content-Type', 'application/pdf');
+        }
+        if (isDownload) {
+            const cleanDownloadName = (customTitle.endsWith('.pdf') ? customTitle : `${customTitle}.pdf`).replace(/[^a-zA-Z0-9._-]/g, '_');
+            res.setHeader('Content-Disposition', `attachment; filename="${cleanDownloadName}"`);
+        }
+        return res.sendFile(localFilePath);
+    }
+
+    // Fallback: If a PDF was requested but the exact local file name is missing, serve default documentation or resume PDF
     if (filename.toLowerCase().endsWith('.pdf')) {
-        const fallbackPdf = path.resolve(docsPath, 'PORTFOLIO_SYSTEM_DOCUMENTATION.pdf');
-        if (fs.existsSync(fallbackPdf)) {
+        const fallbackPdf = findFileInUploadsOrDocs('PORTFOLIO_SYSTEM_DOCUMENTATION.pdf') ||
+                            findFileInUploadsOrDocs('resume.pdf') ||
+                            findFileInUploadsOrDocs('PORTFOLIO_ENTERPRISE_DOCUMENTATION_28_SECTIONS.pdf');
+        if (fallbackPdf) {
+            res.setHeader('Content-Type', 'application/pdf');
+            if (isDownload) {
+                res.setHeader('Content-Disposition', `attachment; filename="${filename.replace(/[^a-zA-Z0-9._-]/g, '_')}"`);
+            }
             return res.sendFile(fallbackPdf);
         }
     }
+
     res.status(404).json({
         status: 404,
-        message: `File "${filename}" was stored on temporary instance storage and has expired. Please re-upload via the Admin CMS with Cloudinary enabled.`,
+        message: `File "${filename}" not found.`,
         filename
     });
 });

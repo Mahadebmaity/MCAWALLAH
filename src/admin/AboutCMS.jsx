@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { API_BASE, getDocUrl } from '../config/api';
+import { API_BASE, getDocUrl, downloadFile } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
@@ -75,6 +75,8 @@ export default function AboutCMS() {
     const [copiedUrl, setCopiedUrl] = useState(false);
     const [showResumeIconPicker, setShowResumeIconPicker] = useState(false);
     const [imgError, setImgError] = useState(false);
+    const [previewResume, setPreviewResume] = useState(null);
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
     const [about, setAbout] = useState({
         displayName: 'Mahadeb Maity',
@@ -797,23 +799,22 @@ export default function AboutCMS() {
                             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                 {about.resumeUrl && (
                                     <>
-                                        <a
-                                            href={getDocUrl(about.resumeUrl)}
-                                            target="_blank"
-                                            rel="noreferrer"
+                                        <button
+                                            type="button"
+                                            onClick={() => setPreviewResume({ title: formatResumeTitle(about.resumeUrl, about.resumeLabel), url: about.resumeUrl, fileName: about.resumeUrl.split('/').pop(), fileSize: 'Active PDF' })}
                                             className="adm-btn adm-btn-secondary adm-btn-sm"
-                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}
                                         >
-                                            <i className="fa-solid fa-arrow-up-right-from-square" /> Preview
-                                        </a>
-                                        <a
-                                            href={getDocUrl(about.resumeUrl)}
-                                            download
+                                            <i className="fa-solid fa-eye" /> Preview
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => downloadFile(about.resumeUrl, formatResumeTitle(about.resumeUrl, about.resumeLabel))}
                                             className="adm-btn adm-btn-primary adm-btn-sm"
-                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', cursor: 'pointer' }}
                                         >
                                             <i className="fa-solid fa-download" /> Download
-                                        </a>
+                                        </button>
                                     </>
                                 )}
                             </div>
@@ -987,23 +988,24 @@ export default function AboutCMS() {
                                                 </div>
 
                                                 <div className="adm-vault-card-actions">
-                                                    <a
-                                                        href={r.url}
-                                                        target="_blank"
-                                                        rel="noreferrer"
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setPreviewResume(r)}
                                                         className="adm-btn adm-btn-sm adm-btn-secondary"
-                                                        title="Preview Resume in new tab"
+                                                        title="Preview Resume"
+                                                        style={{ cursor: 'pointer' }}
                                                     >
-                                                        <i className="fa-solid fa-arrow-up-right-from-square" />
-                                                    </a>
-                                                    <a
-                                                        href={r.url}
-                                                        download
+                                                        <i className="fa-solid fa-eye" />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => downloadFile(r.url, r.title || r.fileName || 'Resume')}
                                                         className="adm-btn adm-btn-sm adm-btn-secondary"
                                                         title="Test Download"
+                                                        style={{ cursor: 'pointer' }}
                                                     >
                                                         <i className="fa-solid fa-download" />
-                                                    </a>
+                                                    </button>
                                                     <button
                                                         type="button"
                                                         onClick={() => deleteResumeItem(idx)}
@@ -1390,6 +1392,163 @@ export default function AboutCMS() {
                     </button>
                 </div>
             </form>
+
+            {/* ══ Interactive Beautiful PDF Resume Preview Modal ══ */}
+            {previewResume && (
+                <div
+                    className={`adm-doc-modal-backdrop ${isFullscreen ? 'adm-doc-modal--fullscreen' : ''}`}
+                    onClick={() => { setPreviewResume(null); setIsFullscreen(false); }}
+                >
+                    <div
+                        className="adm-doc-modal"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            maxWidth: isFullscreen ? '100vw' : '900px',
+                            height: isFullscreen ? '100vh' : '88vh',
+                            maxHeight: isFullscreen ? '100vh' : '900px'
+                        }}
+                    >
+                        {/* Header */}
+                        <div className="adm-doc-modal-header">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                                <div style={{
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: '8px',
+                                    background: 'rgba(56, 189, 248, 0.15)',
+                                    color: '#38bdf8',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '18px',
+                                    flexShrink: 0
+                                }}>
+                                    <i className="fa-solid fa-file-pdf" />
+                                </div>
+                                <div style={{ minWidth: 0 }}>
+                                    <h3 className="adm-doc-modal-title" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {previewResume.title || 'Resume Document Preview'}
+                                    </h3>
+                                    <div className="adm-doc-modal-meta">
+                                        <span style={{ color: '#38bdf8', fontWeight: '600' }}>Portfolio Resume Vault</span>
+                                        {previewResume.fileSize && <span>• {previewResume.fileSize}</span>}
+                                        {previewResume.fileName && <span>• {previewResume.fileName}</span>}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {/* Toggle Fullscreen / Maximize */}
+                                <button
+                                    type="button"
+                                    onClick={() => setIsFullscreen(!isFullscreen)}
+                                    className="adm-doc-btn-icon"
+                                    title={isFullscreen ? "Exit Fullscreen" : "Maximize / Fullscreen"}
+                                >
+                                    <i className={isFullscreen ? "fa-solid fa-compress" : "fa-solid fa-expand"} />
+                                </button>
+
+                                {/* Close Button */}
+                                <button
+                                    type="button"
+                                    onClick={() => { setPreviewResume(null); setIsFullscreen(false); }}
+                                    className="adm-doc-btn-icon"
+                                    title="Close Preview (Esc)"
+                                    style={{ color: '#f87171' }}
+                                >
+                                    <i className="fa-solid fa-xmark" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Body / Viewer */}
+                        <div className="adm-doc-modal-body">
+                            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+                                <iframe
+                                    src={`${getDocUrl(previewResume.url)}#toolbar=1&navpanes=0`}
+                                    title={previewResume.title || 'Resume PDF'}
+                                    className="adm-doc-modal-iframe"
+                                />
+                                <div style={{
+                                    background: 'rgba(11, 17, 32, 0.95)',
+                                    padding: '8px 16px',
+                                    fontSize: '11.5px',
+                                    color: '#94a3b8',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    flexWrap: 'wrap',
+                                    gap: '8px',
+                                    borderTop: '1px solid rgba(255, 255, 255, 0.08)'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <i className="fa-solid fa-mobile-screen" style={{ color: '#38bdf8' }} />
+                                        <span>Mobile tip: Tap <strong>Open in New Tab</strong> or <strong>Download</strong> for native high-speed reader.</span>
+                                    </div>
+                                    <a
+                                        href={getDocUrl(previewResume.url)}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: '700', fontSize: '11.5px' }}
+                                    >
+                                        Full View ↗
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer Controls */}
+                        <div className="adm-doc-modal-footer">
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                <a
+                                    href={getDocUrl(previewResume.url)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="adm-doc-btn-tab"
+                                >
+                                    <i className="fa-solid fa-arrow-up-right-from-square" /> Open in New Tab
+                                </a>
+
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const resolved = getDocUrl(previewResume.url);
+                                        const fullUrl = resolved.startsWith('http') ? resolved : `${window.location.origin}${resolved}`;
+                                        navigator.clipboard.writeText(fullUrl);
+                                        setToast({
+                                            type: 'success',
+                                            title: 'Link Copied! 📋',
+                                            message: 'Direct PDF URL copied to clipboard.'
+                                        });
+                                    }}
+                                    className="adm-doc-btn-copy"
+                                >
+                                    <i className="fa-solid fa-copy" /> Copy Link
+                                </button>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => downloadFile(previewResume.url, previewResume.title || previewResume.fileName || 'Resume')}
+                                    className="adm-doc-btn-download"
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <i className="fa-solid fa-download" /> Download Document
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => { setPreviewResume(null); setIsFullscreen(false); }}
+                                    className="adm-doc-btn-close"
+                                >
+                                    <i className="fa-solid fa-xmark" /> Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

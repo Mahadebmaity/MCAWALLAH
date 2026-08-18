@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { usePortfolioData } from "../../context/DataContext";
 import { trackActivity } from "../../utils/analytics";
+import { getDocUrl, downloadFile } from "../../config/api";
 import AuthModal from "../AuthModal/AuthModal";
 import LogoutFeedbackModal from "../Feedback/LogoutFeedbackModal";
 import "./Navbar.css";
@@ -184,7 +185,7 @@ export default function Navbar() {
         if (e) e.stopPropagation();
         const item = resumeItem || primaryResume;
 
-        const performDownload = () => {
+        const performDownload = async () => {
             const targetUrl = item?.url || about.resumeUrl || "/resume.pdf";
             const title = item?.title || "Resume";
 
@@ -194,14 +195,7 @@ export default function Navbar() {
                 details: `Downloaded resume: "${title}"`
             });
 
-            const a = document.createElement("a");
-            a.href = targetUrl;
-            a.setAttribute("download", title.replace(/[^a-zA-Z0-9_-]/g, "_") + ".pdf");
-            a.target = "_blank";
-            a.rel = "noreferrer";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            await downloadFile(targetUrl, title);
             setResumeDropdown(false);
         };
 
@@ -417,7 +411,7 @@ export default function Navbar() {
                                                             </div>
                                                             <div className="navbar__resume-dropdown-actions">
                                                                 <a
-                                                                    href={r.url}
+                                                                    href={getDocUrl(r.url)}
                                                                     target="_blank"
                                                                     rel="noreferrer"
                                                                     className="navbar__resume-icon-btn"

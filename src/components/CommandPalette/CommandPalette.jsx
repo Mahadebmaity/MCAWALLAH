@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { usePortfolioData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
-import { API_BASE, getDocUrl } from '../../config/api';
+import { API_BASE, getDocUrl, downloadFile } from '../../config/api';
 import './CommandPalette.css';
 
 export default function CommandPalette() {
@@ -69,6 +69,8 @@ export default function CommandPalette() {
         }
 
         // 3. Resume (Public)
+        const activeResumeUrl = data?.about?.resumeUrl || '/resume.pdf';
+        const resumeTitle = data?.about?.resumeLabel || 'Mahadeb_Maity_Resume';
         list.push(
             {
                 id: 'doc-resume',
@@ -77,10 +79,7 @@ export default function CommandPalette() {
                 icon: 'fa-solid fa-file-arrow-down',
                 desc: 'Full-stack software developer resume',
                 action: () => {
-                    const dlLink = document.createElement('a');
-                    dlLink.href = getDocUrl('/docs/PORTFOLIO_SYSTEM_DOCUMENTATION.pdf');
-                    dlLink.download = 'Mahadeb_Maity_Resume.pdf';
-                    dlLink.click();
+                    downloadFile(activeResumeUrl, `${resumeTitle}.pdf`);
                 }
             }
         );

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePortfolioData } from "../../context/DataContext";
 import { useAuth } from "../../context/AuthContext";
+import { getDocUrl, downloadFile } from "../../config/api";
 import "./About.css";
 
 const DEFAULT_SKILLS = [
@@ -113,21 +114,20 @@ export default function About() {
     const hobbies = about.hobbies?.length ? about.hobbies : DEFAULT_HOBBIES;
 
     const handleResumeDownload = (resItem) => {
-        const performDownload = () => {
-            const a = document.createElement("a");
-            a.href = resItem.url;
-            a.download = (resItem.title || 'Resume').replace(/[^a-zA-Z0-9_-]/g, "_") + ".pdf";
-            a.target = "_blank";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+        const performDownload = async () => {
+            const targetUrl = resItem.url || about.resumeUrl || "/resume.pdf";
+            const title = resItem.title || about.resumeLabel || "Resume";
+            await downloadFile(targetUrl, title);
         };
         if (!requireAuth(performDownload, "Please Sign In or Sign Up to download full resume & CV documents.", "register")) return;
         performDownload();
     };
 
     const handleResumePreview = (resItem) => {
-        const performPreview = () => window.open(resItem.url, "_blank");
+        const performPreview = () => {
+            const targetUrl = resItem.url || about.resumeUrl || "/resume.pdf";
+            window.open(getDocUrl(targetUrl), "_blank");
+        };
         if (!requireAuth(performPreview, "Please Sign In or Sign Up to preview resume documents.", "register")) return;
         performPreview();
     };

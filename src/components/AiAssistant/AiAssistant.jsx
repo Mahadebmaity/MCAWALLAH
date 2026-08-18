@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { API_BASE, getDocUrl } from '../../config/api';
+import { API_BASE, getDocUrl, downloadFile } from '../../config/api';
 import './AiAssistant.css';
 
 const INITIAL_PROMPTS = [
@@ -268,14 +268,8 @@ export default function AiAssistant() {
                 setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), isMobile ? 200 : 0);
             }
         } else if (action.type === 'resume' || action.type === 'doc') {
-            const url = getDocUrl(action.target);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = action.target.split('/').pop() || 'resume.pdf';
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const fileName = action.target?.split('/').pop() || 'resume.pdf';
+            downloadFile(action.target, fileName);
         } else if (action.type === 'navigate') {
             if (isMobile) setIsOpen(false);
             navigate(action.target);

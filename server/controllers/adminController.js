@@ -18,6 +18,7 @@ import ActivityLog from '../models/ActivityLog.js';
 import path from 'path';
 import fs from 'fs';
 import cloudinary, { isCloudinaryConfigured } from '../config/cloudinary.js';
+import { saveBufferToAllUploadDirs } from '../utils/fileStorage.js';
 
 // @desc Get Full Admin Dashboard Statistics & Overview
 // @route GET /api/admin/overview
@@ -468,14 +469,8 @@ export const uploadDocument = async (req, res) => {
         }
 
         // Local storage fallback
-        const uploadDir = path.resolve('public', 'uploads');
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
         const filename = `${Date.now()}-${req.file.originalname.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-        const uploadPath = path.resolve(uploadDir, filename);
-        
-        fs.writeFileSync(uploadPath, req.file.buffer);
+        saveBufferToAllUploadDirs(filename, req.file.buffer);
 
         const fileUrl = `/uploads/${filename}`;
 
