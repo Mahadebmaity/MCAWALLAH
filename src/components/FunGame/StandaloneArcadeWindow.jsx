@@ -27,7 +27,7 @@ export default function StandaloneArcadeWindow() {
 
     const [activeSlug, setActiveSlug] = useState(slug || "snake");
     const [showLeaderboard, setShowLeaderboard] = useState(false);
-    const [showInstructions, setShowInstructions] = useState(true); // First show instructions automatically!
+    const [showInstructions, setShowInstructions] = useState(false);
     const [scoreAlert, setScoreAlert] = useState(null);
 
     // Live Game Stopwatch Timer
