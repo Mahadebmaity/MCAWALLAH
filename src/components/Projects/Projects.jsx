@@ -1,30 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { usePortfolioData } from "../../context/DataContext";
-import { API_BASE, getMediaUrl } from "../../config/api";
+import { API_BASE } from "../../config/api";
 import PlaygroundModal from "../Playground/PlaygroundModal";
 import "./Projects.css";
-
-function PublicProjectCover({ coverImage, title }) {
-    const [failed, setFailed] = useState(false);
-    const mediaUrl = coverImage ? getMediaUrl(coverImage) : null;
-
-    useEffect(() => {
-        setFailed(false);
-    }, [coverImage]);
-
-    if (!mediaUrl || failed) return null;
-
-    return (
-        <div style={{ height: '140px', borderRadius: '10px', overflow: 'hidden', margin: '4px 0 8px', background: '#0a0f1d' }}>
-            <img
-                src={mediaUrl}
-                alt={title || ''}
-                onError={() => setFailed(true)}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-        </div>
-    );
-}
 
 const DEFAULT_PROJECTS = [
     {
@@ -260,10 +238,6 @@ export default function Projects() {
                                         {p.status || "Live"}
                                     </span>
                                 </div>
-
-                                {p.coverImage && (
-                                    <PublicProjectCover coverImage={p.coverImage} title={p.title} />
-                                )}
 
                                 {/* Info */}
                                 <h3 className="projects__card-title" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: '38px', margin: '4px 0 6px' }}>
