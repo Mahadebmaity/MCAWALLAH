@@ -21,6 +21,7 @@ const NAV_ITEMS = [
     { to: '/admin/plans', icon: 'fa-solid fa-list-check', label: 'Feature Plans & Specs' },
     { to: '/admin/command-palette', icon: 'fa-solid fa-terminal', label: 'Command Palette CMS' },
     { to: '/admin/ai-assistant', icon: 'fa-solid fa-robot', label: 'AI Assistant CMS' },
+    { to: '/admin/contact', icon: 'fa-solid fa-address-book', label: 'Contact & Inquiries' },
     { to: '/admin/messages', icon: 'fa-solid fa-inbox', label: 'Feedback Inbox' },
     { to: '/admin/footer', icon: 'fa-solid fa-envelope-open-text', label: 'Footer & Subscribers' },
     { to: '/admin/settings', icon: 'fa-solid fa-sliders', label: 'Settings & Backup' }

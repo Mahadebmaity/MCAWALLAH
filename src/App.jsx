@@ -36,6 +36,7 @@ const ImplementationPlansCMS = lazy(() => import('./admin/ImplementationPlansCMS
 const CommandPaletteCMS = lazy(() => import('./admin/CommandPaletteCMS'));
 const AiAssistantCMS = lazy(() => import('./admin/AiAssistantCMS'));
 const MessagesInbox = lazy(() => import('./admin/MessagesInbox'));
+const ContactCMS = lazy(() => import('./admin/ContactCMS'));
 const FooterSubscribersCMS = lazy(() => import('./admin/FooterSubscribersCMS'));
 const SettingsCMS = lazy(() => import('./admin/SettingsCMS'));
 const UsersActivityCMS = lazy(() => import('./admin/UsersActivityCMS'));
@@ -133,6 +134,7 @@ function App() {
             <Route path="plans" element={<ImplementationPlansCMS />} />
             <Route path="command-palette" element={<CommandPaletteCMS />} />
             <Route path="ai-assistant" element={<AiAssistantCMS />} />
+            <Route path="contact" element={<ContactCMS />} />
             <Route path="messages" element={<MessagesInbox />} />
             <Route path="footer" element={<FooterSubscribersCMS />} />
             <Route path="settings" element={<SettingsCMS />} />

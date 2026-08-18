@@ -130,20 +130,19 @@ export default function Contact() {
                     {/* ── LEFT: info ── */}
                     <div className="contact__info">
                         <h2 className="contact__title">
-                            Let's <span className="contact__title-accent">Connect</span>
+                            {settings.contactHeading || "Let's"} <span className="contact__title-accent">{settings.contactHeadingAccent || "Connect"}</span>
                         </h2>
                         <p className="contact__subtitle">
-                            Have a project in mind, want to collaborate, or just say hi?
-                            My inbox is always open — I'll get back within 24 hours.
+                            {settings.contactSubtitle || "Have a project in mind, want to collaborate, or just say hi? My inbox is always open — I'll get back within 24 hours."}
                         </p>
 
                         {/* Info cards */}
                         <div className="contact__cards">
                             {[
-                                { icon: "fa-solid fa-envelope", label: "Email", val: settings.contactEmail || "mahadeb@portfolio.com", href: `mailto:${settings.contactEmail || "mahadeb@portfolio.com"}` },
-                                { icon: "fa-solid fa-phone", label: "Phone", val: settings.contactPhone || "+91 12345 67890", href: `tel:${settings.contactPhone || "+911234567890"}` },
-                                { icon: "fa-solid fa-location-dot", label: "Location", val: settings.contactLocation || "Haldia, West Bengal, India", href: null },
-                            ].map((c) => (
+                                settings.showEmailCard !== false && { icon: "fa-solid fa-envelope", label: "Email", val: settings.contactEmail || "mahadeb@portfolio.com", href: `mailto:${settings.contactEmail || "mahadeb@portfolio.com"}` },
+                                settings.showPhoneCard !== false && { icon: "fa-solid fa-phone", label: "Phone", val: settings.contactPhone || "+91 12345 67890", href: `tel:${settings.contactPhone || "+911234567890"}` },
+                                settings.showLocationCard !== false && { icon: "fa-solid fa-location-dot", label: "Location", val: settings.contactLocation || "Haldia, West Bengal, India", href: null },
+                            ].filter(Boolean).map((c) => (
                                 <div key={c.label} className="contact__card">
                                     <div className="contact__card-icon">
                                         <i className={c.icon} />
@@ -160,31 +159,35 @@ export default function Contact() {
                         </div>
 
                         {/* Availability */}
-                        <div className="contact__availability">
-                            <span className="contact__avail-dot" />
-                            <span>Currently available for freelance &amp; full-time roles</span>
-                        </div>
+                        {settings.showAvailability !== false && (
+                            <div className="contact__availability">
+                                <span className="contact__avail-dot" />
+                                <span>{settings.availabilityText || "Currently available for freelance & full-time roles"}</span>
+                            </div>
+                        )}
 
                         {/* Socials */}
-                        <div className="contact__socials">
-                            <p className="contact__socials-label">Find me on</p>
-                            <div className="contact__socials-row">
-                                {SOCIAL_LINKS.map((s) => (
-                                    <a
-                                        key={s.label}
-                                        href={s.href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="contact__social"
-                                        title={s.label}
-                                        style={{ "--sc": s.color }}
-                                    >
-                                        <i className={s.icon} />
-                                        <span>{s.label}</span>
-                                    </a>
-                                ))}
+                        {settings.showSocialsRow !== false && (
+                            <div className="contact__socials">
+                                <p className="contact__socials-label">Find me on</p>
+                                <div className="contact__socials-row">
+                                    {(settings.socialLinks?.length ? settings.socialLinks : SOCIAL_LINKS).map((s) => (
+                                        <a
+                                            key={s.label || s.platform}
+                                            href={s.href || s.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="contact__social"
+                                            title={s.label}
+                                            style={{ "--sc": s.color || "#38bdf8" }}
+                                        >
+                                            <i className={s.icon || "fa-solid fa-link"} />
+                                            <span>{s.label}</span>
+                                        </a>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
 
                     {/* ── RIGHT: form ── */}
