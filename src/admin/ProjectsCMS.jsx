@@ -1,11 +1,179 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { API_BASE } from '../config/api';
+import { API_BASE, getMediaUrl } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
 const CATEGORIES = ['React', 'Full Stack', 'Python', 'UI/UX', 'Mobile', 'Open Source', 'Other'];
 const STATUSES = ['Live', 'Open Source', 'In Progress', 'Archived'];
+
+function ProjectCoverBanner({ coverImage, title, category, color }) {
+    const [imgFailed, setImgFailed] = useState(false);
+    const mediaUrl = coverImage ? getMediaUrl(coverImage) : null;
+
+    useEffect(() => {
+        setImgFailed(false);
+    }, [coverImage]);
+
+    const getCategoryIcon = (cat) => {
+        switch ((cat || '').toLowerCase()) {
+            case 'react': return 'fa-brands fa-react';
+            case 'full stack': return 'fa-solid fa-layer-group';
+            case 'python': return 'fa-brands fa-python';
+            case 'ui/ux': return 'fa-solid fa-palette';
+            case 'mobile': return 'fa-solid fa-mobile-screen-button';
+            case 'open source': return 'fa-solid fa-code-branch';
+            default: return 'fa-solid fa-laptop-code';
+        }
+    };
+
+    if (mediaUrl && !imgFailed) {
+        return (
+            <img
+                src={mediaUrl}
+                alt=""
+                onError={() => setImgFailed(true)}
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block'
+                }}
+            />
+        );
+    }
+
+    return (
+        <div style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: `radial-gradient(circle at 50% 50%, ${color || '#38bdf8'}25 0%, rgba(10, 15, 29, 0.98) 85%)`,
+            position: 'relative'
+        }}>
+            <i
+                className={getCategoryIcon(category)}
+                style={{
+                    fontSize: '44px',
+                    color: color || 'var(--adm-primary)',
+                    opacity: 0.85,
+                    filter: `drop-shadow(0 0 15px ${color || '#38bdf8'}40)`
+                }}
+            />
+        </div>
+    );
+}
+
+function ProjectImagePreview({ src, onRemove }) {
+    const [hasError, setHasError] = useState(false);
+    const mediaUrl = src ? getMediaUrl(src) : '';
+
+    useEffect(() => {
+        setHasError(false);
+    }, [src]);
+
+    if (!src) return null;
+
+    return (
+        <div style={{
+            marginTop: '12px',
+            padding: '10px 14px',
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid var(--adm-border)',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '14px'
+        }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+                <div style={{
+                    width: '90px',
+                    height: '60px',
+                    borderRadius: '6px',
+                    overflow: 'hidden',
+                    background: '#0a0f1d',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                }}>
+                    {!hasError ? (
+                        <img
+                            src={mediaUrl}
+                            alt=""
+                            onError={() => setHasError(true)}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                    ) : (
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '3px',
+                            color: '#f87171',
+                            fontSize: '10px',
+                            textAlign: 'center',
+                            padding: '4px'
+                        }}>
+                            <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: '15px' }} />
+                            <span style={{ fontSize: '9px', fontWeight: 600 }}>Not Found</span>
+                        </div>
+                    )}
+                </div>
+
+                <div style={{ minWidth: 0 }}>
+                    <div style={{
+                        fontSize: '12.5px',
+                        fontWeight: '600',
+                        color: hasError ? '#f87171' : '#34d399',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                    }}>
+                        <i className={`fa-solid ${hasError ? 'fa-triangle-exclamation' : 'fa-circle-check'}`} />
+                        {hasError ? 'Image file not accessible' : 'Cover Image Loaded'}
+                    </div>
+                    <div style={{
+                        fontSize: '11px',
+                        color: 'var(--adm-text-muted)',
+                        maxWidth: '260px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        marginTop: '2px'
+                    }}>
+                        {hasError ? 'Fallback category icon will be displayed' : src}
+                    </div>
+                </div>
+            </div>
+
+            <button
+                type="button"
+                onClick={onRemove}
+                className="adm-btn"
+                style={{
+                    padding: '6px 12px',
+                    fontSize: '12px',
+                    color: '#f87171',
+                    border: '1px solid rgba(248, 113, 113, 0.3)',
+                    background: 'rgba(248, 113, 113, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                    borderRadius: '6px',
+                    flexShrink: 0
+                }}
+            >
+                <i className="fa-solid fa-trash-can" /> Clear
+            </button>
+        </div>
+    );
+}
 
 export default function ProjectsCMS() {
     const { authFetch } = useAuth();
@@ -282,46 +450,23 @@ export default function ProjectsCMS() {
                                     overflow: 'hidden',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    justifyContent: 'center'
+                                    justifyContent: 'center',
+                                    flexShrink: 0
                                 }}>
-                                    {project.coverImage ? (
-                                        <img
-                                            src={project.coverImage}
-                                            alt={project.title}
-                                            style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                objectFit: 'cover'
-                                            }}
-                                        />
-                                    ) : (
-                                        <div style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            background: `radial-gradient(circle at 50% 50%, ${project.color || '#38bdf8'}20 0%, rgba(10, 15, 29, 0.95) 80%)`,
-                                            position: 'relative'
-                                        }}>
-                                            <i
-                                                className={getCategoryIcon(project.category)}
-                                                style={{
-                                                    fontSize: '44px',
-                                                    color: project.color || 'var(--adm-primary)',
-                                                    opacity: 0.85,
-                                                    filter: `drop-shadow(0 0 15px ${project.color || '#38bdf8'}40)`
-                                                }}
-                                            />
-                                        </div>
-                                    )}
+                                    <ProjectCoverBanner
+                                        coverImage={project.coverImage}
+                                        title={project.title}
+                                        category={project.category}
+                                        color={project.color}
+                                    />
 
                                     {/* Gradient overlay on banner */}
                                     <div style={{
                                         position: 'absolute',
                                         inset: 0,
                                         background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 40%, rgba(15,23,42,0.85) 100%)',
-                                        pointerEvents: 'none'
+                                        pointerEvents: 'none',
+                                        zIndex: 1
                                     }} />
 
                                     {/* Category Pill Overlay */}
@@ -627,9 +772,10 @@ export default function ProjectsCMS() {
                                     </button>
                                 </div>
                                 {formData.coverImage && (
-                                    <div style={{ marginTop: '10px', height: '100px', width: '180px', borderRadius: '8px', overflow: 'hidden' }}>
-                                        <img src={formData.coverImage} alt="Cover Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    </div>
+                                    <ProjectImagePreview
+                                        src={formData.coverImage}
+                                        onRemove={() => setFormData(p => ({ ...p, coverImage: '' }))}
+                                    />
                                 )}
                             </div>
 

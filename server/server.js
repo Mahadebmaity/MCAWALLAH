@@ -47,13 +47,23 @@ app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
 // Serve static uploaded files and documentation under root and /api prefixes
-const uploadsPath = path.resolve('public', 'uploads');
+const possibleUploads = [
+    path.resolve('public', 'uploads'),
+    path.resolve(__dirname, 'public', 'uploads'),
+    path.resolve(__dirname, '..', 'public', 'uploads')
+];
+
+possibleUploads.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+        try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+    }
+    if (fs.existsSync(dir)) {
+        app.use('/uploads', express.static(dir));
+        app.use('/api/uploads', express.static(dir));
+    }
+});
+
 const docsPath = path.resolve('public', 'docs');
-if (!fs.existsSync(uploadsPath)) {
-    fs.mkdirSync(uploadsPath, { recursive: true });
-}
-app.use('/uploads', express.static(uploadsPath));
-app.use('/api/uploads', express.static(uploadsPath));
 if (fs.existsSync(docsPath)) {
     app.use('/docs', express.static(docsPath));
     app.use('/api/docs', express.static(docsPath));

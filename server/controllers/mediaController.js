@@ -36,14 +36,18 @@ export const uploadImage = async (req, res) => {
         }
 
         // Local storage fallback if Cloudinary credentials are not configured yet
-        const uploadDir = path.resolve('public', 'uploads');
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
+        const targetDirs = [
+            path.resolve('public', 'uploads'),
+            path.resolve('server', 'public', 'uploads')
+        ];
         const filename = `${Date.now()}-${req.file.originalname.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-        const uploadPath = path.resolve(uploadDir, filename);
-        
-        fs.writeFileSync(uploadPath, req.file.buffer);
+
+        targetDirs.forEach(dir => {
+            try {
+                if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+                fs.writeFileSync(path.resolve(dir, filename), req.file.buffer);
+            } catch (_) {}
+        });
 
         const fileUrl = `/uploads/${filename}`;
 
