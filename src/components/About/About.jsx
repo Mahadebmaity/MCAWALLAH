@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePortfolioData } from "../../context/DataContext";
 import { useAuth } from "../../context/AuthContext";
-import { getDocUrl, downloadFile } from "../../config/api";
+import { getDocUrl, getMediaUrl, downloadFile } from "../../config/api";
 import ResumeModal from "../ResumeModal/ResumeModal";
 import "./About.css";
 
@@ -60,12 +60,19 @@ function useInView(threshold = 0.15) {
     const ref = useRef(null);
     const [inView, setInView] = useState(false);
     useEffect(() => {
-        const obs = new IntersectionObserver(
-            ([e]) => { if (e.isIntersecting) setInView(true); },
+        const el = ref.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setInView(true);
+                    observer.unobserve(el);
+                }
+            },
             { threshold }
         );
-        if (ref.current) obs.observe(ref.current);
-        return () => obs.disconnect();
+        observer.observe(el);
+        return () => observer.disconnect();
     }, [threshold]);
     return [ref, inView];
 }
@@ -107,6 +114,12 @@ export default function About() {
     const [imgError, setImgError] = useState(false);
     const [previewResume, setPreviewResume] = useState(null);
 
+    useEffect(() => {
+        setImgError(false);
+    }, [about.avatarUrl]);
+
+    const avatarSrc = getMediaUrl(about.avatarUrl);
+
     const initials = about.displayName
         ? about.displayName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
         : "MM";
@@ -137,7 +150,6 @@ export default function About() {
 
     return (
         <section id="about" className="about">
-            {/* ── bg decoration ── */}
             <div className="about__bg" aria-hidden="true">
                 <div className="about__bg-blob about__bg-blob--1" />
                 <div className="about__bg-blob about__bg-blob--2" />
@@ -146,7 +158,6 @@ export default function About() {
 
             <div className="about__container">
 
-                {/* ══ SECTION LABEL ══ */}
                 <div className="about__label">
                     <span className="about__label-line" />
                     <span className="about__label-text">
@@ -155,18 +166,17 @@ export default function About() {
                     <span className="about__label-line" />
                 </div>
 
-                {/* ══ HERO ROW ══ */}
                 <div
                     className={`about__hero about__reveal ${heroIn ? "about__reveal--in" : ""}`}
                     ref={heroRef}
                 >
-                    {/* Avatar */}
                     <div className="about__avatar-wrap">
                         <div className="about__avatar-ring" />
                         <div className="about__avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #1e293b, #0f172a)' }}>
-                            {about.avatarUrl && !imgError ? (
+                            {avatarSrc && !imgError ? (
                                 <img
-                                    src={about.avatarUrl}
+                                    key={avatarSrc}
+                                    src={avatarSrc}
                                     alt={about.displayName || "Avatar"}
                                     onError={() => setImgError(true)}
                                     style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
@@ -189,7 +199,6 @@ export default function About() {
                         </div>
                     </div>
 
-                    {/* Bio */}
                     <div className="about__bio">
                         <h2 className="about__name">
                             Hi, I'm <span className="about__name-accent">{about.displayName || "Mahadeb Maity"}</span> 👋

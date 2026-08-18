@@ -21,23 +21,23 @@ import { sendContactNotification } from '../services/emailService.js';
 export const getPublicPortfolio = async (req, res) => {
     try {
         const [hero, about, skills, timeline, projects, games, moments, settings, navbar, footer, adminUser] = await Promise.all([
-            Hero.findOne({ isPublic: true }).lean(),
-            About.findOne({ isPublic: true }).lean(),
-            Skill.find({ isPublic: true }).sort({ order: 1, createdAt: 1 }).lean(),
-            Timeline.find({ isPublic: true }).sort({ order: 1, year: -1 }).lean(),
-            Project.find({ isPublic: true }).sort({ order: 1, createdAt: -1 }).lean(),
-            Game.find({ isPublic: true }).sort({ order: 1, createdAt: 1 }).lean(),
-            Moment.find({ isPublic: true }).sort({ order: 1, createdAt: -1 }).lean(),
+            Hero.findOne({ isPublic: { $ne: false } }).lean() || Hero.findOne().lean(),
+            About.findOne({ isPublic: { $ne: false } }).lean() || About.findOne().lean(),
+            Skill.find({ isPublic: { $ne: false } }).sort({ order: 1, createdAt: 1 }).lean(),
+            Timeline.find({ isPublic: { $ne: false } }).sort({ order: 1, year: -1 }).lean(),
+            Project.find({ isPublic: { $ne: false } }).sort({ order: 1, createdAt: -1 }).lean(),
+            Game.find({ isPublic: { $ne: false } }).sort({ order: 1, createdAt: 1 }).lean(),
+            Moment.find({ isPublic: { $ne: false } }).sort({ order: 1, createdAt: -1 }).lean(),
             SiteSettings.findOne().lean(),
-            Navbar.findOne({ isPublic: true }).lean(),
-            Footer.findOne({ isPublic: true }).lean(),
+            Navbar.findOne({ isPublic: { $ne: false } }).lean() || Navbar.findOne().lean(),
+            Footer.findOne({ isPublic: { $ne: false } }).lean() || Footer.findOne().lean(),
             User.findOne({ role: 'admin' }).select('avatar').lean()
         ]);
 
         const resolvedAbout = about ? {
             ...about,
             avatarUrl: about.avatarUrl || adminUser?.avatar || null
-        } : null;
+        } : (adminUser?.avatar ? { avatarUrl: adminUser.avatar } : null);
 
         res.json({
             hero: hero || null,

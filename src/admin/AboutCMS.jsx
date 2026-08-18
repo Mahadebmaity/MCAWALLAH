@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { API_BASE, getDocUrl, downloadFile } from '../config/api';
+import { API_BASE, getDocUrl, getMediaUrl, downloadFile } from '../config/api';
 import ToastNotification from './ToastNotification';
 import './admin.css';
 
@@ -212,6 +212,14 @@ export default function AboutCMS() {
                     body: JSON.stringify({ ...about, avatarUrl: newAvatarUrl })
                 });
 
+                // Broadcast live update to all tabs
+                try {
+                    const channel = new BroadcastChannel('portfolio_cms_sync');
+                    channel.postMessage({ type: 'about_updated', timestamp: Date.now() });
+                    channel.close();
+                } catch (e) {}
+                localStorage.setItem('portfolio_data_updated', Date.now().toString());
+
                 setToast({
                     type: 'success',
                     title: 'Avatar Uploaded & Saved! 📸',
@@ -240,6 +248,14 @@ export default function AboutCMS() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...about, avatarUrl: '' })
             });
+
+            try {
+                const channel = new BroadcastChannel('portfolio_cms_sync');
+                channel.postMessage({ type: 'about_updated', timestamp: Date.now() });
+                channel.close();
+            } catch (e) {}
+            localStorage.setItem('portfolio_data_updated', Date.now().toString());
+
             setToast({
                 type: 'success',
                 title: 'Default Avatar Restored',
@@ -259,6 +275,14 @@ export default function AboutCMS() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...about, avatarUrl: presetUrl })
             });
+
+            try {
+                const channel = new BroadcastChannel('portfolio_cms_sync');
+                channel.postMessage({ type: 'about_updated', timestamp: Date.now() });
+                channel.close();
+            } catch (e) {}
+            localStorage.setItem('portfolio_data_updated', Date.now().toString());
+
             setToast({
                 type: 'success',
                 title: 'Default Avatar Applied! 🎨',
@@ -568,7 +592,8 @@ export default function AboutCMS() {
                         }}>
                             {about.avatarUrl && !imgError ? (
                                 <img
-                                    src={about.avatarUrl}
+                                    key={about.avatarUrl}
+                                    src={getMediaUrl(about.avatarUrl)}
                                     alt={about.displayName || "Avatar"}
                                     onError={() => setImgError(true)}
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
