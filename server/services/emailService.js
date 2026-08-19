@@ -7,8 +7,11 @@ let transporter = null;
 const getTransporter = async () => {
     if (transporter) return transporter;
 
-    if (process.env.SMTP_USER && process.env.SMTP_PASS && process.env.SMTP_USER !== 'your_email@gmail.com') {
-        const isGmail = (process.env.SMTP_HOST || '').includes('gmail') || (process.env.SMTP_USER || '').includes('gmail');
+    const smtpUser = process.env.SMTP_USER ? process.env.SMTP_USER.trim().toLowerCase() : '';
+    const smtpPass = process.env.SMTP_PASS ? process.env.SMTP_PASS.replace(/\s+/g, '') : '';
+
+    if (smtpUser && smtpPass && smtpUser !== 'your_email@gmail.com') {
+        const isGmail = (process.env.SMTP_HOST || '').includes('gmail') || smtpUser.includes('gmail');
         transporter = nodemailer.createTransport({
             ...(isGmail ? { service: 'gmail' } : {
                 host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -20,8 +23,8 @@ const getTransporter = async () => {
             maxMessages: 100,
             rateLimit: 14,
             auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
+                user: smtpUser,
+                pass: smtpPass,
             },
         });
     } else {
