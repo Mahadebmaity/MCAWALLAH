@@ -5,7 +5,6 @@ import "./ClockWidget.css";
 export default function ClockWidget() {
   const [time, setTime] = useState(new Date());
   const [is24Hour, setIs24Hour] = useState(false);
-  const [isMutedTime, setIsMutedTime] = useState(false);
 
   useEffect(() => {
     // High-precision clock ticker
@@ -45,20 +44,20 @@ export default function ClockWidget() {
   const greeting = getGreeting();
 
   // Date formatting
-  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const days = ["Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Monday", "Tuesday"];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   
   const dayName = days[time.getDay()];
   const monthName = months[time.getMonth()];
   const dateNum = time.getDate();
   const yearNum = time.getFullYear();
 
-  // Dial Hour Marks (1 to 12)
+  // Cardinal numbers on dial
   const dialNumbers = [
-    { num: 12, top: "8%", left: "50%" },
-    { num: 3, top: "50%", left: "92%" },
-    { num: 6, top: "92%", left: "50%" },
-    { num: 9, top: "50%", left: "8%" },
+    { num: 12, top: "9%", left: "50%" },
+    { num: 3, top: "50%", left: "91%" },
+    { num: 6, top: "91%", left: "50%" },
+    { num: 9, top: "50%", left: "9%" },
   ];
 
   return (
@@ -71,7 +70,6 @@ export default function ClockWidget() {
         {/* ── Left Section: Premium Analog Chronograph ── */}
         <div className="clock-analog-section">
           <div className="clock-analog-frame">
-            {/* Outer Chrono Ring */}
             <div className="clock-chrono-ring">
               {/* 12 Hour Ticks */}
               {[...Array(12)].map((_, i) => (
@@ -82,7 +80,7 @@ export default function ClockWidget() {
                 />
               ))}
 
-              {/* Cardinal numerals */}
+              {/* Cardinal numerals (12, 3, 6, 9) */}
               {dialNumbers.map(({ num, top, left }) => (
                 <span
                   key={num}
@@ -93,7 +91,7 @@ export default function ClockWidget() {
                 </span>
               ))}
 
-              {/* Inner Dial Circle */}
+              {/* Inner Dial */}
               <div className="chrono-inner-dial">
                 <span className="chrono-brand">IST</span>
               </div>
@@ -120,10 +118,8 @@ export default function ClockWidget() {
                 <span className="second-tail" />
               </div>
 
-              {/* Center Pin Hub */}
-              <div className="clock-center-hub">
-                <span className="hub-center-dot" />
-              </div>
+              {/* Center Pin */}
+              <div className="clock-center-hub" />
             </div>
           </div>
 
@@ -132,24 +128,25 @@ export default function ClockWidget() {
           </div>
         </div>
 
-        {/* ── Glowing Center Divider ── */}
+        {/* ── Center Divider ── */}
         <div className="clock-bar-divider">
           <span className="divider-core-glow" />
         </div>
 
-        {/* ── Right Section: Futuristic Digital Display & Telemetry ── */}
+        {/* ── Right Section: Digital Display & Telemetry ── */}
         <div className="clock-digital-section">
-          {/* Top Row: Digital LED Digits + 12h/24h toggle & Greeting */}
+          {/* Top Row: Greeting & 24H Toggle (Both grouped together on left) */}
           <div className="clock-digital-header">
-            <div className="clock-greeting-pill" style={{ borderColor: `${greeting.color}40` }}>
+            <div className="clock-greeting-pill" style={{ borderColor: `${greeting.color}50` }}>
               <i className={greeting.icon} style={{ color: greeting.color }} aria-hidden="true" />
               <span style={{ color: greeting.color }}>{greeting.text}</span>
             </div>
 
+            {/* Hours format toggle now placed on left side */}
             <button
               className="clock-toggle-btn"
               onClick={() => setIs24Hour(!is24Hour)}
-              title="Switch 12-Hour / 24-Hour mode"
+              title="Click to switch 12-Hour / 24-Hour mode"
               aria-label="Toggle Time Format"
             >
               <i className="fa-solid fa-clock-rotate-left" />
@@ -162,7 +159,7 @@ export default function ClockWidget() {
             <div
               className="clock-digits-display"
               onClick={() => setIs24Hour(!is24Hour)}
-              title="Click to toggle format"
+              title="Click to toggle 12h/24h format"
             >
               <div className="digit-card">
                 <span className="digit-val">{hoursFormatted}</span>
