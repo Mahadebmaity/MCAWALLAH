@@ -1,69 +1,57 @@
 /* ══════════════════════════════════════════════════════════
-   CLOCKWIDGET.CSS — Cyberpunk & Glassmorphic Dual Clock Bar
+   CLOCKWIDGET.CSS — Vertical Cyberpunk Dual Clock Card
    ══════════════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Fira+Code:wght@400;600;700&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;700&display=swap');
 
-/* ── CONTAINER SECTION (PLACED INTO HERO SPOT) ── */
-.clock-bar-section {
+/* ── MAIN VERTICAL CARD ── */
+.clock-vertical-card {
   position: relative;
-  width: 100%;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0 20px;
-  margin-top: calc(var(--nav-height, 68px) + 16px);
-  margin-bottom: -32px; /* Nicely blends into the hero section space */
-  z-index: 85;
-  box-sizing: border-box;
-}
-
-/* ── MAIN CARD HUB (COMPACT WIDTH & TALLER HEIGHT) ── */
-.clock-bar-container {
-  position: relative;
-  display: inline-flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(18px, 3vw, 36px);
-  min-height: 156px; /* Increased Height for PC */
-  padding: 22px clamp(22px, 3vw, 36px);
-  width: fit-content; /* Compact width: wraps content without empty space */
-  max-width: 95vw;
+  gap: 16px;
+  padding: 22px 26px;
+  width: 100%;
+  max-width: 460px;
+  margin-bottom: 24px;
   
   /* Cyber Glassmorphism */
-  background: radial-gradient(ellipse at top left, rgba(22, 33, 54, 0.85), rgba(8, 12, 24, 0.95));
+  background: radial-gradient(ellipse at top, rgba(22, 33, 54, 0.88), rgba(8, 12, 24, 0.96));
   backdrop-filter: blur(24px) saturate(200%);
   -webkit-backdrop-filter: blur(24px) saturate(200%);
-  border-radius: 26px;
+  border-radius: 24px;
   border: 1.5px solid rgba(232, 69, 69, 0.45); /* Cyber Red glowing outline */
   
   box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.65),
-    0 0 30px rgba(232, 69, 69, 0.2),
-    0 0 45px rgba(56, 189, 248, 0.15),
+    0 16px 45px rgba(0, 0, 0, 0.65),
+    0 0 25px rgba(232, 69, 69, 0.2),
+    0 0 35px rgba(56, 189, 248, 0.12),
     inset 0 1px 1px rgba(255, 255, 255, 0.25);
   
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  box-sizing: border-box;
 }
 
-.clock-bar-container:hover {
-  border-color: rgba(232, 69, 69, 0.7);
+.clock-vertical-card:hover {
+  border-color: rgba(232, 69, 69, 0.75);
   box-shadow: 
-    0 24px 60px rgba(0, 0, 0, 0.75),
-    0 0 40px rgba(232, 69, 69, 0.3),
-    0 0 60px rgba(56, 189, 248, 0.25),
+    0 22px 55px rgba(0, 0, 0, 0.75),
+    0 0 35px rgba(232, 69, 69, 0.3),
+    0 0 50px rgba(56, 189, 248, 0.22),
     inset 0 1px 2px rgba(255, 255, 255, 0.35);
   transform: translateY(-3px);
 }
 
 /* Light Theme */
-[data-theme="light"] .clock-bar-container {
-  background: radial-gradient(ellipse at top left, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.94));
+[data-theme="light"] .clock-vertical-card {
+  background: radial-gradient(ellipse at top, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.94));
   border: 1.5px solid rgba(232, 69, 69, 0.35);
   box-shadow: 
-    0 18px 45px rgba(0, 0, 0, 0.12),
-    0 0 25px rgba(232, 69, 69, 0.12),
+    0 16px 40px rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(232, 69, 69, 0.1),
     inset 0 1px 2px rgba(255, 255, 255, 1);
 }
 
@@ -77,8 +65,8 @@
   background: linear-gradient(
     115deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.04) 45%,
-    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.03) 45%,
+    rgba(255, 255, 255, 0.1) 50%,
     transparent 55%
   );
   pointer-events: none;
@@ -86,38 +74,38 @@
 
 .clock-neon-glow {
   position: absolute;
-  bottom: -30px;
-  right: 20%;
-  width: 220px;
-  height: 80px;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.3) 0%, transparent 70%);
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%);
   filter: blur(25px);
   pointer-events: none;
 }
 
 /* ══════════════════════════════════════════
-   1. ANALOG CHRONOMETER (LEFT SECTION)
+   1. TOP: ANALOG CHRONOMETER
    ══════════════════════════════════════════ */
 .clock-analog-section {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  flex-shrink: 0;
+  gap: 8px;
 }
 
 .clock-analog-frame {
   position: relative;
-  width: 112px; /* Bigger dial on PC */
-  height: 112px;
+  width: 106px;
+  height: 106px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 30%, #1e293b, #090d16);
   padding: 4px;
   box-shadow: 
-    0 10px 25px rgba(0, 0, 0, 0.65),
-    0 0 20px rgba(56, 189, 248, 0.25),
-    inset 0 0 16px rgba(0, 0, 0, 0.85);
+    0 8px 22px rgba(0, 0, 0, 0.65),
+    0 0 18px rgba(56, 189, 248, 0.25),
+    inset 0 0 14px rgba(0, 0, 0, 0.85);
   border: 2px solid rgba(56, 189, 248, 0.45);
 }
 
@@ -125,8 +113,8 @@
   background: radial-gradient(circle at 35% 30%, #ffffff, #e2e8f0);
   border: 2px solid rgba(14, 165, 233, 0.45);
   box-shadow: 
-    0 8px 20px rgba(0, 0, 0, 0.1),
-    0 0 16px rgba(14, 165, 233, 0.15),
+    0 8px 20px rgba(0, 0, 0, 0.08),
+    0 0 14px rgba(14, 165, 233, 0.15),
     inset 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
@@ -146,14 +134,14 @@
   top: 2px;
   left: 50%;
   width: 1.5px;
-  height: 6px;
+  height: 5.5px;
   background: rgba(255, 255, 255, 0.25);
-  transform-origin: center 50px;
+  transform-origin: center 47px;
 }
 
 .chrono-tick--major {
   width: 2.2px;
-  height: 9px;
+  height: 8.5px;
   background: #38bdf8;
   box-shadow: 0 0 6px #38bdf8;
 }
@@ -172,7 +160,7 @@
   position: absolute;
   transform: translate(-50%, -50%);
   font-family: 'Orbitron', 'Fira Code', monospace;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 800;
   color: #94a3b8;
   user-select: none;
@@ -185,8 +173,8 @@
 /* Inner Dial */
 .chrono-inner-dial {
   position: absolute;
-  width: 54px;
-  height: 54px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   border: 1px dashed rgba(255, 255, 255, 0.12);
   display: flex;
@@ -197,11 +185,11 @@
 
 .chrono-brand {
   font-family: 'Orbitron', sans-serif;
-  font-size: 8px;
+  font-size: 7.5px;
   font-weight: 800;
   letter-spacing: 1px;
   color: rgba(56, 189, 248, 0.75);
-  margin-top: -18px;
+  margin-top: -16px;
 }
 
 /* Hands */
@@ -216,7 +204,7 @@
 
 .hand-hour {
   width: 3.5px;
-  height: 30px;
+  height: 28px;
   background: linear-gradient(to top, #38bdf8, #818cf8);
   box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
   z-index: 3;
@@ -224,7 +212,7 @@
 
 .hand-minute {
   width: 2.5px;
-  height: 42px;
+  height: 38px;
   background: #f8fafc;
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
   z-index: 4;
@@ -237,7 +225,7 @@
 
 .hand-second {
   width: 1.5px;
-  height: 48px;
+  height: 44px;
   background: #e84545;
   box-shadow: 0 0 10px rgba(232, 69, 69, 0.9);
   z-index: 5;
@@ -249,7 +237,7 @@
   top: 100%;
   left: 0;
   width: 1.5px;
-  height: 12px;
+  height: 10px;
   background: #e84545;
   border-radius: 2px;
 }
@@ -257,8 +245,8 @@
 /* Center Hub */
 .clock-center-hub {
   position: absolute;
-  width: 11px;
-  height: 11px;
+  width: 10px;
+  height: 10px;
   background: radial-gradient(circle, #e84545 40%, #0f172a 100%);
   border: 2px solid #ffffff;
   border-radius: 50%;
@@ -272,13 +260,13 @@
 
 .label-badge {
   font-family: 'Orbitron', 'Fira Code', monospace;
-  font-size: 8.5px;
+  font-size: 8px;
   font-weight: 700;
   letter-spacing: 0.8px;
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.1);
   border: 1px solid rgba(56, 189, 248, 0.25);
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: 6px;
 }
 
@@ -289,21 +277,20 @@
 }
 
 /* ══════════════════════════════════════════
-   DIVIDER
+   HORIZONTAL DIVIDER (FOR VERTICAL STACK)
    ══════════════════════════════════════════ */
-.clock-bar-divider {
+.clock-vertical-divider {
   position: relative;
-  width: 2px;
-  height: 100px;
+  width: 85%;
+  height: 1.5px;
   background: linear-gradient(
-    to bottom,
+    to right,
     transparent,
-    rgba(232, 69, 69, 0.5) 30%,
+    rgba(232, 69, 69, 0.4) 30%,
     rgba(56, 189, 248, 0.6) 70%,
     transparent
   );
   border-radius: 2px;
-  flex-shrink: 0;
 }
 
 .divider-core-glow {
@@ -311,43 +298,44 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 6px;
-  height: 35px;
+  width: 40px;
+  height: 4px;
   background: rgba(56, 189, 248, 0.45);
   filter: blur(4px);
   border-radius: 50%;
 }
 
 /* ══════════════════════════════════════════
-   2. DIGITAL SECTION (RIGHT)
+   2. BOTTOM: DIGITAL SECTION
    ══════════════════════════════════════════ */
 .clock-digital-section {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 12px;
-  justify-content: center;
+  width: 100%;
 }
 
-/* Digital Header (Greeting + 24H Toggle brought together on left side) */
+/* Digital Header (Greeting + 24H Toggle) */
 .clock-digital-header {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Grouped cleanly on left */
+  justify-content: center;
   gap: 10px;
-  flex-wrap: wrap;
+  width: 100%;
 }
 
 .clock-greeting-pill {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   letter-spacing: 0.3px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 4px 11px;
+  padding: 3px 10px;
   border-radius: 999px;
 }
 
@@ -358,16 +346,16 @@
 .clock-toggle-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   font-family: 'Orbitron', 'Fira Code', monospace;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.5px;
   color: #94a3b8;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  padding: 4px 10px;
-  border-radius: 8px;
+  padding: 3px 8px;
+  border-radius: 7px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -389,12 +377,13 @@
 .clock-digits-wrapper {
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .clock-digits-display {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   cursor: pointer;
   user-select: none;
   transition: transform 0.2s ease;
@@ -412,9 +401,9 @@
   justify-content: center;
   background: rgba(15, 23, 42, 0.75);
   border: 1.5px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  padding: 5px 14px 3px;
-  min-width: 60px;
+  border-radius: 11px;
+  padding: 4px 11px 2px;
+  min-width: 52px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
   transition: all 0.2s ease;
 }
@@ -437,7 +426,7 @@
 
 .digit-val {
   font-family: 'Orbitron', 'Fira Code', monospace;
-  font-size: clamp(24px, 3.2vw, 36px);
+  font-size: clamp(22px, 2.8vw, 30px);
   font-weight: 800;
   line-height: 1;
   color: #f8fafc;
@@ -450,10 +439,10 @@
 
 .digit-sub {
   font-family: 'Orbitron', monospace;
-  font-size: 7.5px;
+  font-size: 7px;
   font-weight: 700;
   color: #64748b;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   margin-top: 2px;
 }
 
@@ -474,7 +463,7 @@
 
 .digit-colon {
   font-family: 'Orbitron', monospace;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 900;
   color: #94a3b8;
   animation: colonBlink 1s infinite steps(1);
@@ -490,31 +479,33 @@
   align-items: center;
   justify-content: center;
   font-family: 'Orbitron', monospace;
-  font-size: 13px;
+  font-size: 11.5px;
   font-weight: 900;
   color: #ffffff;
   background: linear-gradient(135deg, #e84545, #c0392b);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 6px 10px;
-  border-radius: 8px;
-  box-shadow: 0 0 12px rgba(232, 69, 69, 0.5);
-  margin-left: 6px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  box-shadow: 0 0 10px rgba(232, 69, 69, 0.5);
+  margin-left: 4px;
 }
 
 /* ── BOTTOM TELEMETRY ROW ── */
 .clock-telemetry-row {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 8px 16px;
+  gap: 6px;
+  width: 100%;
 }
 
 .telemetry-pill {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  justify-content: center;
+  gap: 6px;
   font-family: 'DM Sans', sans-serif;
-  font-size: clamp(11.5px, 1.15vw, 13.5px);
+  font-size: 12px;
   color: #94a3b8;
   font-weight: 500;
 }
@@ -525,7 +516,7 @@
 
 .telemetry-pill i {
   color: #38bdf8;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 [data-theme="light"] .telemetry-pill i {
@@ -551,7 +542,7 @@
 
 .telemetry-tz-tag {
   font-family: 'Fira Code', monospace;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
   color: #22c55e;
   background: rgba(34, 197, 94, 0.1);
@@ -566,13 +557,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
 }
 
 .radar-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: #22c55e;
   box-shadow: 0 0 8px #22c55e;
@@ -580,8 +571,8 @@
 
 .radar-ring {
   position: absolute;
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
   border: 1.5px solid #22c55e;
   animation: radarExpand 1.8s infinite cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -593,78 +584,39 @@
 }
 
 /* ══════════════════════════════════════════
-   MOBILE & TABLET RESPONSIVENESS
+   RESPONSIVE
    ══════════════════════════════════════════ */
-@media (max-width: 768px) {
-  .clock-bar-section {
-    padding: 0 14px;
-    margin-top: calc(var(--nav-height, 68px) + 10px);
-    margin-bottom: -15px;
-  }
-
-  .clock-bar-container {
-    min-height: auto;
-    gap: 14px;
-    padding: 14px 18px;
+@media (max-width: 600px) {
+  .clock-vertical-card {
+    padding: 16px 18px;
     border-radius: 20px;
+    gap: 12px;
+    margin-bottom: 18px;
   }
 
   .clock-analog-frame {
-    width: 86px;
-    height: 86px;
+    width: 88px;
+    height: 88px;
   }
 
   .chrono-tick {
-    transform-origin: center 38px;
+    transform-origin: center 39px;
   }
 
-  .hand-hour { height: 24px; width: 3px; }
+  .hand-hour { height: 23px; width: 3px; }
   .hand-minute { height: 32px; width: 2px; }
   .hand-second { height: 36px; width: 1.2px; }
 
-  .clock-bar-divider {
-    height: 75px;
-  }
-
   .digit-card {
-    min-width: 48px;
-    padding: 4px 8px 2px;
+    min-width: 44px;
+    padding: 3px 8px 1px;
   }
 
   .digit-val {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   .digit-colon {
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 540px) {
-  .clock-bar-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-    padding: 16px 14px;
-    width: 100%;
-  }
-
-  .clock-bar-divider {
-    width: 80%;
-    height: 1.5px;
-    background: linear-gradient(to right, transparent, rgba(56, 189, 248, 0.5), transparent);
-  }
-
-  .clock-digital-header {
-    justify-content: center;
-  }
-
-  .clock-digits-wrapper {
-    justify-content: center;
-  }
-
-  .clock-telemetry-row {
-    justify-content: center;
-    text-align: center;
+    font-size: 18px;
   }
 }

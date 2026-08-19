@@ -4,7 +4,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Public Immediate Components (Critical for initial fast paint)
 import Navbar from './components/Navbar/Navbar';
-import ClockWidget from './components/ClockWidget/ClockWidget';
 import Header from './components/Header/Header';
 import MomentsSlider from './components/MomentsSlider/MomentsSlider';
 import About from './components/About/About';
@@ -82,7 +81,6 @@ function PublicPortfolio() {
   return (
     <>
       <Navbar />
-      <ClockWidget />
       <Header />
       <MomentsSlider />
       <About />

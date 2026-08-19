@@ -1,6 +1,7 @@
 // src/components/Header/Header.jsx
 import { useState, useEffect, useRef } from "react";
 import { usePortfolioData } from "../../context/DataContext";
+import ClockWidget from "../ClockWidget/ClockWidget";
 import "./Header.css";
 
 /* ── 8 Background Presets ── */
@@ -566,8 +567,9 @@ export default function Header() {
                             {socialElements}
                         </div>
 
-                        {/* Right Column: Interactive Code IDE Window */}
+                        {/* Right Column: Clock & Interactive Code IDE Window */}
                         <div className="header__split-right">
+                            <ClockWidget />
                             <div className="header__code-window">
                                 <div className="header__code-header">
                                     <div className="header__code-dots">

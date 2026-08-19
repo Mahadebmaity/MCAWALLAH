@@ -7,7 +7,6 @@ export default function ClockWidget() {
   const [is24Hour, setIs24Hour] = useState(false);
 
   useEffect(() => {
-    // High-precision clock ticker
     const timer = setInterval(() => {
       setTime(new Date());
     }, 1000);
@@ -44,7 +43,7 @@ export default function ClockWidget() {
   const greeting = getGreeting();
 
   // Date formatting
-  const days = ["Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Monday", "Tuesday"];
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   
   const dayName = days[time.getDay()];
@@ -61,153 +60,150 @@ export default function ClockWidget() {
   ];
 
   return (
-    <section className="clock-bar-section" aria-label="Dual Timezone & System Clock Hub">
-      <div className="clock-bar-container">
-        {/* Ambient background glow & glass sheen */}
-        <div className="clock-glass-sheen" aria-hidden="true" />
-        <div className="clock-neon-glow" aria-hidden="true" />
+    <div className="clock-vertical-card" aria-label="Live Vertical Dual Clock Hub">
+      {/* Ambient background glass sheen & glow */}
+      <div className="clock-glass-sheen" aria-hidden="true" />
+      <div className="clock-neon-glow" aria-hidden="true" />
 
-        {/* ── Left Section: Premium Analog Chronograph ── */}
-        <div className="clock-analog-section">
-          <div className="clock-analog-frame">
-            <div className="clock-chrono-ring">
-              {/* 12 Hour Ticks */}
-              {[...Array(12)].map((_, i) => (
-                <span
-                  key={i}
-                  className={`chrono-tick ${i % 3 === 0 ? "chrono-tick--major" : ""}`}
-                  style={{ transform: `rotate(${i * 30}deg)` }}
-                />
-              ))}
+      {/* ── TOP: Analog Chronograph ── */}
+      <div className="clock-analog-section">
+        <div className="clock-analog-frame">
+          <div className="clock-chrono-ring">
+            {/* 12 Hour Ticks */}
+            {[...Array(12)].map((_, i) => (
+              <span
+                key={i}
+                className={`chrono-tick ${i % 3 === 0 ? "chrono-tick--major" : ""}`}
+                style={{ transform: `rotate(${i * 30}deg)` }}
+              />
+            ))}
 
-              {/* Cardinal numerals (12, 3, 6, 9) */}
-              {dialNumbers.map(({ num, top, left }) => (
-                <span
-                  key={num}
-                  className="chrono-numeral"
-                  style={{ top, left }}
-                >
-                  {num}
-                </span>
-              ))}
-
-              {/* Inner Dial */}
-              <div className="chrono-inner-dial">
-                <span className="chrono-brand">IST</span>
-              </div>
-
-              {/* Hands */}
-              <div
-                className="clock-hand hand-hour"
-                style={{ transform: `translateX(-50%) rotate(${hourDeg}deg)` }}
+            {/* Cardinal numerals (12, 3, 6, 9) */}
+            {dialNumbers.map(({ num, top, left }) => (
+              <span
+                key={num}
+                className="chrono-numeral"
+                style={{ top, left }}
               >
-                <span className="hand-cap-glow" />
-              </div>
-              
-              <div
-                className="clock-hand hand-minute"
-                style={{ transform: `translateX(-50%) rotate(${minuteDeg}deg)` }}
-              >
-                <span className="hand-cap-glow" />
-              </div>
-
-              <div
-                className="clock-hand hand-second"
-                style={{ transform: `translateX(-50%) rotate(${secondDeg}deg)` }}
-              >
-                <span className="second-tail" />
-              </div>
-
-              {/* Center Pin */}
-              <div className="clock-center-hub" />
-            </div>
-          </div>
-
-          <div className="clock-analog-label">
-            <span className="label-badge">ANALOG CHRONO</span>
-          </div>
-        </div>
-
-        {/* ── Center Divider ── */}
-        <div className="clock-bar-divider">
-          <span className="divider-core-glow" />
-        </div>
-
-        {/* ── Right Section: Digital Display & Telemetry ── */}
-        <div className="clock-digital-section">
-          {/* Top Row: Greeting & 24H Toggle (Both grouped together on left) */}
-          <div className="clock-digital-header">
-            <div className="clock-greeting-pill" style={{ borderColor: `${greeting.color}50` }}>
-              <i className={greeting.icon} style={{ color: greeting.color }} aria-hidden="true" />
-              <span style={{ color: greeting.color }}>{greeting.text}</span>
-            </div>
-
-            {/* Hours format toggle now placed on left side */}
-            <button
-              className="clock-toggle-btn"
-              onClick={() => setIs24Hour(!is24Hour)}
-              title="Click to switch 12-Hour / 24-Hour mode"
-              aria-label="Toggle Time Format"
-            >
-              <i className="fa-solid fa-clock-rotate-left" />
-              <span>{is24Hour ? "24H FORMAT" : "12H FORMAT"}</span>
-            </button>
-          </div>
-
-          {/* Main Digits Counter */}
-          <div className="clock-digits-wrapper">
-            <div
-              className="clock-digits-display"
-              onClick={() => setIs24Hour(!is24Hour)}
-              title="Click to toggle 12h/24h format"
-            >
-              <div className="digit-card">
-                <span className="digit-val">{hoursFormatted}</span>
-                <span className="digit-sub">HR</span>
-              </div>
-
-              <span className="digit-colon">:</span>
-
-              <div className="digit-card">
-                <span className="digit-val">{minutesFormatted}</span>
-                <span className="digit-sub">MIN</span>
-              </div>
-
-              <span className="digit-colon">:</span>
-
-              <div className="digit-card digit-card--seconds">
-                <span className="digit-val seconds-glow">{secondsFormatted}</span>
-                <span className="digit-sub">SEC</span>
-              </div>
-
-              {!is24Hour && (
-                <div className="digit-ampm-badge">
-                  <span>{ampm}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Bottom Telemetry: Date + Location / Timezone */}
-          <div className="clock-telemetry-row">
-            <div className="telemetry-pill">
-              <i className="fa-regular fa-calendar-check" aria-hidden="true" />
-              <span className="telemetry-highlight">{dayName}</span>
-              <span className="telemetry-separator">•</span>
-              <span>{monthName} {dateNum}, {yearNum}</span>
-            </div>
-
-            <div className="telemetry-pill telemetry-pill--live">
-              <span className="radar-ping">
-                <span className="radar-ring" />
-                <span className="radar-dot" />
+                {num}
               </span>
-              <span className="telemetry-location">Kolkata, India</span>
-              <span className="telemetry-tz-tag">IST (UTC+5:30)</span>
+            ))}
+
+            {/* Inner Dial */}
+            <div className="chrono-inner-dial">
+              <span className="chrono-brand">IST</span>
             </div>
+
+            {/* Hands */}
+            <div
+              className="clock-hand hand-hour"
+              style={{ transform: `translateX(-50%) rotate(${hourDeg}deg)` }}
+            >
+              <span className="hand-cap-glow" />
+            </div>
+            
+            <div
+              className="clock-hand hand-minute"
+              style={{ transform: `translateX(-50%) rotate(${minuteDeg}deg)` }}
+            >
+              <span className="hand-cap-glow" />
+            </div>
+
+            <div
+              className="clock-hand hand-second"
+              style={{ transform: `translateX(-50%) rotate(${secondDeg}deg)` }}
+            >
+              <span className="second-tail" />
+            </div>
+
+            {/* Center Pin Hub */}
+            <div className="clock-center-hub" />
+          </div>
+        </div>
+
+        <div className="clock-analog-label">
+          <span className="label-badge">ANALOG CHRONO</span>
+        </div>
+      </div>
+
+      {/* ── HORIZONTAL DIVIDER ── */}
+      <div className="clock-vertical-divider">
+        <span className="divider-core-glow" />
+      </div>
+
+      {/* ── BOTTOM: Digital Display & Telemetry ── */}
+      <div className="clock-digital-section">
+        {/* Greeting & Format Toggle */}
+        <div className="clock-digital-header">
+          <div className="clock-greeting-pill" style={{ borderColor: `${greeting.color}50` }}>
+            <i className={greeting.icon} style={{ color: greeting.color }} aria-hidden="true" />
+            <span style={{ color: greeting.color }}>{greeting.text}</span>
+          </div>
+
+          <button
+            className="clock-toggle-btn"
+            onClick={() => setIs24Hour(!is24Hour)}
+            title="Click to switch 12-Hour / 24-Hour mode"
+            aria-label="Toggle Time Format"
+          >
+            <i className="fa-solid fa-clock-rotate-left" />
+            <span>{is24Hour ? "24H" : "12H"}</span>
+          </button>
+        </div>
+
+        {/* Main Digits Counter */}
+        <div className="clock-digits-wrapper">
+          <div
+            className="clock-digits-display"
+            onClick={() => setIs24Hour(!is24Hour)}
+            title="Click to toggle 12h/24h format"
+          >
+            <div className="digit-card">
+              <span className="digit-val">{hoursFormatted}</span>
+              <span className="digit-sub">HR</span>
+            </div>
+
+            <span className="digit-colon">:</span>
+
+            <div className="digit-card">
+              <span className="digit-val">{minutesFormatted}</span>
+              <span className="digit-sub">MIN</span>
+            </div>
+
+            <span className="digit-colon">:</span>
+
+            <div className="digit-card digit-card--seconds">
+              <span className="digit-val seconds-glow">{secondsFormatted}</span>
+              <span className="digit-sub">SEC</span>
+            </div>
+
+            {!is24Hour && (
+              <div className="digit-ampm-badge">
+                <span>{ampm}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom Telemetry: Date + Location / Timezone */}
+        <div className="clock-telemetry-row">
+          <div className="telemetry-pill">
+            <i className="fa-regular fa-calendar-check" aria-hidden="true" />
+            <span className="telemetry-highlight">{dayName}</span>
+            <span className="telemetry-separator">•</span>
+            <span>{monthName} {dateNum}, {yearNum}</span>
+          </div>
+
+          <div className="telemetry-pill telemetry-pill--live">
+            <span className="radar-ping">
+              <span className="radar-ring" />
+              <span className="radar-dot" />
+            </span>
+            <span className="telemetry-location">Kolkata, India</span>
+            <span className="telemetry-tz-tag">IST (UTC+5:30)</span>
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
