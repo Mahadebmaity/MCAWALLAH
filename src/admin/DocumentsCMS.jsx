@@ -18,6 +18,7 @@ export default function DocumentsCMS() {
     const [previewDoc, setPreviewDoc] = useState(null);
     const [copiedDocId, setCopiedDocId] = useState(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [docViewerEngine, setDocViewerEngine] = useState('direct'); // 'direct', 'gdocs', 'img'
 
     const [form, setForm] = useState({
         title: '',
@@ -656,6 +657,65 @@ export default function DocumentsCMS() {
                                 </div>
 
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    {/* Viewer Engine Selector for PDFs */}
+                                    {isPdfDoc(previewDoc) && hasValidUrl && (
+                                        <div style={{ display: 'flex', background: 'rgba(0,0,0,0.4)', borderRadius: '8px', padding: '2px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                            <button
+                                                type="button"
+                                                onClick={() => setDocViewerEngine('direct')}
+                                                style={{
+                                                    background: docViewerEngine === 'direct' ? '#0284c7' : 'transparent',
+                                                    color: docViewerEngine === 'direct' ? '#ffffff' : '#94a3b8',
+                                                    border: 'none',
+                                                    borderRadius: '6px',
+                                                    padding: '3px 8px',
+                                                    fontSize: '11px',
+                                                    fontWeight: '600',
+                                                    cursor: 'pointer'
+                                                }}
+                                                title="Standard Browser PDF Viewer"
+                                            >
+                                                📄 Direct
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setDocViewerEngine('gdocs')}
+                                                style={{
+                                                    background: docViewerEngine === 'gdocs' ? '#0284c7' : 'transparent',
+                                                    color: docViewerEngine === 'gdocs' ? '#ffffff' : '#94a3b8',
+                                                    border: 'none',
+                                                    borderRadius: '6px',
+                                                    padding: '3px 8px',
+                                                    fontSize: '11px',
+                                                    fontWeight: '600',
+                                                    cursor: 'pointer'
+                                                }}
+                                                title="Google Docs PDF Viewer (Fixes Blank / Blocked Previews)"
+                                            >
+                                                ⚡ Google Reader
+                                            </button>
+                                            {resolvedUrl.includes('res.cloudinary.com') && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setDocViewerEngine('img')}
+                                                    style={{
+                                                        background: docViewerEngine === 'img' ? '#0284c7' : 'transparent',
+                                                        color: docViewerEngine === 'img' ? '#ffffff' : '#94a3b8',
+                                                        border: 'none',
+                                                        borderRadius: '6px',
+                                                        padding: '3px 8px',
+                                                        fontSize: '11px',
+                                                        fontWeight: '600',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                    title="Image Render (Cloudinary Page Render)"
+                                                >
+                                                    🖼️ Image
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+
                                     {/* Toggle Fullscreen / Maximize */}
                                     <button
                                         type="button"
@@ -698,11 +758,22 @@ export default function DocumentsCMS() {
                                     </div>
                                 ) : isPdfDoc(previewDoc) ? (
                                     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-                                        <iframe
-                                            src={`${resolvedUrl}#toolbar=1&navpanes=0`}
-                                            title={previewDoc.title}
-                                            className="adm-doc-modal-iframe"
-                                        />
+                                        {docViewerEngine === 'img' && resolvedUrl.includes('res.cloudinary.com') ? (
+                                            <div style={{ flex: 1, overflow: 'auto', display: 'flex', justifyContent: 'center', background: '#0a0f1d', padding: '16px' }}>
+                                                <img
+                                                    src={resolvedUrl.replace('/image/upload/', '/image/upload/f_auto,q_auto/').replace(/\.pdf$/i, '.jpg')}
+                                                    alt={previewDoc.title}
+                                                    style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <iframe
+                                                key={docViewerEngine === 'gdocs' ? `gdocs-${resolvedUrl}` : `direct-${resolvedUrl}`}
+                                                src={docViewerEngine === 'gdocs' ? `https://docs.google.com/viewer?url=${encodeURIComponent(resolvedUrl)}&embedded=true` : `${resolvedUrl}#toolbar=1&navpanes=0`}
+                                                title={previewDoc.title}
+                                                className="adm-doc-modal-iframe"
+                                            />
+                                        )}
                                         <div style={{
                                             background: 'rgba(11, 17, 32, 0.95)',
                                             padding: '8px 16px',
@@ -716,8 +787,8 @@ export default function DocumentsCMS() {
                                             borderTop: '1px solid rgba(255, 255, 255, 0.08)'
                                         }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                <i className="fa-solid fa-mobile-screen" style={{ color: '#38bdf8' }} />
-                                                <span>Mobile tip: Tap <strong>Open in New Tab</strong> or <strong>Download</strong> for native high-speed reader.</span>
+                                                <i className="fa-solid fa-circle-info" style={{ color: '#38bdf8' }} />
+                                                <span>Preview issue? Click <strong>⚡ Google Reader</strong> above or tap <strong>Open in New Tab</strong>.</span>
                                             </div>
                                             <a
                                                 href={resolvedUrl}

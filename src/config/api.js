@@ -86,11 +86,12 @@ export const getDocUrl = (urlOrDoc) => {
 
     // External Cloudinary / AWS / HTTPS URLs
     if (url.startsWith('https://')) {
-        // Fix Cloudinary PDF delivery restriction (ERR_INVALID_RESPONSE on image/upload PDFs)
-        if (url.includes('res.cloudinary.com') && (url.toLowerCase().endsWith('.pdf') || url.includes('/portfolio_cms/') || url.includes('/portfolio_documents/'))) {
-            if (url.includes('/image/upload/') && !url.includes('/fl_attachment')) {
-                return url.replace('/image/upload/', '/image/upload/fl_attachment/');
-            }
+        // Strip problematic fl_attachment flag if present from legacy uploads (causes ERR_INVALID_RESPONSE and breaks iframe rendering)
+        if (url.includes('/image/upload/fl_attachment/')) {
+            url = url.replace('/image/upload/fl_attachment/', '/image/upload/');
+        }
+        if (url.includes('/fl_attachment/')) {
+            url = url.replace('/fl_attachment/', '/');
         }
         return url;
     }
@@ -129,11 +130,6 @@ export const downloadFile = async (urlOrDoc, defaultFileName = 'Resume.pdf') => 
         if (!resolvedUrl || resolvedUrl === '#') {
             console.error('Download cancelled: Invalid document URL');
             return false;
-        }
-
-        // Ensure Cloudinary URLs have fl_attachment flag for direct binary download
-        if (resolvedUrl.includes('res.cloudinary.com') && resolvedUrl.includes('/image/upload/') && !resolvedUrl.includes('/fl_attachment')) {
-            resolvedUrl = resolvedUrl.replace('/image/upload/', '/image/upload/fl_attachment/');
         }
 
         // Clean desired filename

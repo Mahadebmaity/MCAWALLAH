@@ -18,8 +18,7 @@ export const uploadImage = async (req, res) => {
                 const uploadStream = cloudinary.uploader.upload_stream(
                     {
                         folder: 'portfolio_cms',
-                        resource_type: 'auto',
-                        ...(isPdf ? { flags: 'attachment' } : {})
+                        resource_type: isPdf ? 'raw' : 'auto'
                     },
                     (error, result) => {
                         if (error) {

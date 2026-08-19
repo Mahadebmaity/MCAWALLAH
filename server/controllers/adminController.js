@@ -437,16 +437,18 @@ export const uploadDocument = async (req, res) => {
             return res.status(400).json({ message: 'No document file uploaded' });
         }
 
-        const fileSizeMB = (req.file.size / (1024 * 1024)).toFixed(2) + ' MB';
-        const fileType = req.file.mimetype.includes('pdf') ? 'PDF' : req.file.originalname.split('.').pop().toUpperCase();
+        const isPdf = req.file.mimetype?.includes('pdf') || req.file.originalname?.toLowerCase().endsWith('.pdf');
+        const fileType = isPdf ? 'PDF' : req.file.originalname.split('.').pop().toUpperCase();
 
         // If Cloudinary is configured with valid credentials
         if (isCloudinaryConfigured()) {
             return new Promise((resolve, reject) => {
+                const safeName = req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
                 const uploadStream = cloudinary.uploader.upload_stream(
                     {
                         folder: 'portfolio_documents',
-                        resource_type: 'auto'
+                        resource_type: isPdf ? 'raw' : 'auto',
+                        public_id: `${Date.now()}-${safeName}`
                     },
                     (error, result) => {
                         if (error) {

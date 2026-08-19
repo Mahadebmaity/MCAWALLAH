@@ -5,6 +5,7 @@ import './ResumeModal.css';
 export default function ResumeModal({ resume, onClose }) {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [copied, setCopied] = useState(false);
+    const [viewerEngine, setViewerEngine] = useState('auto'); // 'direct', 'gdocs', 'img'
 
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -16,9 +17,29 @@ export default function ResumeModal({ resume, onClose }) {
 
     if (!resume) return null;
 
-    const resolvedUrl = getDocUrl(resume.url || resume);
+    const rawUrl = resume.url || resume.fileUrl || resume.secure_url || resume;
+    const resolvedUrl = getDocUrl(rawUrl);
     const title = resume.title || resume.fileName || 'Mahadeb Maity — Verified Resume';
     const fileSize = resume.fileSize || 'PDF Document';
+
+    const isCloudinary = typeof resolvedUrl === 'string' && resolvedUrl.includes('res.cloudinary.com');
+    const isRemoteHttps = typeof resolvedUrl === 'string' && resolvedUrl.startsWith('https://');
+
+    // Cloudinary high-res rendered image URL for guaranteed viewing
+    const cloudinaryImgUrl = isCloudinary 
+        ? resolvedUrl.replace('/image/upload/', '/image/upload/f_auto,q_auto/').replace(/\.pdf$/i, '.jpg')
+        : '';
+
+    // Google Docs Viewer for seamless remote viewing
+    const gDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(resolvedUrl)}&embedded=true`;
+
+    // Compute active preview URL based on engine
+    let activeSrc = `${resolvedUrl}#toolbar=1&navpanes=0`;
+    if (viewerEngine === 'gdocs') {
+        activeSrc = gDocsViewerUrl;
+    } else if (viewerEngine === 'img' && cloudinaryImgUrl) {
+        activeSrc = cloudinaryImgUrl;
+    }
 
     const handleCopyLink = () => {
         const fullUrl = resolvedUrl.startsWith('http') ? resolvedUrl : `${window.location.origin}${resolvedUrl}`;
@@ -54,6 +75,36 @@ export default function ResumeModal({ resume, onClose }) {
                     </div>
 
                     <div className="resume-modal__header-actions">
+                        {/* Viewer Engine Selector */}
+                        <div className="resume-modal__engine-selector">
+                            <button
+                                type="button"
+                                className={`resume-modal__engine-btn ${viewerEngine === 'auto' || viewerEngine === 'direct' ? 'active' : ''}`}
+                                onClick={() => setViewerEngine('direct')}
+                                title="Standard Browser PDF Viewer"
+                            >
+                                📄 Direct
+                            </button>
+                            <button
+                                type="button"
+                                className={`resume-modal__engine-btn ${viewerEngine === 'gdocs' ? 'active' : ''}`}
+                                onClick={() => setViewerEngine('gdocs')}
+                                title="Google Docs PDF Viewer (Fixes Blank / Blocked Previews)"
+                            >
+                                ⚡ Google Reader
+                            </button>
+                            {isCloudinary && (
+                                <button
+                                    type="button"
+                                    className={`resume-modal__engine-btn ${viewerEngine === 'img' ? 'active' : ''}`}
+                                    onClick={() => setViewerEngine('img')}
+                                    title="Crisp Image Preview (Cloudinary Page Render)"
+                                >
+                                    🖼️ Image
+                                </button>
+                            )}
+                        </div>
+
                         <button
                             type="button"
                             onClick={() => setIsFullscreen(!isFullscreen)}
@@ -76,15 +127,26 @@ export default function ResumeModal({ resume, onClose }) {
 
                 {/* ── Modal PDF Viewer Body ── */}
                 <div className="resume-modal__body">
-                    <iframe
-                        src={`${resolvedUrl}#toolbar=1&navpanes=0`}
-                        title={title}
-                        className="resume-modal__iframe"
-                    />
+                    {viewerEngine === 'img' && cloudinaryImgUrl ? (
+                        <div style={{ flex: 1, overflow: 'auto', display: 'flex', justifyContent: 'center', background: '#0a0f1d', padding: '16px' }}>
+                            <img
+                                src={cloudinaryImgUrl}
+                                alt={title}
+                                style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }}
+                            />
+                        </div>
+                    ) : (
+                        <iframe
+                            key={activeSrc}
+                            src={activeSrc}
+                            title={title}
+                            className="resume-modal__iframe"
+                        />
+                    )}
                     <div className="resume-modal__mobile-bar">
                         <div className="resume-modal__mobile-tip">
-                            <i className="fa-solid fa-mobile-screen" />
-                            <span>Mobile tip: Tap <strong>Open in New Tab</strong> or <strong>Download</strong> for native reader.</span>
+                            <i className="fa-solid fa-circle-info" />
+                            <span>Preview issue? Click <strong>⚡ Google Reader</strong> above or tap <strong>Open in New Tab</strong>.</span>
                         </div>
                         <a
                             href={resolvedUrl}
@@ -140,3 +202,4 @@ export default function ResumeModal({ resume, onClose }) {
         </div>
     );
 }
+

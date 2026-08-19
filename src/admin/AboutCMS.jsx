@@ -77,6 +77,7 @@ export default function AboutCMS() {
     const [imgError, setImgError] = useState(false);
     const [previewResume, setPreviewResume] = useState(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [resumeViewerEngine, setResumeViewerEngine] = useState('direct'); // 'direct', 'gdocs', 'img'
 
     const [about, setAbout] = useState({
         displayName: 'Mahadeb Maity',
@@ -1463,37 +1464,107 @@ export default function AboutCMS() {
                             </div>
 
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                {/* Toggle Fullscreen / Maximize */}
-                                <button
-                                    type="button"
-                                    onClick={() => setIsFullscreen(!isFullscreen)}
-                                    className="adm-doc-btn-icon"
-                                    title={isFullscreen ? "Exit Fullscreen" : "Maximize / Fullscreen"}
-                                >
-                                    <i className={isFullscreen ? "fa-solid fa-compress" : "fa-solid fa-expand"} />
-                                </button>
+                                    {/* Viewer Engine Selector for Resume */}
+                                    {previewResume.url && (
+                                        <div style={{ display: 'flex', background: 'rgba(0,0,0,0.4)', borderRadius: '8px', padding: '2px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                            <button
+                                                type="button"
+                                                onClick={() => setResumeViewerEngine('direct')}
+                                                style={{
+                                                    background: resumeViewerEngine === 'direct' ? '#0284c7' : 'transparent',
+                                                    color: resumeViewerEngine === 'direct' ? '#ffffff' : '#94a3b8',
+                                                    border: 'none',
+                                                    borderRadius: '6px',
+                                                    padding: '3px 8px',
+                                                    fontSize: '11px',
+                                                    fontWeight: '600',
+                                                    cursor: 'pointer'
+                                                }}
+                                                title="Standard Browser PDF Viewer"
+                                            >
+                                                📄 Direct
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setResumeViewerEngine('gdocs')}
+                                                style={{
+                                                    background: resumeViewerEngine === 'gdocs' ? '#0284c7' : 'transparent',
+                                                    color: resumeViewerEngine === 'gdocs' ? '#ffffff' : '#94a3b8',
+                                                    border: 'none',
+                                                    borderRadius: '6px',
+                                                    padding: '3px 8px',
+                                                    fontSize: '11px',
+                                                    fontWeight: '600',
+                                                    cursor: 'pointer'
+                                                }}
+                                                title="Google Docs PDF Viewer (Fixes Blank / Blocked Previews)"
+                                            >
+                                                ⚡ Google Reader
+                                            </button>
+                                            {getDocUrl(previewResume.url).includes('res.cloudinary.com') && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setResumeViewerEngine('img')}
+                                                    style={{
+                                                        background: resumeViewerEngine === 'img' ? '#0284c7' : 'transparent',
+                                                        color: resumeViewerEngine === 'img' ? '#ffffff' : '#94a3b8',
+                                                        border: 'none',
+                                                        borderRadius: '6px',
+                                                        padding: '3px 8px',
+                                                        fontSize: '11px',
+                                                        fontWeight: '600',
+                                                        cursor: 'pointer'
+                                                    }}
+                                                    title="Image Render (Cloudinary Page Render)"
+                                                >
+                                                    🖼️ Image
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
 
-                                {/* Close Button */}
-                                <button
-                                    type="button"
-                                    onClick={() => { setPreviewResume(null); setIsFullscreen(false); }}
-                                    className="adm-doc-btn-icon"
-                                    title="Close Preview (Esc)"
-                                    style={{ color: '#f87171' }}
-                                >
-                                    <i className="fa-solid fa-xmark" />
-                                </button>
+                                    {/* Toggle Fullscreen / Maximize */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsFullscreen(!isFullscreen)}
+                                        className="adm-doc-btn-icon"
+                                        title={isFullscreen ? "Exit Fullscreen" : "Maximize / Fullscreen"}
+                                    >
+                                        <i className={isFullscreen ? "fa-solid fa-compress" : "fa-solid fa-expand"} />
+                                    </button>
+
+                                    {/* Close Button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => { setPreviewResume(null); setIsFullscreen(false); }}
+                                        className="adm-doc-btn-icon"
+                                        title="Close Preview (Esc)"
+                                        style={{ color: '#f87171' }}
+                                    >
+                                        <i className="fa-solid fa-xmark" />
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
                         {/* Body / Viewer */}
                         <div className="adm-doc-modal-body">
                             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-                                <iframe
-                                    src={`${getDocUrl(previewResume.url)}#toolbar=1&navpanes=0`}
-                                    title={previewResume.title || 'Resume PDF'}
-                                    className="adm-doc-modal-iframe"
-                                />
+                                    {resumeViewerEngine === 'img' && getDocUrl(previewResume.url).includes('res.cloudinary.com') ? (
+                                        <div style={{ flex: 1, overflow: 'auto', display: 'flex', justifyContent: 'center', background: '#0a0f1d', padding: '16px' }}>
+                                            <img
+                                                src={getDocUrl(previewResume.url).replace('/image/upload/', '/image/upload/f_auto,q_auto/').replace(/\.pdf$/i, '.jpg')}
+                                                alt={previewResume.title || 'Resume PDF'}
+                                                style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', boxShadow: '0 8px 30px rgba(0,0,0,0.5)' }}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <iframe
+                                            key={resumeViewerEngine === 'gdocs' ? `gdocs-${getDocUrl(previewResume.url)}` : `direct-${getDocUrl(previewResume.url)}`}
+                                            src={resumeViewerEngine === 'gdocs' ? `https://docs.google.com/viewer?url=${encodeURIComponent(getDocUrl(previewResume.url))}&embedded=true` : `${getDocUrl(previewResume.url)}#toolbar=1&navpanes=0`}
+                                            title={previewResume.title || 'Resume PDF'}
+                                            className="adm-doc-modal-iframe"
+                                        />
+                                    )}
                                 <div style={{
                                     background: 'rgba(11, 17, 32, 0.95)',
                                     padding: '8px 16px',
@@ -1507,8 +1578,8 @@ export default function AboutCMS() {
                                     borderTop: '1px solid rgba(255, 255, 255, 0.08)'
                                 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <i className="fa-solid fa-mobile-screen" style={{ color: '#38bdf8' }} />
-                                        <span>Mobile tip: Tap <strong>Open in New Tab</strong> or <strong>Download</strong> for native high-speed reader.</span>
+                                        <i className="fa-solid fa-circle-info" style={{ color: '#38bdf8' }} />
+                                        <span>Preview issue? Click <strong>⚡ Google Reader</strong> above or tap <strong>Open in New Tab</strong>.</span>
                                     </div>
                                     <a
                                         href={getDocUrl(previewResume.url)}
