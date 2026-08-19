@@ -23,6 +23,8 @@ export default function ResumeModal({ resume, onClose }) {
     const fileSize = resume.fileSize || 'PDF Document';
 
     const isCloudinary = typeof resolvedUrl === 'string' && resolvedUrl.includes('res.cloudinary.com');
+    const isDropbox = typeof rawUrl === 'string' && rawUrl.includes('dropbox.com');
+    const isGoogleDrive = typeof rawUrl === 'string' && (rawUrl.includes('drive.google.com') || rawUrl.includes('docs.google.com'));
     const isRemoteHttps = typeof resolvedUrl === 'string' && resolvedUrl.startsWith('https://');
 
     // Cloudinary high-res rendered image URL for guaranteed viewing
@@ -30,15 +32,22 @@ export default function ResumeModal({ resume, onClose }) {
         ? resolvedUrl.replace('/image/upload/', '/image/upload/f_auto,q_auto/').replace(/\.pdf$/i, '.jpg')
         : '';
 
-    // Google Docs Viewer for seamless remote viewing
-    const gDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(resolvedUrl)}&embedded=true`;
+    // Clean direct stream URL for Dropbox
+    const dropboxRawUrl = isDropbox
+        ? rawUrl.replace(/\?dl=[01]/, '?raw=1').replace(/&dl=[01]/, '&raw=1')
+        : resolvedUrl;
+
+    // Google Docs Viewer for seamless remote viewing (guarantees preview for Dropbox, AWS, etc.)
+    const gDocsViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(dropboxRawUrl)}&embedded=true`;
 
     // Compute active preview URL based on engine
     let activeSrc = `${resolvedUrl}#toolbar=1&navpanes=0`;
-    if (viewerEngine === 'gdocs') {
+    if (viewerEngine === 'gdocs' || (viewerEngine === 'auto' && isDropbox)) {
         activeSrc = gDocsViewerUrl;
     } else if (viewerEngine === 'img' && cloudinaryImgUrl) {
         activeSrc = cloudinaryImgUrl;
+    } else if (isGoogleDrive) {
+        activeSrc = resolvedUrl;
     }
 
     const handleCopyLink = () => {
