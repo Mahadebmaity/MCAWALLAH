@@ -51,13 +51,8 @@ export default function ClockWidget() {
   const dateNum = time.getDate();
   const yearNum = time.getFullYear();
 
-  // Cardinal numbers on dial
-  const dialNumbers = [
-    { num: 12, top: "9%", left: "50%" },
-    { num: 3, top: "50%", left: "91%" },
-    { num: 6, top: "91%", left: "50%" },
-    { num: 9, top: "50%", left: "9%" },
-  ];
+  // All 12 clock numbers
+  const all12Hours = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
   return (
     <div className="clock-vertical-card" aria-label="Live Vertical Dual Clock Hub">
@@ -69,27 +64,33 @@ export default function ClockWidget() {
       <div className="clock-analog-section">
         <div className="clock-analog-frame">
           <div className="clock-chrono-ring">
-            {/* 12 Hour Ticks */}
-            {[...Array(12)].map((_, i) => (
+            {/* 60 Minute/Second ticks */}
+            {[...Array(60)].map((_, i) => (
               <span
                 key={i}
-                className={`chrono-tick ${i % 3 === 0 ? "chrono-tick--major" : ""}`}
-                style={{ transform: `rotate(${i * 30}deg)` }}
+                className={`chrono-tick ${i % 5 === 0 ? "chrono-tick--major" : "chrono-tick--minor"}`}
+                style={{ transform: `rotate(${i * 6}deg)` }}
               />
             ))}
 
-            {/* Cardinal numerals (12, 3, 6, 9) */}
-            {dialNumbers.map(({ num, top, left }) => (
-              <span
-                key={num}
-                className="chrono-numeral"
-                style={{ top, left }}
-              >
-                {num}
-              </span>
-            ))}
+            {/* All 12 Numerals (1 to 12) placed around the dial */}
+            {all12Hours.map((num) => {
+              const angleDeg = (num % 12) * 30;
+              const isCardinal = num % 3 === 0;
+              return (
+                <div
+                  key={num}
+                  className={`chrono-numeral-slot ${isCardinal ? "chrono-numeral-slot--cardinal" : ""}`}
+                  style={{
+                    transform: `translate(-50%, -50%) rotate(${angleDeg}deg) translateY(calc(-1 * var(--chrono-radius, 45px))) rotate(-${angleDeg}deg)`,
+                  }}
+                >
+                  <span className="chrono-numeral-text">{num}</span>
+                </div>
+              );
+            })}
 
-            {/* Inner Dial */}
+            {/* Inner Dial Branding */}
             <div className="chrono-inner-dial">
               <span className="chrono-brand">IST</span>
             </div>
@@ -99,14 +100,14 @@ export default function ClockWidget() {
               className="clock-hand hand-hour"
               style={{ transform: `translateX(-50%) rotate(${hourDeg}deg)` }}
             >
-              <span className="hand-cap-glow" />
+              <span className="hand-luminous" />
             </div>
             
             <div
               className="clock-hand hand-minute"
               style={{ transform: `translateX(-50%) rotate(${minuteDeg}deg)` }}
             >
-              <span className="hand-cap-glow" />
+              <span className="hand-luminous" />
             </div>
 
             <div
@@ -122,7 +123,7 @@ export default function ClockWidget() {
         </div>
 
         <div className="clock-analog-label">
-          <span className="label-badge">ANALOG CHRONO</span>
+          <span className="label-badge">LIVE CHRONOMETER</span>
         </div>
       </div>
 
