@@ -1,73 +1,18 @@
 import User from '../models/User.js';
 import About from '../models/About.js';
 import ActivityLog from '../models/ActivityLog.js';
-import Otp from '../models/Otp.js';
 import { generateTokens } from '../middleware/auth.js';
 import jwt from 'jsonwebtoken';
 import cloudinary, { isCloudinaryConfigured } from '../config/cloudinary.js';
 import path from 'path';
 import fs from 'fs';
 import { saveBufferToAllUploadDirs } from '../utils/fileStorage.js';
-import { sendOtpVerificationEmail, sendNewUserSignupAdminNotification } from '../services/emailService.js';
 
-// @desc Send OTP Verification Code for Signup
-// @route POST /api/auth/send-otp
-export const sendSignupOtp = async (req, res) => {
-    try {
-        const { email, name } = req.body;
-
-        if (!email) {
-            return res.status(400).json({ message: 'Email address is required.' });
-        }
-
-        const normalizedEmail = email.toLowerCase().trim();
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(normalizedEmail)) {
-            return res.status(400).json({ message: 'Please provide a valid email address.' });
-        }
-
-        // Check if an account already exists
-        const existingUser = await User.findOne({ email: normalizedEmail });
-        if (existingUser) {
-            return res.status(400).json({ message: 'An account with this email already exists. Please sign in instead.' });
-        }
-
-        // Generate a 6-digit random OTP
-        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-        // Clear any prior signup OTPs for this email
-        await Otp.deleteMany({ email: normalizedEmail, purpose: 'signup' });
-
-        // Save new OTP
-        await Otp.create({
-            email: normalizedEmail,
-            otp: otpCode,
-            purpose: 'signup'
-        });
-
-        // Send email via Nodemailer
-        const emailSent = await sendOtpVerificationEmail({
-            email: normalizedEmail,
-            otp: otpCode,
-            name: name?.trim() || 'Visitor'
-        });
-
-        return res.json({
-            success: true,
-            message: `Verification code sent to ${normalizedEmail}. Please check your inbox.`,
-            emailSent
-        });
-    } catch (error) {
-        console.error('Error sending OTP:', error);
-        res.status(500).json({ message: error.message || 'Failed to dispatch verification code' });
-    }
-};
-
-// @desc Register User / Admin with OTP Verification
-// @route POST /api/auth/verify-otp-register (or POST /api/auth/register)
+// @desc Register User / Admin
+// @route POST /api/auth/register
 export const register = async (req, res) => {
     try {
-        const { name, email, password, otp } = req.body;
+        const { name, email, password } = req.body;
 
         if (!name || !email || !password) {
             return res.status(400).json({ message: 'Name, email, and password are required.' });
@@ -85,29 +30,9 @@ export const register = async (req, res) => {
             return res.status(400).json({ message: 'An account with this email already exists.' });
         }
 
-        // Check if any users exist in DB
+        // Check if any users exist in DB (first user becomes admin)
         const totalUsers = await User.countDocuments();
         const isFirst = totalUsers === 0;
-
-        // Verify OTP if provided or required
-        if (otp) {
-            const cleanOtp = otp.toString().trim();
-            const otpRecord = await Otp.findOne({
-                email: normalizedEmail,
-                otp: cleanOtp,
-                purpose: 'signup'
-            });
-
-            if (!otpRecord) {
-                return res.status(400).json({ message: 'Invalid or expired verification code. Please check your email or request a new code.' });
-            }
-
-            // OTP is valid - consume it so it cannot be reused
-            await Otp.deleteMany({ email: normalizedEmail, purpose: 'signup' });
-        } else if (!isFirst) {
-            // Non-first registrations require OTP verification
-            return res.status(400).json({ message: 'Email verification OTP is required to complete registration.' });
-        }
 
         const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
         const userAgent = req.headers['user-agent'] || '';
@@ -137,23 +62,12 @@ export const register = async (req, res) => {
                 userRole: user.role,
                 action: 'USER_SIGNUP',
                 category: 'auth',
-                details: `New account registered (${user.role.toUpperCase()}) with verified email`,
+                details: `New account registered (${user.role.toUpperCase()})`,
                 ipAddress: clientIp,
                 userAgent
             });
         } catch (e) {
             console.error('Activity log error:', e);
-        }
-
-        // Notify Admin via Email about the new user registration
-        try {
-            sendNewUserSignupAdminNotification({
-                user,
-                ip: clientIp,
-                userAgent
-            }).catch(err => console.warn('Non-blocking signup notification error:', err.message));
-        } catch (e) {
-            console.warn('Signup admin notification trigger failed:', e.message);
         }
 
         const tokens = generateTokens(user._id);
