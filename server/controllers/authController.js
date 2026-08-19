@@ -45,19 +45,17 @@ export const sendSignupOtp = async (req, res) => {
             purpose: 'signup'
         });
 
-        // Send email via Nodemailer asynchronously without blocking HTTP response
-        sendOtpVerificationEmail({
+        // Send email via Nodemailer
+        const emailSent = await sendOtpVerificationEmail({
             email: normalizedEmail,
             otp: otpCode,
             name: name?.trim() || 'Visitor'
-        }).catch(err => {
-            console.error('Background OTP email delivery failed:', err.message);
         });
 
-        // Respond instantly to client (< 50ms)
         return res.json({
             success: true,
-            message: `Verification code sent to ${normalizedEmail}. Please check your inbox.`
+            message: `Verification code sent to ${normalizedEmail}. Please check your inbox.`,
+            emailSent
         });
     } catch (error) {
         console.error('Error sending OTP:', error);

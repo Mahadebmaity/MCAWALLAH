@@ -12,21 +12,25 @@ const getTransporter = async () => {
 
     if (smtpUser && smtpPass && smtpUser !== 'your_email@gmail.com') {
         const isGmail = (process.env.SMTP_HOST || '').includes('gmail') || smtpUser.includes('gmail');
-        transporter = nodemailer.createTransport({
-            host: isGmail ? 'smtp.gmail.com' : (process.env.SMTP_HOST || 'smtp.gmail.com'),
-            port: 465, // Direct SSL port 465 is significantly faster than 587 STARTTLS
-            secure: true,
-            pool: true,
-            maxConnections: 10,
-            maxMessages: Infinity,
-            rateDelta: 1000,
-            rateLimit: 20,
-            socketTimeout: 30000,
-            auth: {
-                user: smtpUser,
-                pass: smtpPass,
-            },
-        });
+        transporter = nodemailer.createTransport(
+            isGmail
+                ? {
+                      service: 'gmail',
+                      auth: {
+                          user: smtpUser,
+                          pass: smtpPass,
+                      },
+                  }
+                : {
+                      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+                      port: Number(process.env.SMTP_PORT) || 587,
+                      secure: Number(process.env.SMTP_PORT) === 465,
+                      auth: {
+                          user: smtpUser,
+                          pass: smtpPass,
+                      },
+                  }
+        );
     } else {
         // Fallback to ethereal test email transporter for local dev if real credentials aren't set
         try {
