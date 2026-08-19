@@ -86,6 +86,12 @@ export const getDocUrl = (urlOrDoc) => {
 
     // External Cloudinary / AWS / HTTPS URLs
     if (url.startsWith('https://')) {
+        // Fix Cloudinary PDF delivery restriction (ERR_INVALID_RESPONSE on image/upload PDFs)
+        if (url.includes('res.cloudinary.com') && (url.toLowerCase().endsWith('.pdf') || url.includes('/portfolio_cms/') || url.includes('/portfolio_documents/'))) {
+            if (url.includes('/image/upload/') && !url.includes('/fl_attachment')) {
+                return url.replace('/image/upload/', '/image/upload/fl_attachment/');
+            }
+        }
         return url;
     }
 
@@ -113,15 +119,21 @@ export const getDocUrl = (urlOrDoc) => {
 /**
  * Universal Safe Document Downloader
  * - Fixes browser cross-origin download restrictions by fetching as binary Blob
- * - Validates MIME type to prevent downloading HTML 404/SPA error pages as corrupted PDF files
- * - Automatically ensures clean and proper '.pdf' file extension
+ * - Converts Cloudinary URLs with fl_attachment for seamless delivery
+ * - Prevents downloading HTML 404/SPA error pages
+ * - Ensures correct '.pdf' file extension across mobile & desktop
  */
 export const downloadFile = async (urlOrDoc, defaultFileName = 'Resume.pdf') => {
     try {
-        const resolvedUrl = getDocUrl(urlOrDoc);
+        let resolvedUrl = getDocUrl(urlOrDoc);
         if (!resolvedUrl || resolvedUrl === '#') {
             console.error('Download cancelled: Invalid document URL');
             return false;
+        }
+
+        // Ensure Cloudinary URLs have fl_attachment flag for direct binary download
+        if (resolvedUrl.includes('res.cloudinary.com') && resolvedUrl.includes('/image/upload/') && !resolvedUrl.includes('/fl_attachment')) {
+            resolvedUrl = resolvedUrl.replace('/image/upload/', '/image/upload/fl_attachment/');
         }
 
         // Clean desired filename
@@ -142,36 +154,40 @@ export const downloadFile = async (urlOrDoc, defaultFileName = 'Resume.pdf') => 
         }
 
         // 2. Fetch as binary Blob to ensure reliable cross-origin & local downloads
-        const response = await fetch(resolvedUrl);
-        if (!response.ok) {
-            throw new Error(`Server returned HTTP ${response.status}: ${response.statusText}`);
+        try {
+            const response = await fetch(resolvedUrl);
+            if (response.ok) {
+                const contentType = response.headers.get('content-type') || '';
+                // If server returned HTML (SPA fallback or 404 web page), do NOT save it as a PDF
+                if (!contentType.includes('text/html')) {
+                    const blob = await response.blob();
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = cleanName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 2000);
+                    return true;
+                }
+            }
+        } catch (fetchErr) {
+            console.warn('Blob download fetch error, falling back to direct anchor download:', fetchErr);
         }
 
-        const contentType = response.headers.get('content-type') || '';
-        // If server returned HTML (SPA fallback or 404 web page), do NOT save it as a PDF
-        if (contentType.includes('text/html')) {
-            console.warn('Server returned HTML response instead of binary PDF stream. Opening directly in new tab.');
-            window.open(resolvedUrl, '_blank');
-            return false;
-        }
-
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
+        // 3. Fallback: Direct Anchor Download
         const a = document.createElement('a');
-        a.href = blobUrl;
+        a.href = resolvedUrl;
         a.download = cleanName;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        setTimeout(() => window.URL.revokeObjectURL(blobUrl), 2000);
         return true;
     } catch (err) {
-        console.warn('Blob download fetch error, falling back to direct window download:', err.message);
-        // Fallback: Open in new tab so browser native PDF viewer handles it
-        const fallbackUrl = getDocUrl(urlOrDoc);
-        if (fallbackUrl && fallbackUrl !== '#') {
-            window.open(fallbackUrl, '_blank');
-        }
+        console.error('Download execution failed:', err);
         return false;
     }
 };

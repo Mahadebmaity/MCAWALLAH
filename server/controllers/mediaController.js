@@ -13,11 +13,13 @@ export const uploadImage = async (req, res) => {
 
         // If Cloudinary is configured with valid credentials
         if (isCloudinaryConfigured()) {
+            const isPdf = req.file.mimetype?.includes('pdf') || req.file.originalname?.toLowerCase().endsWith('.pdf');
             return new Promise((resolve, reject) => {
                 const uploadStream = cloudinary.uploader.upload_stream(
                     {
                         folder: 'portfolio_cms',
-                        resource_type: 'auto'
+                        resource_type: 'auto',
+                        ...(isPdf ? { flags: 'attachment' } : {})
                     },
                     (error, result) => {
                         if (error) {
