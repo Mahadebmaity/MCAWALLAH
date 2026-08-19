@@ -7,6 +7,7 @@ import cloudinary, { isCloudinaryConfigured } from '../config/cloudinary.js';
 import path from 'path';
 import fs from 'fs';
 import { saveBufferToAllUploadDirs } from '../utils/fileStorage.js';
+import { checkEmailExists } from '../utils/emailValidator.js';
 
 // @desc Register User / Admin
 // @route POST /api/auth/register
@@ -22,12 +23,18 @@ export const register = async (req, res) => {
             return res.status(400).json({ message: 'Password must be at least 6 characters long.' });
         }
 
-        const normalizedEmail = email.toLowerCase().trim();
+        // Validate that the email is syntactically valid and its domain actually exists
+        const emailCheck = await checkEmailExists(email);
+        if (!emailCheck.valid) {
+            return res.status(400).json({ message: emailCheck.message });
+        }
+
+        const normalizedEmail = emailCheck.email;
 
         // Check if user already exists
         const existingUser = await User.findOne({ email: normalizedEmail });
         if (existingUser) {
-            return res.status(400).json({ message: 'An account with this email already exists.' });
+            return res.status(400).json({ message: 'An account with this email already exists. Please sign in instead.' });
         }
 
         // Check if any users exist in DB (first user becomes admin)
@@ -215,7 +222,11 @@ export const updateProfile = async (req, res) => {
         if (req.body.name) user.name = req.body.name.trim();
 
         if (req.body.email) {
-            const newEmail = req.body.email.trim().toLowerCase();
+            const emailCheck = await checkEmailExists(req.body.email);
+            if (!emailCheck.valid) {
+                return res.status(400).json({ message: emailCheck.message });
+            }
+            const newEmail = emailCheck.email;
             if (newEmail !== user.email) {
                 const existing = await User.findOne({ email: newEmail, _id: { $ne: user._id } });
                 if (existing) {
