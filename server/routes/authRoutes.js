@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+    sendSignupOtp,
     register,
     login,
     logout,
@@ -18,6 +19,8 @@ import { uploadFlexible } from '../middleware/upload.js';
 const router = express.Router();
 
 // Public auth endpoints
+router.post('/send-otp', sendSignupOtp);
+router.post('/verify-otp-register', register);
 router.post('/register', register);
 router.post('/login', login);
 router.post('/logout', logout);

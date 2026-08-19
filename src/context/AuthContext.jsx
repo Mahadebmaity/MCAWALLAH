@@ -101,12 +101,23 @@ export function AuthProvider({ children }) {
         boot();
     }, [authFetch, refreshAccess]);
 
-    /* ── REGISTER ── */
-    const register = async ({ name, email, password }) => {
-        const res = await fetch(`${API}/auth/register`, {
+    /* ── SEND SIGNUP OTP ── */
+    const sendSignupOtp = async ({ email, name }) => {
+        const res = await fetch(`${API}/auth/send-otp`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email, password }),
+            body: JSON.stringify({ email, name }),
+        });
+        const data = await parseResponseJson(res, "Failed to send verification OTP");
+        return data;
+    };
+
+    /* ── REGISTER (WITH OTP) ── */
+    const register = async ({ name, email, password, otp }) => {
+        const res = await fetch(`${API}/auth/verify-otp-register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, password, otp }),
         });
         const data = await parseResponseJson(res, "Registration failed");
         saveTokens(data.accessToken, data.refreshToken);
@@ -251,6 +262,7 @@ export function AuthProvider({ children }) {
         <AuthContext.Provider value={{
             user,
             loading,
+            sendSignupOtp,
             register,
             login,
             logout,

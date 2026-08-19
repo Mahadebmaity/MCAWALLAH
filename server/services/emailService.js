@@ -76,3 +76,163 @@ export const sendContactNotification = async ({ name, email, subject, message })
         return false;
     }
 };
+
+export const sendOtpVerificationEmail = async ({ email, otp, name }) => {
+    try {
+        const mailer = await getTransporter();
+        if (!mailer) {
+            console.log(`[DEV OTP NOTIFICATION] Verification OTP for ${email}: ${otp}`);
+            return true;
+        }
+
+        const senderName = process.env.ADMIN_NAME || 'Mahadeb Maity Portfolio';
+        const senderEmail = process.env.SMTP_USER && process.env.SMTP_USER !== 'your_email@gmail.com'
+            ? process.env.SMTP_USER
+            : 'no-reply@mahadebmaity.dev';
+
+        const info = await mailer.sendMail({
+            from: `"${senderName}" <${senderEmail}>`,
+            to: email,
+            subject: `🔐 ${otp} is your verification code for Mahadeb Maity Portfolio`,
+            html: `
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 540px; margin: 0 auto; background: #0b0f19; color: #f1f5f9; padding: 32px 24px; border-radius: 16px; border: 1px solid #1e293b; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <span style="display: inline-block; padding: 6px 14px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 9999px; color: #38bdf8; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">
+                            🛡️ EMAIL VERIFICATION
+                        </span>
+                    </div>
+
+                    <h2 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 12px; text-align: center;">
+                        Confirm Your Email Address
+                    </h2>
+                    
+                    <p style="color: #94a3b8; font-size: 14px; line-height: 1.6; text-align: center; margin: 0 0 24px;">
+                        Hello ${name ? `<strong style="color: #f1f5f9;">${name}</strong>` : 'there'},<br/>
+                        Thank you for registering on <strong>Mahadeb Maity's Portfolio</strong>. Use the 6-digit one-time password (OTP) below to complete your registration:
+                    </p>
+
+                    <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)); border: 1px solid #334155; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
+                        <div style="font-family: 'Courier New', Courier, monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #38bdf8; text-shadow: 0 0 12px rgba(56, 189, 248, 0.4); margin: 4px 0;">
+                            ${otp}
+                        </div>
+                        <p style="color: #64748b; font-size: 12px; margin: 8px 0 0;">
+                            ⏰ Valid for 10 minutes. Please do not share this code with anyone.
+                        </p>
+                    </div>
+
+                    <div style="background: rgba(239, 68, 68, 0.08); border-left: 3px solid #ef4444; border-radius: 6px; padding: 12px; margin-bottom: 24px;">
+                        <p style="color: #fca5a5; font-size: 12px; margin: 0; line-height: 1.5;">
+                            ⚠️ If you did not request this registration, you can safely ignore this email.
+                        </p>
+                    </div>
+
+                    <hr style="border: none; border-top: 1px solid #1e293b; margin: 24px 0;" />
+
+                    <p style="font-size: 12px; color: #64748b; text-align: center; margin: 0; line-height: 1.5;">
+                        Sent automatically by <strong>Mahadeb Maity Portfolio Platform</strong><br/>
+                        &copy; 2026 Mahadeb Maity. All rights reserved.
+                    </p>
+                </div>
+            `
+        });
+
+        console.log(`📧 Verification OTP email sent to ${email}: ${info.messageId}`);
+        return true;
+    } catch (error) {
+        console.error('⚠️ Failed to send verification OTP email:', error.message);
+        console.log(`[FALLBACK DEV OTP] OTP for ${email}: ${otp}`);
+        return false;
+    }
+};
+
+export const sendNewUserSignupAdminNotification = async ({ user, ip, userAgent }) => {
+    try {
+        const mailer = await getTransporter();
+        if (!mailer) return false;
+
+        const recipient = process.env.NOTIFY_EMAIL || process.env.ADMIN_EMAIL || 'mahadeb@portfolio.com';
+        const senderEmail = process.env.SMTP_USER && process.env.SMTP_USER !== 'your_email@gmail.com'
+            ? process.env.SMTP_USER
+            : 'no-reply@mahadebmaity.dev';
+
+        const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+        const formattedDate = new Date().toLocaleString('en-US', {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+            timeZone: 'Asia/Kolkata'
+        });
+
+        const info = await mailer.sendMail({
+            from: `"Portfolio Admin Alert" <${senderEmail}>`,
+            to: recipient,
+            subject: `🎉 [New User Registered] ${user.name} (${user.email})`,
+            html: `
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 580px; margin: 0 auto; background: #0b0f19; color: #f1f5f9; padding: 28px 24px; border-radius: 16px; border: 1px solid #1e293b; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <span style="display: inline-block; padding: 6px 14px; background: rgba(34, 197, 94, 0.12); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 9999px; color: #4ade80; font-size: 13px; font-weight: 600;">
+                            ✨ NEW USER REGISTRATION
+                        </span>
+                    </div>
+
+                    <h2 style="color: #ffffff; font-size: 20px; font-weight: 700; margin: 0 0 16px; text-align: center;">
+                        A New User Just Signed Up!
+                    </h2>
+
+                    <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                            <tr>
+                                <td style="padding: 8px 0; color: #94a3b8; width: 35%;"><strong>Name:</strong></td>
+                                <td style="padding: 8px 0; color: #f8fafc; font-weight: 600;">${user.name}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0; color: #94a3b8;"><strong>Email:</strong></td>
+                                <td style="padding: 8px 0; color: #38bdf8; font-weight: 600;">
+                                    <a href="mailto:${user.email}" style="color: #38bdf8; text-decoration: none;">${user.email}</a> 
+                                    <span style="font-size: 11px; background: rgba(56, 189, 248, 0.15); border-radius: 4px; padding: 2px 6px; margin-left: 6px; color: #38bdf8;">Verified OTP ✓</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0; color: #94a3b8;"><strong>Role:</strong></td>
+                                <td style="padding: 8px 0; color: #f8fafc;">
+                                    <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; background: rgba(232, 69, 69, 0.2); color: #f87171; padding: 2px 8px; border-radius: 6px;">${user.role}</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 0; color: #94a3b8;"><strong>Registration Time:</strong></td>
+                                <td style="padding: 8px 0; color: #cbd5e1;">${formattedDate} (IST)</td>
+                            </tr>
+                            ${ip ? `
+                            <tr>
+                                <td style="padding: 8px 0; color: #94a3b8;"><strong>IP Address:</strong></td>
+                                <td style="padding: 8px 0; color: #94a3b8; font-family: monospace;">${ip}</td>
+                            </tr>` : ''}
+                            ${userAgent ? `
+                            <tr>
+                                <td style="padding: 8px 0; color: #94a3b8;"><strong>Device / Browser:</strong></td>
+                                <td style="padding: 8px 0; color: #94a3b8; font-size: 12px;">${userAgent.slice(0, 80)}...</td>
+                            </tr>` : ''}
+                        </table>
+                    </div>
+
+                    <div style="text-align: center; margin: 24px 0 16px;">
+                        <a href="${clientUrl}/admin/users" style="display: inline-block; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; font-size: 14px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
+                            Open Admin Studio &rarr;
+                        </a>
+                    </div>
+
+                    <p style="font-size: 12px; color: #64748b; text-align: center; margin: 16px 0 0;">
+                        Sent automatically by your Portfolio CMS Notification System.
+                    </p>
+                </div>
+            `
+        });
+
+        console.log(`📧 New user signup admin alert sent: ${info.messageId}`);
+        return true;
+    } catch (error) {
+        console.error('⚠️ Failed to send new user signup admin alert:', error.message);
+        return false;
+    }
+};
+
+
