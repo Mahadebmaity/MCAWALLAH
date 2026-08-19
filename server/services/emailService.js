@@ -13,15 +13,15 @@ const getTransporter = async () => {
     if (smtpUser && smtpPass && smtpUser !== 'your_email@gmail.com') {
         const isGmail = (process.env.SMTP_HOST || '').includes('gmail') || smtpUser.includes('gmail');
         transporter = nodemailer.createTransport({
-            ...(isGmail ? { service: 'gmail' } : {
-                host: process.env.SMTP_HOST || 'smtp.gmail.com',
-                port: Number(process.env.SMTP_PORT) || 587,
-                secure: Number(process.env.SMTP_PORT) === 465,
-            }),
-            pool: true, // Reuse pooled TCP/TLS connections for instantaneous delivery
-            maxConnections: 5,
-            maxMessages: 100,
-            rateLimit: 14,
+            host: isGmail ? 'smtp.gmail.com' : (process.env.SMTP_HOST || 'smtp.gmail.com'),
+            port: 465, // Direct SSL port 465 is significantly faster than 587 STARTTLS
+            secure: true,
+            pool: true,
+            maxConnections: 10,
+            maxMessages: Infinity,
+            rateDelta: 1000,
+            rateLimit: 20,
+            socketTimeout: 30000,
             auth: {
                 user: smtpUser,
                 pass: smtpPass,
@@ -108,6 +108,13 @@ export const sendOtpVerificationEmail = async ({ email, otp, name }) => {
             from: `"${websiteName}" <${senderEmail}>`,
             to: email,
             subject: `🔐 [${otp}] Verification Code for Mahadeb Maity Portfolio`,
+            priority: 'high',
+            headers: {
+                'X-Priority': '1 (Highest)',
+                'X-MSMail-Priority': 'High',
+                'Importance': 'High'
+            },
+            text: `Your verification code for Mahadeb Maity Portfolio is: ${otp}. This code is valid for 10 minutes.`,
             html: `
                 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; background: #0b0f19; color: #f1f5f9; padding: 36px 28px; border-radius: 16px; border: 1px solid #1e293b; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
                     
