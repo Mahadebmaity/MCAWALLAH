@@ -5,8 +5,10 @@ import "./ClockWidget.css";
 export default function ClockWidget() {
   const [time, setTime] = useState(new Date());
   const [is24Hour, setIs24Hour] = useState(false);
+  const [isMutedTime, setIsMutedTime] = useState(false);
 
   useEffect(() => {
+    // High-precision clock ticker
     const timer = setInterval(() => {
       setTime(new Date());
     }, 1000);
@@ -32,94 +34,179 @@ export default function ClockWidget() {
   const secondsFormatted = String(seconds).padStart(2, "0");
   const ampm = hoursRaw >= 12 ? "PM" : "AM";
 
+  // Dynamic greeting based on time of day
+  const getGreeting = () => {
+    if (hoursRaw >= 5 && hoursRaw < 12) return { text: "Morning Pulse", icon: "fa-solid fa-cloud-sun", color: "#f59e0b" };
+    if (hoursRaw >= 12 && hoursRaw < 17) return { text: "Afternoon Flow", icon: "fa-solid fa-sun", color: "#38bdf8" };
+    if (hoursRaw >= 17 && hoursRaw < 21) return { text: "Evening Glow", icon: "fa-solid fa-cloud-moon", color: "#e84545" };
+    return { text: "Night Shift", icon: "fa-solid fa-moon", color: "#a855f7" };
+  };
+
+  const greeting = getGreeting();
+
   // Date formatting
   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   
   const dayName = days[time.getDay()];
   const monthName = months[time.getMonth()];
   const dateNum = time.getDate();
   const yearNum = time.getFullYear();
 
+  // Dial Hour Marks (1 to 12)
+  const dialNumbers = [
+    { num: 12, top: "8%", left: "50%" },
+    { num: 3, top: "50%", left: "92%" },
+    { num: 6, top: "92%", left: "50%" },
+    { num: 9, top: "50%", left: "8%" },
+  ];
+
   return (
-    <section className="clock-bar-section" aria-label="Live Clock & Timezone Bar">
+    <section className="clock-bar-section" aria-label="Dual Timezone & System Clock Hub">
       <div className="clock-bar-container">
-        {/* ── Left Side: Analog Clock ── */}
-        <div className="clock-analog-wrapper" title="Live Analog Clock">
-          <div className="clock-analog-face">
-            {/* Clock hour marks (12, 3, 6, 9) */}
-            <span className="clock-mark mark-12">12</span>
-            <span className="clock-mark mark-3">3</span>
-            <span className="clock-mark mark-6">6</span>
-            <span className="clock-mark mark-9">9</span>
+        {/* Ambient background glow & glass sheen */}
+        <div className="clock-glass-sheen" aria-hidden="true" />
+        <div className="clock-neon-glow" aria-hidden="true" />
 
-            {/* Subtle dial tick notches */}
-            {[...Array(12)].map((_, i) => (
-              <span
-                key={i}
-                className="clock-dial-notch"
-                style={{ transform: `rotate(${i * 30}deg)` }}
-              />
-            ))}
+        {/* ── Left Section: Premium Analog Chronograph ── */}
+        <div className="clock-analog-section">
+          <div className="clock-analog-frame">
+            {/* Outer Chrono Ring */}
+            <div className="clock-chrono-ring">
+              {/* 12 Hour Ticks */}
+              {[...Array(12)].map((_, i) => (
+                <span
+                  key={i}
+                  className={`chrono-tick ${i % 3 === 0 ? "chrono-tick--major" : ""}`}
+                  style={{ transform: `rotate(${i * 30}deg)` }}
+                />
+              ))}
 
-            {/* Hands */}
-            <div
-              className="clock-hand hand-hour"
-              style={{ transform: `translateX(-50%) rotate(${hourDeg}deg)` }}
-            />
-            <div
-              className="clock-hand hand-minute"
-              style={{ transform: `translateX(-50%) rotate(${minuteDeg}deg)` }}
-            />
-            <div
-              className="clock-hand hand-second"
-              style={{ transform: `translateX(-50%) rotate(${secondDeg}deg)` }}
-            />
+              {/* Cardinal numerals */}
+              {dialNumbers.map(({ num, top, left }) => (
+                <span
+                  key={num}
+                  className="chrono-numeral"
+                  style={{ top, left }}
+                >
+                  {num}
+                </span>
+              ))}
 
-            {/* Center Pivot Point */}
-            <div className="clock-center-pin" />
+              {/* Inner Dial Circle */}
+              <div className="chrono-inner-dial">
+                <span className="chrono-brand">IST</span>
+              </div>
+
+              {/* Hands */}
+              <div
+                className="clock-hand hand-hour"
+                style={{ transform: `translateX(-50%) rotate(${hourDeg}deg)` }}
+              >
+                <span className="hand-cap-glow" />
+              </div>
+              
+              <div
+                className="clock-hand hand-minute"
+                style={{ transform: `translateX(-50%) rotate(${minuteDeg}deg)` }}
+              >
+                <span className="hand-cap-glow" />
+              </div>
+
+              <div
+                className="clock-hand hand-second"
+                style={{ transform: `translateX(-50%) rotate(${secondDeg}deg)` }}
+              >
+                <span className="second-tail" />
+              </div>
+
+              {/* Center Pin Hub */}
+              <div className="clock-center-hub">
+                <span className="hub-center-dot" />
+              </div>
+            </div>
+          </div>
+
+          <div className="clock-analog-label">
+            <span className="label-badge">ANALOG CHRONO</span>
           </div>
         </div>
 
-        {/* ── Center Divider / Glowing Line ── */}
-        <div className="clock-bar-divider" />
+        {/* ── Glowing Center Divider ── */}
+        <div className="clock-bar-divider">
+          <span className="divider-core-glow" />
+        </div>
 
-        {/* ── Right Side: Digital Clock & Info ── */}
-        <div className="clock-digital-wrapper">
-          <div className="clock-digital-top">
+        {/* ── Right Section: Futuristic Digital Display & Telemetry ── */}
+        <div className="clock-digital-section">
+          {/* Top Row: Digital LED Digits + 12h/24h toggle & Greeting */}
+          <div className="clock-digital-header">
+            <div className="clock-greeting-pill" style={{ borderColor: `${greeting.color}40` }}>
+              <i className={greeting.icon} style={{ color: greeting.color }} aria-hidden="true" />
+              <span style={{ color: greeting.color }}>{greeting.text}</span>
+            </div>
+
+            <button
+              className="clock-toggle-btn"
+              onClick={() => setIs24Hour(!is24Hour)}
+              title="Switch 12-Hour / 24-Hour mode"
+              aria-label="Toggle Time Format"
+            >
+              <i className="fa-solid fa-clock-rotate-left" />
+              <span>{is24Hour ? "24H FORMAT" : "12H FORMAT"}</span>
+            </button>
+          </div>
+
+          {/* Main Digits Counter */}
+          <div className="clock-digits-wrapper">
             <div
               className="clock-digits-display"
               onClick={() => setIs24Hour(!is24Hour)}
-              title="Click to toggle 12h / 24h format"
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setIs24Hour(!is24Hour)}
+              title="Click to toggle format"
             >
-              <span className="digit-block">{hoursFormatted}</span>
-              <span className="digit-separator">:</span>
-              <span className="digit-block">{minutesFormatted}</span>
-              <span className="digit-separator">:</span>
-              <span className="digit-block digit-seconds">{secondsFormatted}</span>
+              <div className="digit-card">
+                <span className="digit-val">{hoursFormatted}</span>
+                <span className="digit-sub">HR</span>
+              </div>
+
+              <span className="digit-colon">:</span>
+
+              <div className="digit-card">
+                <span className="digit-val">{minutesFormatted}</span>
+                <span className="digit-sub">MIN</span>
+              </div>
+
+              <span className="digit-colon">:</span>
+
+              <div className="digit-card digit-card--seconds">
+                <span className="digit-val seconds-glow">{secondsFormatted}</span>
+                <span className="digit-sub">SEC</span>
+              </div>
 
               {!is24Hour && (
-                <span className="digit-ampm-pill">{ampm}</span>
+                <div className="digit-ampm-badge">
+                  <span>{ampm}</span>
+                </div>
               )}
-            </div>
-
-            <div className="clock-format-hint">
-              <span className="format-tag">{is24Hour ? "24H" : "12H"}</span>
             </div>
           </div>
 
-          <div className="clock-digital-bottom">
-            <div className="clock-date-pill">
-              <i className="fa-regular fa-calendar-days" aria-hidden="true" />
-              <span>{dayName}, {monthName} {dateNum}, {yearNum}</span>
+          {/* Bottom Telemetry: Date + Location / Timezone */}
+          <div className="clock-telemetry-row">
+            <div className="telemetry-pill">
+              <i className="fa-regular fa-calendar-check" aria-hidden="true" />
+              <span className="telemetry-highlight">{dayName}</span>
+              <span className="telemetry-separator">•</span>
+              <span>{monthName} {dateNum}, {yearNum}</span>
             </div>
 
-            <div className="clock-location-pill">
-              <span className="live-status-dot" />
-              <span>Kolkata, IN (IST • UTC+5:30)</span>
+            <div className="telemetry-pill telemetry-pill--live">
+              <span className="radar-ping">
+                <span className="radar-ring" />
+                <span className="radar-dot" />
+              </span>
+              <span className="telemetry-location">Kolkata, India</span>
+              <span className="telemetry-tz-tag">IST (UTC+5:30)</span>
             </div>
           </div>
         </div>
