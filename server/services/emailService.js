@@ -8,10 +8,17 @@ const getTransporter = async () => {
     if (transporter) return transporter;
 
     if (process.env.SMTP_USER && process.env.SMTP_PASS && process.env.SMTP_USER !== 'your_email@gmail.com') {
+        const isGmail = (process.env.SMTP_HOST || '').includes('gmail') || (process.env.SMTP_USER || '').includes('gmail');
         transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: Number(process.env.SMTP_PORT) || 587,
-            secure: Number(process.env.SMTP_PORT) === 465,
+            ...(isGmail ? { service: 'gmail' } : {
+                host: process.env.SMTP_HOST || 'smtp.gmail.com',
+                port: Number(process.env.SMTP_PORT) || 587,
+                secure: Number(process.env.SMTP_PORT) === 465,
+            }),
+            pool: true, // Reuse pooled TCP/TLS connections for instantaneous delivery
+            maxConnections: 5,
+            maxMessages: 100,
+            rateLimit: 14,
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
@@ -38,6 +45,9 @@ const getTransporter = async () => {
 
     return transporter;
 };
+
+// Pre-warm transporter connection on startup
+getTransporter().catch(() => {});
 
 export const sendContactNotification = async ({ name, email, subject, message }) => {
     try {
