@@ -85,34 +85,50 @@ export const sendOtpVerificationEmail = async ({ email, otp, name }) => {
             return true;
         }
 
-        const senderName = process.env.ADMIN_NAME || 'Mahadeb Maity Portfolio';
+        const websiteName = process.env.ADMIN_NAME ? `${process.env.ADMIN_NAME} | Official Portfolio` : 'Mahadeb Maity | Official Portfolio';
+        const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
         const senderEmail = process.env.SMTP_USER && process.env.SMTP_USER !== 'your_email@gmail.com'
             ? process.env.SMTP_USER
             : 'no-reply@mahadebmaity.dev';
 
         const info = await mailer.sendMail({
-            from: `"${senderName}" <${senderEmail}>`,
+            from: `"${websiteName}" <${senderEmail}>`,
             to: email,
-            subject: `🔐 ${otp} is your verification code for Mahadeb Maity Portfolio`,
+            subject: `🔐 [${otp}] Verification Code for Mahadeb Maity Portfolio`,
             html: `
-                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 540px; margin: 0 auto; background: #0b0f19; color: #f1f5f9; padding: 32px 24px; border-radius: 16px; border: 1px solid #1e293b; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
-                    <div style="text-align: center; margin-bottom: 24px;">
-                        <span style="display: inline-block; padding: 6px 14px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 9999px; color: #38bdf8; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">
-                            🛡️ EMAIL VERIFICATION
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; background: #0b0f19; color: #f1f5f9; padding: 36px 28px; border-radius: 16px; border: 1px solid #1e293b; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
+                    
+                    <!-- Website Brand Header -->
+                    <div style="text-align: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid rgba(51, 65, 85, 0.6);">
+                        <div style="display: inline-block; font-family: 'Courier New', Courier, monospace; font-size: 20px; font-weight: 800; color: #ffffff; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.4); padding: 8px 18px; border-radius: 10px; margin-bottom: 8px; letter-spacing: 1px;">
+                            <span style="color: #38bdf8;">&lt;</span> Mahadeb Maity <span style="color: #38bdf8;">/&gt;</span>
+                        </div>
+                        <div style="color: #94a3b8; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                            🌐 Official Developer Portfolio &amp; Tech Hub
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <span style="display: inline-block; padding: 5px 14px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 9999px; color: #38bdf8; font-size: 12px; font-weight: 700; letter-spacing: 0.5px;">
+                            🛡️ ACCOUNT EMAIL VERIFICATION
                         </span>
                     </div>
 
-                    <h2 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 12px; text-align: center;">
+                    <h2 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 14px; text-align: center;">
                         Confirm Your Email Address
                     </h2>
                     
-                    <p style="color: #94a3b8; font-size: 14px; line-height: 1.6; text-align: center; margin: 0 0 24px;">
-                        Hello ${name ? `<strong style="color: #f1f5f9;">${name}</strong>` : 'there'},<br/>
-                        Thank you for registering on <strong>Mahadeb Maity's Portfolio</strong>. Use the 6-digit one-time password (OTP) below to complete your registration:
+                    <p style="color: #cbd5e1; font-size: 14.5px; line-height: 1.6; text-align: center; margin: 0 0 24px;">
+                        Hello ${name ? `<strong style="color: #ffffff;">${name}</strong>` : 'there'},<br/>
+                        You are signing up for an account on <strong>Mahadeb Maity's Official Portfolio Website</strong>. To verify that this is your valid email address, please enter the one-time code below:
                     </p>
 
-                    <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)); border: 1px solid #334155; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 24px;">
-                        <div style="font-family: 'Courier New', Courier, monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #38bdf8; text-shadow: 0 0 12px rgba(56, 189, 248, 0.4); margin: 4px 0;">
+                    <!-- OTP Box -->
+                    <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)); border: 1.5px solid #38bdf8; border-radius: 14px; padding: 24px; text-align: center; margin-bottom: 24px; box-shadow: 0 0 25px rgba(56, 189, 248, 0.15);">
+                        <div style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px;">
+                            Your 6-Digit Verification Code
+                        </div>
+                        <div style="font-family: 'Courier New', Courier, monospace; font-size: 40px; font-weight: 900; letter-spacing: 10px; color: #38bdf8; text-shadow: 0 0 16px rgba(56, 189, 248, 0.5); margin: 6px 0;">
                             ${otp}
                         </div>
                         <p style="color: #64748b; font-size: 12px; margin: 8px 0 0;">
@@ -120,16 +136,22 @@ export const sendOtpVerificationEmail = async ({ email, otp, name }) => {
                         </p>
                     </div>
 
-                    <div style="background: rgba(239, 68, 68, 0.08); border-left: 3px solid #ef4444; border-radius: 6px; padding: 12px; margin-bottom: 24px;">
+                    <div style="background: rgba(239, 68, 68, 0.08); border-left: 3px solid #ef4444; border-radius: 6px; padding: 12px 14px; margin-bottom: 24px;">
                         <p style="color: #fca5a5; font-size: 12px; margin: 0; line-height: 1.5;">
-                            ⚠️ If you did not request this registration, you can safely ignore this email.
+                            ⚠️ If you did not attempt to sign up on <strong>Mahadeb Maity's Portfolio</strong>, you can safely ignore or delete this email.
                         </p>
                     </div>
 
-                    <hr style="border: none; border-top: 1px solid #1e293b; margin: 24px 0;" />
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <a href="${clientUrl}" style="display: inline-block; font-size: 13px; color: #38bdf8; text-decoration: none; font-weight: 600;">
+                            Visit Website &rarr; ${clientUrl}
+                        </a>
+                    </div>
 
-                    <p style="font-size: 12px; color: #64748b; text-align: center; margin: 0; line-height: 1.5;">
-                        Sent automatically by <strong>Mahadeb Maity Portfolio Platform</strong><br/>
+                    <hr style="border: none; border-top: 1px solid #1e293b; margin: 20px 0;" />
+
+                    <p style="font-size: 12px; color: #64748b; text-align: center; margin: 0; line-height: 1.6;">
+                        This automated message was sent by <strong>Mahadeb Maity Portfolio Platform</strong>.<br/>
                         &copy; 2026 Mahadeb Maity. All rights reserved.
                     </p>
                 </div>
