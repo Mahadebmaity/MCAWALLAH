@@ -20,10 +20,35 @@ export const API_BASE = getApiBase();
 export const API = API_BASE;
 
 /**
- * Resolves static media / uploaded assets URL
+ * Extracts the unique File ID from any Google Drive or Google Docs URL
+ */
+export const extractGoogleDriveFileId = (url) => {
+    if (!url || typeof url !== 'string') return null;
+    const match = url.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^&]*&)*id=)|docs\.google\.com\/(?:document|presentation|spreadsheets|forms)\/d\/|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : null;
+};
+
+/**
+ * Converts any Google Drive link to a direct high-speed image CDN link
+ */
+export const getGoogleDriveImageUrl = (url) => {
+    const fileId = extractGoogleDriveFileId(url);
+    if (!fileId) return url;
+    return `https://lh3.googleusercontent.com/d/${fileId}`;
+};
+
+/**
+ * Resolves static media / uploaded assets URL (supports Local, Cloudinary, AWS, and Google Drive)
  */
 export const getMediaUrl = (path) => {
     if (!path) return '';
+
+    // If it's a Google Drive link, convert to direct image stream
+    const gDriveId = extractGoogleDriveFileId(path);
+    if (gDriveId) {
+        return `https://lh3.googleusercontent.com/d/${gDriveId}`;
+    }
+
     // Normalize localhost / loopback URLs that might have been saved in DB
     if (typeof path === 'string' && (path.includes('localhost:5000') || path.includes('127.0.0.1:5000'))) {
         const pathPart = path.replace(/^https?:\/\/(localhost|127\.0\.0\.1):5000/, '');
@@ -54,7 +79,7 @@ export const getMediaUrl = (path) => {
 
 /**
  * Resolves document URLs for preview, iframe viewing, and downloads across mobile & desktop.
- * Gracefully handles doc objects, raw strings, undefined/null, localhost URLs, and production domains.
+ * Gracefully handles Google Drive, Cloudinary, doc objects, raw strings, undefined/null, localhost URLs, and production domains.
  */
 export const getDocUrl = (urlOrDoc) => {
     if (!urlOrDoc) return '#';
@@ -67,6 +92,12 @@ export const getDocUrl = (urlOrDoc) => {
     }
 
     url = url.trim();
+
+    // If it's a Google Drive link, convert to embeddable preview link
+    const gDriveId = extractGoogleDriveFileId(url);
+    if (gDriveId) {
+        return `https://drive.google.com/file/d/${gDriveId}/preview`;
+    }
 
     // If it's a data or blob URL
     if (url.startsWith('data:') || url.startsWith('blob:')) return url;
@@ -120,12 +151,20 @@ export const getDocUrl = (urlOrDoc) => {
 /**
  * Universal Safe Document Downloader
  * - Fixes browser cross-origin download restrictions by fetching as binary Blob
- * - Converts Cloudinary URLs with fl_attachment for seamless delivery
+ * - Handles Google Drive direct downloads
  * - Prevents downloading HTML 404/SPA error pages
  * - Ensures correct '.pdf' file extension across mobile & desktop
  */
 export const downloadFile = async (urlOrDoc, defaultFileName = 'Resume.pdf') => {
     try {
+        let rawUrl = typeof urlOrDoc === 'string' ? urlOrDoc : (urlOrDoc.fileUrl || urlOrDoc.url || urlOrDoc.secure_url || urlOrDoc.path || '');
+        const gDriveId = extractGoogleDriveFileId(rawUrl);
+        if (gDriveId) {
+            const directDownload = `https://drive.google.com/uc?export=download&id=${gDriveId}`;
+            window.open(directDownload, '_blank');
+            return true;
+        }
+
         let resolvedUrl = getDocUrl(urlOrDoc);
         if (!resolvedUrl || resolvedUrl === '#') {
             console.error('Download cancelled: Invalid document URL');

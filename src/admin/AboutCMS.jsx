@@ -381,7 +381,7 @@ export default function AboutCMS() {
                     fileName: file.name,
                     fileSize: file.size ? `${(file.size / 1024).toFixed(1)} KB` : 'PDF Document',
                     uploadedAt: new Date().toISOString(),
-                    isVisible: shouldBeVisible,
+                    isVisible: true,
                     isDefault: currentResumes.length === 0,
                     icon: 'fa-solid fa-file-pdf'
                 };
@@ -399,7 +399,7 @@ export default function AboutCMS() {
                 setToast({
                     type: 'success',
                     title: 'Resume Added to Vault! 📄',
-                    message: `"${cleanName}" saved to your permanent catalog${shouldBeVisible ? ' and activated on your portfolio.' : '.'}`
+                    message: `"${cleanName}" saved to your permanent catalog and activated on your portfolio.`
                 });
             } else {
                 const errData = await res.json();
@@ -422,21 +422,7 @@ export default function AboutCMS() {
         const target = currentList[index];
         if (!target) return;
 
-        const currentlyVisibleCount = currentList.filter((r, i) => i !== index && r.isVisible !== false).length;
-
-        if (target.isVisible === false) {
-            if (currentlyVisibleCount >= 3) {
-                setToast({
-                    type: 'warning',
-                    title: 'Limit Reached (3 Resumes Max)',
-                    message: 'You can display a maximum of 3 resume buttons simultaneously on your portfolio. Please turn off another resume first.'
-                });
-                return;
-            }
-            target.isVisible = true;
-        } else {
-            target.isVisible = false;
-        }
+        target.isVisible = target.isVisible === false ? true : false;
 
         setAbout(prev => ({
             ...prev,
@@ -505,15 +491,13 @@ export default function AboutCMS() {
     const addCustomResumeUrl = () => {
         if (!newCustomResume.url.trim()) return;
         const currentResumes = Array.isArray(about.resumes) ? about.resumes : [];
-        const visibleCount = currentResumes.filter(r => r.isVisible !== false).length;
-        const shouldBeVisible = visibleCount < 3;
 
         const newResumeItem = {
             title: newCustomResume.title.trim() || 'Custom Resume Link',
             url: newCustomResume.url.trim(),
             fileName: 'Cloud / Direct Link',
             uploadedAt: new Date().toISOString(),
-            isVisible: shouldBeVisible,
+            isVisible: true,
             isDefault: currentResumes.length === 0,
             icon: 'fa-solid fa-cloud-arrow-down'
         };
@@ -642,6 +626,38 @@ export default function AboutCMS() {
                                         <i className="fa-solid fa-trash"></i> Reset Default
                                     </button>
                                 )}
+                            </div>
+
+                            {/* Direct URL / Google Drive Link Input for Avatar */}
+                            <div style={{ marginBottom: '10px' }}>
+                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    <input
+                                        type="text"
+                                        className="adm-input"
+                                        placeholder="Or paste Image URL (Google Drive, Cloudinary, Imgur, etc.)..."
+                                        value={about.avatarUrl || ''}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setAbout(prev => ({ ...prev, avatarUrl: val }));
+                                            setImgError(false);
+                                        }}
+                                        style={{ fontSize: '12px' }}
+                                    />
+                                    {about.avatarUrl && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleSelectDefaultPreset(about.avatarUrl)}
+                                            className="adm-btn adm-btn-secondary adm-btn-sm"
+                                            title="Save Avatar URL"
+                                            style={{ whiteSpace: 'nowrap' }}
+                                        >
+                                            <i className="fa-solid fa-check" /> Apply
+                                        </button>
+                                    )}
+                                </div>
+                                <span style={{ fontSize: '10.5px', color: 'var(--adm-text-muted)', display: 'block', marginTop: '3px' }}>
+                                    💡 Tip: You can paste a public Google Drive link (e.g. <code>drive.google.com/file/d/...</code>) directly!
+                                </span>
                             </div>
 
                             {/* Preset Default Avatars */}
@@ -935,13 +951,13 @@ export default function AboutCMS() {
                                 <span style={{
                                     fontSize: '12px',
                                     fontWeight: '700',
-                                    color: (about.resumes.filter(r => r.isVisible !== false).length <= 3) ? '#10b981' : '#f59e0b',
+                                    color: '#10b981',
                                     background: 'var(--adm-surface-2)',
                                     padding: '4px 12px',
                                     borderRadius: '999px',
                                     border: '1px solid var(--adm-border)'
                                 }}>
-                                    Active on Portfolio: {about.resumes.filter(r => r.isVisible !== false).length} / 3 max
+                                    Active on Portfolio: {about.resumes.filter(r => r.isVisible !== false).length} (Unlimited)
                                 </span>
                             </div>
 

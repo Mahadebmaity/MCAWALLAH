@@ -807,7 +807,7 @@ export default function ProjectsCMS() {
                                     <input
                                         type="text"
                                         className="adm-input"
-                                        placeholder="Image URL or upload via button..."
+                                        placeholder="Paste image URL (Google Drive, Cloudinary, Imgur, etc.) or upload..."
                                         value={formData.coverImage}
                                         onChange={(e) => setFormData(p => ({ ...p, coverImage: e.target.value }))}
                                     />

@@ -503,7 +503,7 @@ export default function MomentsCMS() {
                                     <input
                                         type="text"
                                         className="adm-input"
-                                        placeholder="Paste image URL (https://...) or upload file below"
+                                        placeholder="Paste image URL (Google Drive, Cloudinary, Imgur, etc.) or upload file below"
                                         value={formData.imageUrl}
                                         onChange={(e) => setFormData(p => ({ ...p, imageUrl: e.target.value }))}
                                         required
