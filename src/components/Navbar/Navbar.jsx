@@ -171,17 +171,26 @@ export default function Navbar() {
         }
     };
 
-    /* ── Dynamic Multi-Resume Management ── */
-    const visibleResumes = (about.resumes?.length > 0)
-        ? about.resumes.filter(r => r.isVisible !== false).slice(0, 3)
-        : (about.resumeUrl ? [{ title: about.resumeLabel || "Resume", url: about.resumeUrl }] : []);
-
-    const primaryResume = visibleResumes.find(r => r.isDefault) || visibleResumes[0] || {
-        title: about.resumeLabel || "Resume",
-        url: about.resumeUrl || "/resume.pdf"
+    /* ── Dynamic Multi-Resume Management (Preserves default + adds admin uploaded resumes) ── */
+    const baseDefaultResume = {
+        title: about.resumeLabel || "Primary Resume",
+        url: about.resumeUrl || "/resume.pdf",
+        fileSize: "PDF",
+        isVisible: true,
+        isDefault: true
     };
 
-    const primaryButtonLabel = navbarConfig.resumeButtonText || about.resumeLabel || primaryResume.title || "Resume";
+    const customResumes = Array.isArray(about.resumes)
+        ? about.resumes.filter(r => r && r.isVisible !== false)
+        : [];
+
+    const visibleResumes = customResumes.some(r => r.url === baseDefaultResume.url)
+        ? customResumes
+        : [baseDefaultResume, ...customResumes];
+
+    const primaryResume = visibleResumes.find(r => r.isDefault) || visibleResumes[0] || baseDefaultResume;
+
+    const primaryButtonLabel = navbarConfig.resumeButtonText || about.resumeLabel || "Latest Resume";
 
     const downloadResume = (resumeItem, e) => {
         if (e) e.stopPropagation();

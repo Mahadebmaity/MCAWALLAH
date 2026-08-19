@@ -237,11 +237,22 @@ export default function About() {
                             ))}
                         </div>
 
-                        {/* Resume Actions (Admin Configured - up to 3 max) */}
+                        {/* Resume Actions (Preserves base resume + adds admin configured resumes) */}
                         {(() => {
-                            const visibleResumes = (about.resumes?.length > 0)
-                                ? about.resumes.filter(r => r.isVisible !== false).slice(0, 3)
-                                : (about.resumeUrl ? [{ title: about.resumeLabel || "Download Resume", url: about.resumeUrl }] : []);
+                            const baseDefaultResume = {
+                                title: about.resumeLabel || "Download Resume",
+                                url: about.resumeUrl || "/resume.pdf",
+                                fileSize: "PDF",
+                                isVisible: true
+                            };
+
+                            const customResumes = Array.isArray(about.resumes)
+                                ? about.resumes.filter(r => r && r.isVisible !== false)
+                                : [];
+
+                            const visibleResumes = customResumes.some(r => r.url === baseDefaultResume.url)
+                                ? customResumes
+                                : [baseDefaultResume, ...customResumes];
 
                             if (visibleResumes.length === 0) return null;
 
