@@ -171,24 +171,33 @@ export default function Navbar() {
         }
     };
 
-    /* ── Dynamic Multi-Resume Management (Preserves default + adds admin uploaded resumes) ── */
-    const baseDefaultResume = {
-        title: about.resumeLabel || "Primary Resume",
-        url: about.resumeUrl || "/resume.pdf",
-        fileSize: "PDF",
+    /* ── Dynamic Multi-Resume Management (Original Standard Resume + Admin Uploaded Resumes) ── */
+    const originalMasterResume = {
+        title: "Standard Resume",
+        url: "/resume.pdf",
+        fileSize: "Verified PDF",
         isVisible: true,
-        isDefault: true
+        isDefault: false
     };
 
     const customResumes = Array.isArray(about.resumes)
         ? about.resumes.filter(r => r && r.isVisible !== false)
         : [];
 
-    const visibleResumes = customResumes.some(r => r.url === baseDefaultResume.url)
-        ? customResumes
-        : [baseDefaultResume, ...customResumes];
+    // Always include the original master resume (/resume.pdf) + all active custom resumes
+    const visibleResumes = [];
+    
+    // Add original master resume first (if not already custom with same url)
+    visibleResumes.push(originalMasterResume);
 
-    const primaryResume = visibleResumes.find(r => r.isDefault) || visibleResumes[0] || baseDefaultResume;
+    // Add all active custom uploaded resumes
+    customResumes.forEach(r => {
+        if (!visibleResumes.some(item => item.url === r.url)) {
+            visibleResumes.push(r);
+        }
+    });
+
+    const primaryResume = visibleResumes.find(r => r.isDefault) || visibleResumes[0] || originalMasterResume;
 
     const primaryButtonLabel = navbarConfig.resumeButtonText || about.resumeLabel || "Latest Resume";
 

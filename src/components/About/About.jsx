@@ -237,12 +237,12 @@ export default function About() {
                             ))}
                         </div>
 
-                        {/* Resume Actions (Preserves base resume + adds admin configured resumes) */}
+                        {/* Resume Actions (Original Master Resume + Admin Configured Resumes) */}
                         {(() => {
-                            const baseDefaultResume = {
-                                title: about.resumeLabel || "Download Resume",
-                                url: about.resumeUrl || "/resume.pdf",
-                                fileSize: "PDF",
+                            const originalMasterResume = {
+                                title: "Standard Resume",
+                                url: "/resume.pdf",
+                                fileSize: "Verified PDF",
                                 isVisible: true
                             };
 
@@ -250,9 +250,12 @@ export default function About() {
                                 ? about.resumes.filter(r => r && r.isVisible !== false)
                                 : [];
 
-                            const visibleResumes = customResumes.some(r => r.url === baseDefaultResume.url)
-                                ? customResumes
-                                : [baseDefaultResume, ...customResumes];
+                            const visibleResumes = [originalMasterResume];
+                            customResumes.forEach(r => {
+                                if (!visibleResumes.some(item => item.url === r.url)) {
+                                    visibleResumes.push(r);
+                                }
+                            });
 
                             if (visibleResumes.length === 0) return null;
 
