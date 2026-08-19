@@ -134,10 +134,15 @@ export default function AuthModal({ onClose, prompt, defaultMode = "login", isWa
         setResendLoading(true);
         setErrMsg("");
         setSuccessMsg("");
+        setErrors({});
         try {
             const res = await sendSignupOtp({ email: form.email, name: form.name });
             setOtpTimer(60);
-            setSuccessMsg(res.message || "A new 6-digit OTP has been sent!");
+            setForm((prev) => ({ ...prev, otp: "" }));
+            setSuccessMsg(res.message || "A new 6-digit verification code has been sent! Please enter the new code.");
+            if (otpInputRef.current) {
+                otpInputRef.current.focus();
+            }
         } catch (err) {
             handleError(err);
         } finally {
